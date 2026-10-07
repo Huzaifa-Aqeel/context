@@ -19,5 +19,6 @@ export const tasteContextSchema = z.object({
   connections: z.array(tasteConnectionSchema).max(100), warnings: z.array(z.string().max(1000)).max(10), signature,
 });
 export const tasteResolveRequestSchema = z.object({ text: z.string().trim().min(1).max(2000) });
-export const tasteConfirmRequestSchema = z.object({ draft: tasteDraftSchema, includedIds: z.array(text).min(1).max(10) });
+export const tasteClarificationSchema = z.object({ label: text, entityId: text });
+export const tasteConfirmRequestSchema = z.object({ draft: tasteDraftSchema, includedIds: z.array(text).min(1).max(10), clarified: z.array(tasteClarificationSchema).max(10).optional() });
 export const explorationStrategySchema = z.enum(['balanced', 'familiar', 'discover']);

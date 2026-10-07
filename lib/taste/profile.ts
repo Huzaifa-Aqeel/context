@@ -12,8 +12,14 @@ export async function resolveTasteInterests(inputs: { label: string; category: s
     return { ...base, status: 'no_match' as const };
   }) };
 }
-export function confirmTasteProfile(draft: TasteDraft, includedIds: string[]): TasteProfile {
-  const matched = draft.candidates.flatMap((candidate) => candidate.status === 'matched' ? [candidate.entity] : []);
+export function confirmTasteProfile(draft: TasteDraft, includedIds: string[], clarified: { label: string; entityId: string }[] = []): TasteProfile {
+  const selected = clarified.map((choice) => {
+    const candidate = draft.candidates.find((item) => item.label === choice.label && item.status === 'clarify');
+    const entity = candidate?.status === 'clarify' ? candidate.candidates.find((item) => item.id === choice.entityId) : undefined;
+    if (!entity) throw new ApiError(400, 'INVALID_CLARIFICATION', 'Choose one of the Qloo matches shown for this interest, or leave it out.');
+    return entity;
+  });
+  const matched = [...draft.candidates.flatMap((candidate) => candidate.status === 'matched' ? [candidate.entity] : []), ...selected];
   const ids = new Set(includedIds);
   if ([...ids].some((id) => !matched.some((entity) => entity.id === id))) throw new ApiError(400, 'UNRESOLVED_INTEREST', 'Only matched interests can be added. You can leave unresolved interests out and continue.');
   const entities = [...new Map(matched.filter((entity) => ids.has(entity.id)).map((entity) => [entity.id, entity])).values()];

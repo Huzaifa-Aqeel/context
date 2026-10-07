@@ -50,7 +50,7 @@ export function selectQlooMatch(detected: VisionEntity, candidates: QlooEntity[]
   const expectedType = categoryTypes[normalized(detected.category).replace(/ /g, '_')];
   const namesMatch = (entity: QlooEntity) => [entity.name, ...(entity.properties?.akas?.map((aka) => aka.value) ?? [])].some((name) => normalized(name) === normalized(detected.label));
   const exact = candidates.filter((candidate) => namesMatch(candidate) && (!expectedType || typeOf(candidate) === expectedType));
-  const base = { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence, source: 'vision' as const };
+  const base = { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence, source: 'vision' as const, ...(detected.position ? { position: detected.position } : {}) };
   if (exact.length !== 1) return {
     ...base, matchConfidence: candidates.length ? 0.4 : 0,
     candidates: candidates.slice(0, 3).map((candidate) => ({ id: candidate.entity_id, name: candidate.name.slice(0, 500), type: typeOf(candidate) })),

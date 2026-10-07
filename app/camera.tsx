@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useForegroundTask } from '@/hooks/use-foreground-task';
 import { AppState, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useIsFocused } from 'expo-router';
@@ -17,20 +18,25 @@ export default function CameraScreen() {
     return () => listener.remove();
   }, []);
   const [pending, setPending] = useState(false);
+  const task = useForegroundTask(useCallback(() => setPending(false), []));
   const [error, setError] = useState('');
   const setImage = useContextStore((state) => state.setImage);
   async function capture() {
     if (pending || AppState.currentState !== 'active') return;
     setPending(true); setError('');
+    const ticket = task.begin();
     let temporaryUri: string | undefined;
     try {
       const image = await camera.current?.takePictureAsync({ quality: 0.8 });
       if (!image) throw new Error('Camera did not return an image.');
       temporaryUri = image.uri;
-      setImage(await prepareImage(image.uri, image.width, image.height));
+      if (!ticket.current()) return;
+      const prepared = await prepareImage(image.uri, image.width, image.height);
+      if (!ticket.current()) return;
+      setImage(prepared);
       router.replace('/scene');
-    } catch { setError('The image could not be captured. Please try again or choose a photo.'); }
-    finally { discardTemporaryFile(temporaryUri); setPending(false); }
+    } catch { if (ticket.current()) setError('The image could not be captured. Please try again or choose a photo.'); }
+    finally { discardTemporaryFile(temporaryUri); if (task.mounted()) setPending(false); }
   }
   if (!permission?.granted) return <Screen>
     <Heading>Capture what’s around you</Heading>
@@ -49,7 +55,7 @@ export default function CameraScreen() {
     <Body>Camera preview is active. No video is recorded.</Body>
     <Button title={pending ? 'Preparing scene…' : 'Capture image'} onPress={() => { void capture(); }} disabled={!focused || !active || !ready || pending} />
     <Notice text={error} />
-    <Button title="Cancel capture" onPress={() => router.back()} secondary />
+    <Button title="Cancel capture" onPress={() => { task.cancel(); router.back(); }} secondary />
   </Screen>;
 }
 const cameraStyles = StyleSheet.create({ preview: { height: 320, borderRadius: 18, overflow: 'hidden', backgroundColor: '#182C30' } });

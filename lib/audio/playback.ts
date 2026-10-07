@@ -53,6 +53,6 @@ const sequence = new SpeechSequence({
   },
 });
 
-export const speakResponse = (text: string) => { void sequence.speak(text, useContextStore.getState().speechPreferences); };
+export const speakResponse = (text: string) => { if (!useContextStore.getState().recordingOwner) void sequence.speak(text, useContextStore.getState().speechPreferences); };
 export const stopSpokenOutput = () => sequence.stop();
 export const clearSpokenOutput = () => sequence.clear();

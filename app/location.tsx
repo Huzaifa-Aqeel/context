@@ -1,21 +1,24 @@
 import { useState } from 'react';
-import { TextInput } from 'react-native';
+import { useExploration } from '@/hooks/use-exploration';
+import { useForegroundTask } from '@/hooks/use-foreground-task';
 import { router } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { TasteEvidence } from '@/components/taste-evidence';
 import { TasteControls } from '@/components/taste-controls';
-import { Body, Button, Card, Heading, Notice, Screen, styles } from '@/components/ui';
+import { Body, Button, Card, Heading, Notice, Screen, styles, TextInput } from '@/components/ui';
 import { ResponseControls } from '@/components/response-controls';
 import { VoiceInput } from '@/components/voice-input';
 import { useLocality } from '@/hooks/use-locality';
 import { postApi } from '@/lib/api/client';
 import { answerSchema, locationRequestSchema } from '@/schemas/context';
-import { activeTasteRequest, assertCurrentSession, useContextStore } from '@/stores/context';
+import { activeTasteRequest, assertCurrentSession, conversationForRequest, useContextStore } from '@/stores/context';
 
 const questions = ['What kind of area am I in?', 'What is culturally significant about this neighborhood?', "How does what I'm seeing relate to this area?"];
 
 export default function LocationScreen() {
-  const { locality, scene, image, setLocality, updateScene, setLocationContext, addMessage } = useContextStore();
+  const { locality, scene, image, locationContext, setLocality, updateScene, setLocationContext, addMessage } = useContextStore();
+  const exploration = useExploration();
+  const task = useForegroundTask();
   const { requestLocality, pending, notice } = useLocality();
   const [area, setArea] = useState('');
   const [question, setQuestion] = useState<string>(questions[1]);
@@ -23,8 +26,10 @@ export default function LocationScreen() {
   const analysis = useMutation({
     mutationFn: async () => {
       const generation = useContextStore.getState().generation;
-      const result = await postApi('/api/location/context', locationRequestSchema.parse({ locality, question, ...activeTasteRequest(), scene: scene ?? undefined }), answerSchema);
+      const ticket = task.begin();
+      const result = await postApi('/api/location/context', locationRequestSchema.parse({ locality, question, locationContext: locationContext ?? undefined, messages: conversationForRequest(), ...activeTasteRequest(), scene: scene ?? undefined }), answerSchema);
       assertCurrentSession(generation);
+      if (!ticket.current()) throw new Error('This area exploration was cancelled. Ask again when you return.');
       return result;
     },
     onSuccess: (result) => {
@@ -38,7 +43,7 @@ export default function LocationScreen() {
   });
   return <Screen>
     <Heading>A little local context.</Heading>
-    <TasteControls />
+    <TasteControls disabled={analysis.isPending || exploration.isPending || !Boolean(scene || locality)} onExplore={(text) => exploration.mutate(text, { onSuccess: () => router.push('/conversation'), onError: (error) => setError(error.message) })} />
     <TasteEvidence />
     <Body>Learn about your area and how the references around you relate to it.</Body>
     <Body>Location is used only while Context is open. There is no background tracking. You can enter an area name instead.</Body>
@@ -46,6 +51,7 @@ export default function LocationScreen() {
     <Notice text={notice} />
     <TextInput accessibilityLabel="Neighborhood or area name" placeholder="Neighborhood, city, or area" placeholderTextColor="#475D60"
       editable={!analysis.isPending && !pending} value={area} onChangeText={setArea} maxLength={500} style={styles.input} />
+    <VoiceInput startLabel="Speak an area name" onText={setArea} disabled={analysis.isPending || pending} />
     <Button title="Use this area name" onPress={() => { setLocality({ neighborhood: area.trim() }); analysis.reset(); setError(''); }} disabled={!area.trim() || pending || analysis.isPending} secondary />
     {locality && <Card><Body>Current area: {Object.values(locality).filter(Boolean).join(', ')}</Body></Card>}
     <TextInput accessibilityLabel="Your locality question" editable={!analysis.isPending} value={question} onChangeText={setQuestion} multiline maxLength={2000} style={styles.input} />

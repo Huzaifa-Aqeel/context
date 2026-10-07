@@ -44,3 +44,7 @@ yarn-error.*
 /ios
 /android
 qloo-hackathon-kit-main
+
+progress.md
+implementation-plan.md
+FR-audit.md

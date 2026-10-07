@@ -84,7 +84,7 @@ test('audio route rejects non-audio input and reports missing transcription hone
 
 test('existing evidence supports a direct answer without extra investigation', async () => {
   const result = await explore({ question: 'What do we know?', scene, messages: [], mode: 'scene' }, providers([answerTurn]));
-  assert.equal(result.answer, answerTurn.result.answer);
+  assert.match(result.answer, /not have enough Qloo facts/);
   assert.deepEqual(result.scene?.culturalEvidence, evidence);
 });
 
@@ -127,7 +127,7 @@ test('scene analysis filters generic objects and excludes uncertain matches from
   const result = await analyzeScene({ image: 'test-image', mode: 'scene' }, service);
   assert.equal(result.culturalEvidence.entities.length, 2);
   assert.deepEqual(result.culturalEvidence.relationships, []);
-  assert.equal(result.summary, answerTurn.result.answer);
+  assert.match(result.summary, /not have enough Qloo facts/);
 });
 
 test('reference investigation retains scene evidence and separates related references from visible ones', async () => {

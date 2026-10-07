@@ -5,7 +5,7 @@ import { GroqClient } from '../lib/groq/client';
 import { groqConfig } from '../lib/server/config';
 import { resolveTasteInterests, confirmTasteProfile } from '../lib/taste/profile';
 import { investigateTaste, tasteReferences } from '../lib/taste/context';
-import { interestConnection, orderedReferences } from '../lib/taste/presentation';
+import { interestConnection, orderedReferences, scenePresentation } from '../lib/taste/presentation';
 import { QlooClient } from '../lib/qloo/client';
 import { sealDocument, sealScene, verifyEvidence } from '../lib/server/evidence';
 import { explore, type Providers } from '../lib/orchestration/context';
@@ -46,6 +46,21 @@ test('Qloo resolution creates three review states without creating profile entit
   assert.equal('entities' in result, false);
   assert.deepEqual(confirmTasteProfile(result, ['interest']).entities, profile.entities);
   assert.throws(() => confirmTasteProfile(result, ['queen']), /Only matched/);
+});
+
+test('clarification confirms only a user-selected candidate from the signed Qloo draft', () => {
+  const confirmed = confirmTasteProfile(draft, ['queen'], [{ label: 'Queen', entityId: 'queen' }]);
+  assert.equal(confirmed.entities[0].name, 'Queen');
+  assert.throws(() => confirmTasteProfile(draft, ['invented'], [{ label: 'Queen', entityId: 'invented' }]), /Qloo matches/);
+  assert.throws(() => confirmTasteProfile(draft, ['queen']), /Only matched/);
+});
+
+test('personalized opening is a derived spoken view and disabling it restores the unchanged summary', () => {
+  const original = JSON.stringify(scene);
+  assert.match(scenePresentation(scene, profile, context, true, 'balanced', ''), /affinity between Nike and your interest in Radiohead/);
+  assert.equal(scenePresentation(scene, profile, context, false, 'balanced', ''), scene.summary);
+  assert.match(scenePresentation(scene, profile, { ...context, connections: [] }, true, 'balanced', ''), /does not mean.*unfamiliar/);
+  assert.equal(JSON.stringify(scene), original);
 });
 
 test('profile confirmation rejects tampered drafts and permits leaving unresolved items out', async () => {
@@ -98,7 +113,7 @@ test('taste evidence binds to the current profile and rejects substitution', asy
     const signedProfile = await sealDocument(profile, 'taste-profile');
     const signedContext = await sealDocument({ ...context, profileSignature: signedProfile.signature! }, 'taste-context');
     await verifyEvidence({ profile: signedProfile, tasteContext: signedContext });
-    const changed = await sealDocument({ entities: [{ ...profile.entities[0], name: 'Changed interest' }] }, 'taste-profile');
+    const changed = await sealDocument({ ...profile, entities: [{ ...profile.entities[0], name: 'Changed interest' }] }, 'taste-profile');
     await assert.rejects(verifyEvidence({ profile: changed, tasteContext: signedContext }), /interests changed/);
     await assert.rejects(verifyEvidence({ profile: signedProfile, tasteContext: { ...signedContext, connections: [] } }), /changed/);
   } finally { if (original === undefined) delete process.env.SESSION_SIGNING_KEY; else process.env.SESSION_SIGNING_KEY = original; }
@@ -144,6 +159,14 @@ test('skipped profiles do not trigger taste calls and cached evidence prevents r
 test('taste references exclude unconfirmed detections and Qloo recommendations but include locality facts', () => {
   const input = { ...scene, culturalEvidence: { ...scene.culturalEvidence, entities: [...scene.culturalEvidence.entities, { ...scene.culturalEvidence.entities[0], qlooId: 'related', source: 'qloo' as const }, { ...scene.culturalEvidence.entities[0], qlooId: 'uncertain', visionConfidence: 0.6 }] } };
   assert.deepEqual(tasteReferences(input, { locality: { city: 'Area' }, confidence: 'medium', culturalThemes: [], relatedEntities: [], facts: [{ entityId: 'museum', name: 'Museum', category: 'urn:entity:place', source: 'qloo', tags: [] }] }).map((entity) => entity.id), ['film', 'brand', 'museum']);
+});
+
+test('changing area excludes previous locality taste targets while retaining scene detections', () => {
+  const locationContext = { locality: { city: 'Previous area' }, confidence: 'medium' as const, culturalThemes: [], relatedEntities: [], facts: [{ entityId: 'museum', name: 'Museum', category: 'urn:entity:place', source: 'qloo' as const, tags: [] }] };
+  const locatedScene = { ...scene, locationContext };
+  assert.deepEqual(tasteReferences(locatedScene, undefined, { city: 'New area' }).map((entity) => entity.id), ['film', 'brand']);
+  assert.deepEqual(tasteReferences(locatedScene, undefined, { city: 'Previous area' }).map((entity) => entity.id), ['film', 'brand', 'museum']);
+  assert.equal(locatedScene.locationContext.facts[0].entityId, 'museum');
 });
 
 test('a familiar explanation must cite a real Qloo pair; invented or disabled-profile pairs are rejected', async () => {

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useForegroundTask } from '@/hooks/use-foreground-task';
 import { Pressable, Text } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,19 +11,23 @@ import { useContextStore } from '@/stores/context';
 export default function HomeScreen() {
   const { mode, setMode, setImage, scene } = useContextStore();
   const [pending, setPending] = useState(false);
+  const task = useForegroundTask(useCallback(() => setPending(false), []), true);
   const [error, setError] = useState('');
   const [focusedMode, setFocusedMode] = useState('');
   async function chooseImage() {
     setPending(true); setError('');
+    const ticket = task.begin();
     try {
       const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
-      if (!result.canceled) {
+      if (!result.canceled && ticket.current()) {
         const image = result.assets[0];
-        setImage(await prepareImage(image.uri, image.width, image.height));
+        const prepared = await prepareImage(image.uri, image.width, image.height);
+        if (!ticket.current()) return;
+        setImage(prepared);
         router.push('/scene');
       }
-    } catch { setError('The image could not be opened. Please try another photo.'); }
-    finally { setPending(false); }
+    } catch { if (ticket.current()) setError('The image could not be opened. Please try another photo.'); }
+    finally { if (task.mounted()) setPending(false); }
   }
   return <Screen>
     <Text style={styles.small}>YOUR CULTURAL COMPANION</Text>

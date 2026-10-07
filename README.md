@@ -49,7 +49,11 @@ The conversation carries the current scene context forward, so users do not need
 
 Optionally share a few interests—films, artists, books, games, brands, places, or other references Qloo can resolve. Onboarding suggests 5–10 interests and can be skipped. Review or change your interests and control whether **Personalize cultural context** is enabled.
 
+Choose **Start speaking** to share interests by voice, or type them. Context extracts candidate names and resolves them through Qloo for review: **Matched**, **Needs clarification**, or **No match**. Confirm the interests you want to use; unresolved items can be left out without blocking exploration. The microphone never starts automatically.
+
 Taste works across all five modes. It helps Context surface meaningful references, explain unfamiliar ones through supported connections to your interests, and offer guided exploration that starts with something familiar or discovers something new. Scene and locality evidence can also show where an environment overlaps with the interests you shared.
+
+Turning personalization on or off keeps the detected references unchanged. Only their ordering, highlighting, and explanation strategy change, and familiar-interest connections require Qloo evidence.
 
 Your explicit question and cultural significance take priority over taste. References outside your interests remain available, and no profile match is treated as a lack of knowledge or a dislike. This supports attention and understanding without turning Context into a shopping or place-recommendation feed.
 

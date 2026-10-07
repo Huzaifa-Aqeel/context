@@ -68,7 +68,7 @@ test('reasoning validates native tool calls and forces completion at the investi
   const llm = new GroqReasoning(new GroqClient(config, async (_url, init) => {
     const body = JSON.parse(String(init?.body)); assert.equal(body.parallel_tool_calls, false);
     assert.equal(body.tool_choice.function.name, 'finishResponse'); assert.equal(body.tools.length, 1);
-    return turn('finishResponse', { answer: 'The evidence is limited.', confidence: 'low' });
+    return turn('finishResponse', { evidenceSelections: [], confidence: 'low' });
   }));
   assert.equal((await llm.nextTurn({ ...reasoningInput, allowInvestigation: false })).kind, 'answer');
   const malformed = new GroqReasoning(new GroqClient(config, async () => turn('resolveEntity', { name: 'Unnamed' })));

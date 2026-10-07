@@ -16,6 +16,7 @@ export const localitySchema = z.object({
 export const visionEntitySchema = z.object({
   label: shortText, category: shortText, confidence: scoreSchema,
   culturallyRelevant: z.boolean(),
+  position: shortText.optional(),
 });
 export const resolvedEntitySchema = z.object({
   detectedName: shortText, detectedCategory: shortText,
@@ -23,6 +24,7 @@ export const resolvedEntitySchema = z.object({
   qlooName: shortText.optional(), qlooType: shortText.optional(),
   matchConfidence: scoreSchema.optional(),
   source: z.enum(['vision', 'user', 'qloo']).optional(),
+  position: shortText.optional(), resolutionPending: z.boolean().optional(),
   candidates: z.array(z.object({ id: shortText, name: shortText, type: shortText })).max(3).optional(),
 });
 export const entityFactSchema = z.object({
@@ -62,6 +64,7 @@ export const messageSchema = z.object({
 export const analyzeRequestSchema = z.object({
   image: z.string().max(8_000_000).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/, 'Provide a supported base64 image.'),
   locality: localitySchema.optional(), mode: modeSchema.default('scene'),
+  question: z.string().trim().min(1).max(2000).optional(),
 });
 export const askRequestSchema = z.object({
   question: z.string().trim().min(1).max(2000), scene: sceneSchema.optional(),
@@ -77,6 +80,7 @@ export const referenceRequestSchema = z.object({
   entityId: shortText, scene: sceneSchema, question: z.string().trim().min(1).max(2000),
 });
 export const locationRequestSchema = z.object({
+  locationContext: locationContextSchema.optional(), messages: z.array(messageSchema).max(20).default([]),
   profile: tasteProfileSchema.optional(), tasteContext: tasteContextSchema.optional(),
   strategy: explorationStrategySchema.optional(),
   locality: localitySchema, question: z.string().trim().min(1).max(2000), scene: sceneSchema.optional(),
@@ -99,4 +103,4 @@ export const speechRequestSchema = z.object({
   style: z.enum(speechStyles).default('natural'),
 }).refine((input) => directionPrefix(input.style).length + input.text.length <= 200, 'Shorten the text to leave room for vocal direction.');
 
-export const tasteContextRequestSchema = z.object({ profile: tasteProfileSchema, scene: sceneSchema.optional(), locationContext: locationContextSchema.optional() }).refine((value) => value.scene || value.locationContext, "Explore a scene or locality first.");
+export const tasteContextRequestSchema = z.object({ profile: tasteProfileSchema, scene: sceneSchema.optional(), locality: localitySchema.optional(), locationContext: locationContextSchema.optional() }).refine((value) => value.scene || value.locationContext, "Explore a scene or locality first.");

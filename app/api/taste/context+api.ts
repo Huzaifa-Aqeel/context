@@ -7,5 +7,5 @@ import { tasteContextRequestSchema } from '@/schemas/context';
 import { tasteContextSchema } from '@/schemas/taste';
 export const POST = jsonRoute(tasteContextRequestSchema, tasteContextSchema, async (input) => {
   await verifyEvidence(input);
-  return sealDocument(await investigateTaste(input.profile, tasteReferences(input.scene, input.locationContext), new QlooClient(qlooConfig())), 'taste-context');
+  return sealDocument(await investigateTaste(input.profile, tasteReferences(input.scene, input.locationContext, input.locality), new QlooClient(qlooConfig())), 'taste-context');
 });

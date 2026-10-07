@@ -7,5 +7,5 @@ import { answerSchema, locationRequestSchema } from '@/schemas/context';
 export const POST = jsonRoute(locationRequestSchema, answerSchema, async (input) => {
   const providers = getProviders();
   await verifyEvidence(input);
-  return sealAnswer(await explore({ ...input, mode: 'location', messages: [] }, providers));
+  return sealAnswer(await explore({ ...input, mode: 'location' }, providers));
 });

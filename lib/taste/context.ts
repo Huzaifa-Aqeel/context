@@ -1,10 +1,13 @@
 import { isConfirmed } from '@/lib/qloo/confirmed';
 import type { QlooService } from '@/lib/qloo/service';
-import type { LocationContext, Scene } from '@/types/context';
+import type { Locality, LocationContext, Scene } from '@/types/context';
 import type { TasteContext, TasteEntity, TasteProfile } from '@/types/taste';
-export function tasteReferences(scene?: Scene, location?: LocationContext): TasteEntity[] {
+export function tasteReferences(scene?: Scene, location?: LocationContext, locality?: Locality): TasteEntity[] {
   const visible = scene?.culturalEvidence.entities.filter((entity) => entity.source !== 'qloo' && isConfirmed(entity)).map((entity) => ({ id: entity.qlooId!, name: entity.qlooName ?? entity.detectedName, type: entity.qlooType ?? 'urn:entity:unknown' })) ?? [];
-  const local = (location ?? scene?.locationContext)?.facts?.map((fact) => ({ id: fact.entityId, name: fact.name, type: fact.category })) ?? [];
+  const context = location ?? scene?.locationContext;
+  const areaKey = (area: Locality) => JSON.stringify(Object.entries(area).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => [key, value?.trim().toLowerCase()]));
+  const currentArea = !locality || (context && areaKey(locality) === areaKey(context.locality));
+  const local = currentArea ? context?.facts?.map((fact) => ({ id: fact.entityId, name: fact.name, type: fact.category })) ?? [] : [];
   return [...new Map([...visible, ...local].map((entity) => [entity.id, entity])).values()].slice(0, 30);
 }
 export async function investigateTaste(profile: TasteProfile, references: TasteEntity[], qloo: QlooService): Promise<TasteContext> {

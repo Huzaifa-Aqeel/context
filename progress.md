@@ -42,10 +42,15 @@ Last updated: 2026-10-08. Update this file after each substantial implementation
 4. Connected providers to API routes, retained exploration context, authenticated evidence, and added honest failure handling.
 5. Connected accessible mobile interactions, permission fallbacks, voice/style selection, spoken output, and cancellation.
 6. Passed 29 tests, live provider checks, an integrated route smoke check, and native/server bundle exports. Device testing remains outstanding.
+7. Implemented the FR-14 capability pipeline: optional explicit voice onboarding, Qloo resolution and confirmation, separate signed taste evidence, stable detected-reference presentation, and familiar/discover exploration controls. The subsequent acceptance audit found remaining gaps; FR-14 is partial rather than fully compliant. Latest checks pass 43 tests.
 
 ## Outstanding issues / handoff warnings
 
-- Personal Taste requirements were approved after the implementation checks below. Taste onboarding, profile state/control, Qloo taste affinities, and personalized reasoning are not implemented yet; historical 29-test/export results do not verify FR-14.
+- Read `FR-audit.md` before further implementation. The 2026-10-08 source/diagnostic audit counts 9 numbered requirements with main implementation present and 5 partial (FR-07/09/10/12/14); no numbered feature is wholly absent. Device verification remains separate from this count.
+- Four confirmed audit gaps: unsupported personalized prose passes with empty citations; taste pairs can remain stale after an in-loop entity change; culturally relevant detections beyond eight are dropped without notice; whole profiles reach reasoning without per-question selection. Fix these with regression coverage, then update the audit statuses.
+- Other acceptance gaps: standalone error/match feedback lacks app TTS/replay, initial spoken scene summaries do not use taste, prioritization is heuristic and its question/necessary-info arguments are not wired at the scene call, and camera/picker/locality operations lack session-generation guards. Accessibility and native lifecycle behavior need device testing.
+- Personal Taste is implemented in session memory. Interests must be confirmed after Qloo resolution; profiles and derived evidence are independently authenticated. Persisted profiles are not implemented, and no persistence occurs by default.
+- Familiar explanations cite validated Qloo reference/interest pairs, with explicit prompts against invented analogies. Pair validation checks the cited evidence, not every semantic claim in free-form model prose; review real spoken explanations during device testing.
 - Real Groq/Qloo adapters and health configuration checks are implemented. API routes use standard fetch suitable for EAS Workers; the kit's subprocess CLI/MCP architecture is unsuitable for this hosting target, so direct REST adapters follow verified API shapes.
 - Native permission dialogs, camera, microphone, VoiceOver/TalkBack, and audio playback still need device validation. Bundle exports do not constitute a native binary/device test.
 - EAS project registration, production secret configuration, API hosting, and native release builds have not been performed. Production native builds require an HTTPS API origin.
@@ -135,8 +140,8 @@ Last updated: 2026-10-08. Update this file after each substantial implementation
 
 ## Next session
 
-1. Implement FR-14: accessible skippable interest onboarding and review/edit/delete; explicit personalization control; Qloo resolution with ambiguity handling; session-only profile state; authenticated taste evidence in API requests; bounded affinity investigation; taste-aware prioritization, familiar explanations, and familiar-or-new guided exploration. Inspect the local Qloo kit first. Do not guess unsupported sports/director/category mappings or API parameters.
-2. Add meaningful checks for disabled/skipped/deleted profiles, profile changes invalidating derived evidence, no supported overlap, weak/ambiguous matches, explicit-question/cultural-significance priority, and distinguishing profile interests from visible references. Re-run checks/exports after implementation; keep documenting substantial changes here.
+1. Read FR.md, FR-audit.md, and the latest checkpoints before continuing. The FR-14 pipeline exists, but its acceptance gaps still need work; avoid repeating completed onboarding/provider work. Check the local Qloo kit before searching Qloo documentation. Do not guess unsupported sports/director/category mappings or API parameters.
+2. Address the audit's reproduced grounding and in-loop taste-freshness defects first. Add regression cases, then complete spoken notices, reference preservation/prioritization, initial personalized spoken presentation, data minimization, and lifecycle guards. Existing 43 passing tests do not cover all these defects.
 3. Run `npm start` and validate the native experience on iOS/Android: permission denial, photo/camera capture, locality-name fallback, microphone recording, selected voice/directions, stop/replay, session clear, foreground lifecycle, dynamic text sizing, taste controls, and VoiceOver/TalkBack.
 4. Native device behavior remains unverified; bundle exports are not APK/IPA builds. No cloud deployment, EAS project setup, release build, commit, or GitHub push was performed.
 5. When preparing a release, configure server-side Qloo/Groq keys on EAS Hosting and set `EXPO_PUBLIC_API_URL` to the HTTPS API origin before native builds. Optionally set a stable `SESSION_SIGNING_KEY`; key rotation invalidates existing signed context.
@@ -168,7 +173,7 @@ Last updated: 2026-10-08. Update this file after each substantial implementation
 
 - Added an optional cultural-interests screen with spoken guidance, explicit Start speaking, transcription→candidate extraction→Qloo resolution, review cards showing Matched / Needs clarification / No match, and explicit profile confirmation.
 - Users can leave any item out and continue; unresolved items never block saving confirmed interests. Profiles can be edited/replaced, deleted, skipped, or disabled. No microphone starts automatically.
-- Added personalization and familiar/discover exploration controls to scene, conversation, locality, and settings. Profile/settings changes invalidate derived taste context and conversation history while preserving the scene object and detections.
+- Added personalization and familiar/discover exploration controls to scene, conversation, locality, and settings. Profile/settings changes invalidate derived taste context while preserving the scene object and detections. Checkpoint 12 refines how earlier personalized messages are retained and filtered.
 - Separate taste-evidence requests drive visible scene labels and ordering. The client sorts a copied view; necessary information, explicit questions, confidence and cultural-significance buckets take priority over taste. Uncertain matches cannot be promoted by taste.
 - Taste evidence queries are memory-only with immediate cache cleanup and session-generation guards. Requests send profiles only while personalization is enabled. Generic scene summaries remain available independently of personal follow-up explanations.
 - Next: run and fix checks, add meaningful taste/agent/store tests, verify real bounded affinity/extraction shapes, update requirements with final interaction rules, and export bundles. Native-device verification remains outstanding.
@@ -180,3 +185,62 @@ Last updated: 2026-10-08. Update this file after each substantial implementation
 - Familiar/discover controls directly start exploration in the conversation screen, while also remaining selectable strategies elsewhere.
 - Structured familiar explanations now carry the Qloo reference/interest pairs used. The server rejects invented pairs or citations while personalization is disabled, and the prompt prohibits unsupported structural analogies.
 - Baseline checks passed before these refinements. Final expanded checks/live taste checks and bundle exports are pending.
+
+## Checkpoint 13 — taste verification and locality freshness
+
+- TypeScript, ESLint, and all 43 tests passed. Added a regression case ensuring that changing area excludes previous locality taste targets while keeping detected scene references intact. Scene highlighting also requires a confirmed identification.
+- Server export passed with ten API routes, including taste resolve/confirm/context. iOS and Android Hermes bundle exports passed with the taste screen and controls. These are bundle checks; native recording, accessibility, and playback still need device testing.
+- Exercised the real taste resolution, confirmation, context, and personalized ask routes using live Groq requests and previously captured genuine Qloo responses. A stated author resolved to one signed profile entity; separate signed taste context returned an exact match and a limited 0.4915 author/book affinity. The limited affinity is not highlighted as a strong interest connection.
+- The first live personalized answer cited valid pairs but overstated the affinity as a direct relationship. Tightened grounding instructions: affinity alone cannot establish authorship, collaboration, influence, or stylistic analogy; weak evidence must be identified as limited, and exact matches take precedence among otherwise equal familiar references. The retry returned HTTP 429 (`rate_limit_exceeded`, tokens), so the revised wording still requires a live recheck when quota permits. Do not claim semantic grounding is guaranteed by pair validation.
+- No new Qloo lookup was required for this smoke check; cached public Qloo responses matched the adapter's exact requests. Standalone curl captured Groq HTTP-200 responses and the actual route runner replayed them, because sandbox Node networking is unavailable. This is not a deployed or device end-to-end test.
+- Updated README with explicit Start speaking, three review states, leave-unresolved-out, and unchanged detections on toggles; it remains a finished-product description without development status. Updated the handoff's next steps to reflect completed FR-14 implementation.
+- Credential scan checked 141 repository/client/native files with zero configured-key matches. `.env.local` remains ignored and unchanged. Temporary credential-bearing curl configs are removed after use.
+- Final checks after the grounding refinement passed: TypeScript, lint, 43 tests, and the server export. Native bundles passed immediately before this server-only prompt change; no client code changed afterward. `git diff --check` passed. All credential-bearing configs for this check were deleted; the rate-limit response was removed from the replay cache.
+- Next: validate optional voice onboarding, review/skip states, personalization ordering/highlights, familiar/discover controls, cancellation, and VoiceOver/TalkBack on a device. Recheck real explanation wording under the revised prompt when Groq token quota permits, then perform deployment/release work only when requested.
+
+## Checkpoint 14 — independent FR acceptance audit
+
+- User requested a diligent verification of implemented FR scope. Read the full requirements and inspected screens, controls, provider/evidence code, schemas, state, lifecycle, configuration, and tests. Created `FR-audit.md` with all FR-01–FR-14 statuses, detailed FR-14 criteria, five modes, accessibility/safety/privacy/failure coverage, and prioritized completion work.
+- Result: main implementation present for 9 numbered requirements; partial for FR-07, FR-09, FR-10, FR-12, FR-14. None is wholly absent. This is an implementation coverage count, not a production-readiness or effort percentage.
+- Ran `npm run check` again: typecheck, lint, and all 43 tests passed. Ran four additional isolated probes using synthetic providers: empty-citation unsupported prose was accepted; entity replacement left an obsolete taste pair usable; 10 meaningful detections became 8 without a warning; all 10 enabled interests were sent to reasoning for a single-reference question. These probes reproduced gaps rather than verifying compliance. Runner: `/tmp/context-fr-audit-probes.ts`, not part of the persistent suite.
+- Reviewed existing successful server/native bundle exports and prior live-route evidence. No new account/provider requests or web search were made. No runtime code, README, credentials, FR wording, deployment, native binary, or git history was changed during this audit.
+- Updated the handoff to qualify prior implementation claims. Native permissions, recording/playback, accessibility, large text, and deployed end-to-end flows remain unverified. Production API-origin configuration is still absent from `.env.local` (presence checked without exposing values).
+
+## Checkpoint 15 — context freshness and grounded explanations
+
+- Saved the sequential authorized work plan in `implementation-plan.md`. Implementation has no external blocker; native/device validation and live provider quota remain separate verification limits.
+- Taste target IDs/profile binding are rechecked before every agent turn. Entity/locality changes invalidate obsolete taste context and permit a fresh bounded lookup; old pairs cannot pass final validation.
+- The agent now selects validated Qloo facts, relationship types, tags, locality, and taste pairs. The server renders the spoken explanation from provider evidence and qualified templates. Untrusted model prose is never emitted, including when citations are empty. Weak affinities remain explicitly limited and cannot become authorship, collaboration, or stylistic analogy.
+- Reasoning receives at most three supported taste anchors relevant to explicitly requested references; unconnected profile entities and signatures are not sent to Groq. Full optional profiles stay available server-side for bounded Qloo investigation.
+- Added regressions for the empty-citation bypass, weak-bridge wording, unknown evidence selections, in-loop replacement, and pertinent-anchor selection. TypeScript, lint and 47 tests passed before starting the reference-preservation changes.
+- Tradeoff: cultural explanations use source-backed sentences instead of unrestricted model-generated analogy. Qloo descriptions and detection correctness still depend on provider evidence; native/live behavior remains to be checked.
+
+## Checkpoint 16 — retained references and question-aware prioritization
+
+- Initial vision accepts up to 30 public cultural detections with optional visible position. All returned culturally relevant detections remain in the scene, including uncertain ones; only up to eight identifiable references enter initial Qloo resolution. Coverage warnings explain that other references can be investigated on demand.
+- The user's scene question now reaches initial analysis and selects the bounded resolution shortlist before confidence. Scene rows use the active question and show explicit pending/uncertain states, positions when supplied, and Explore actions that seed a reference follow-up.
+- Ranking uses explicit question and necessary-information inputs, confirmation/confidence bands, measured relationship strength, category distinctiveness, then taste. It sorts a copy; taste cannot confirm a detection or hide other rows. No navigation or new safety-detection capability was added.
+- Added regression checks for retaining 12 detections, querying only eight, question-based shortlist selection, coverage notices, uncertainty, and cultural evidence outranking taste. TypeScript, lint and 49 tests passed before beginning spoken-notice work.
+
+## Checkpoint 17 — spoken feedback and accessible controls
+
+- Errors, uncertainty notices, provider/coverage warnings and no-overlap feedback now provide Hear message, replay and stop controls. Failed TTS is shown as a terminal text/screen-reader notice without recursively requesting speech for its own failure.
+- Interest resolution review has a spoken summary/replay for matched, clarification and no-match states. Microphone status notices never trigger app speech while recording; a shared ownership lock prevents speech from switching audio mode during another microphone interaction.
+- Shared text inputs display explicit focus styling. Existing labels, roles, live regions, touch targets, non-color status text, scalable text and primary response auto-speech remain in place. Actual hardware keyboard and VoiceOver/TalkBack behavior still need device validation.
+- TypeScript, lint and 49 tests passed with the spoken controls and initial presentation integration before adding the expanded profile/lifecycle regression tests.
+
+## Checkpoint 18 — initial spoken personalization and clarification
+
+- Added a separate derived spoken scene presentation using confirmed references and returned Qloo taste connections. It includes a familiar/discover choice and honest no-overlap limits. Turning personalization off restores the unchanged generic summary; detection IDs and signed scene summary are never rewritten by a toggle.
+- Initial personalized speech waits for taste context, then speaks the derived view; a taste-request failure restores ordinary summary speech. Scene/locality familiar/discover controls now initiate actual exploration through a shared mutation and continue into conversation.
+- Ambiguous onboarding interests provide explicit Qloo candidate buttons. Profile confirmation authenticates the draft and accepts only a selected candidate ID under the matching original label; fabricated selections remain rejected and unresolved interests may still be omitted.
+- Expanded onboarding explains Qloo resolution/affinity use, relevant Groq explanation use, session retention and disable/delete choices. Explanation requests send only supported pertinent anchors rather than the full enabled profile.
+- Added tests for selected candidate confirmation, tampered candidates and derived spoken view/toggle invariance. Combined with lifecycle tests below, typecheck, lint and 53 tests passed before final lifecycle refinements.
+
+## Checkpoint 19 — foreground lifecycle and locality follow-ups
+
+- Added cancellable foreground task tickets bound to session generation, screen focus and active state. Camera/picker/preparation, reverse geocoding, scene/locality answer requests and shared exploration discard late results after navigation, backgrounding or session changes.
+- Native photo selection may legitimately suspend the home screen in system UI; applying its result still requires the current foreground session. Permission-dialog inactivity is distinguished from actual backgrounding for location/microphone operations.
+- Microphone work stops on blur as well as unmount/background/session change. Ownership-aware, serialized audio-mode restoration cannot release another screen's microphone lock. Recording remains explicitly started.
+- Added Speak an area name and request reuse of signed locality evidence/conversation for repeated location questions; changed localities invalidate cached evidence. The active/last question is retained for later scene prioritization.
+- Added pure regressions for cancelled/replaced/background/cleared task results and microphone ownership. Current total: 53 passing tests before final cleanup; full checks and bundle verification are next. Native permission/picker/recording behavior remains unverified on a device.

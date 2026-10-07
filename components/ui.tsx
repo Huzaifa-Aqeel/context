@@ -1,5 +1,7 @@
-import { useEffect, useState, type PropsWithChildren } from 'react';
-import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput as NativeTextInput, View, type TextInputProps } from 'react-native';
+import { getSpeechState, speakResponse, stopSpokenOutput, subscribeSpeech } from '@/lib/audio/playback';
+import { useContextStore } from '@/stores/context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const colors = { ink: '#182C30', paper: '#F6F3EC', muted: '#475D60', border: '#C1CDC7', accent: '#91401F', surface: '#FFFFFF' };
@@ -12,9 +14,24 @@ export function Screen({ children }: PropsWithChildren) {
 export function Heading({ children }: PropsWithChildren) { return <Text accessibilityRole="header" style={styles.heading}>{children}</Text>; }
 export function Body({ children }: PropsWithChildren) { return <Text style={styles.body}>{children}</Text>; }
 export function Card({ children }: PropsWithChildren) { return <View style={styles.card}>{children}</View>; }
-export function Notice({ text }: { text?: string }) {
+export function Notice({ text, speech = true }: { text?: string; speech?: boolean }) {
+  const state = useSyncExternalStore(subscribeSpeech, getSpeechState, getSpeechState);
+  const [requestedText, setRequestedText] = useState('');
+  const requested = Boolean(text && requestedText === text);
+  const recording = useContextStore((state) => Boolean(state.recordingOwner));
   useEffect(() => { if (text && Platform.OS === "ios") AccessibilityInfo.announceForAccessibility(text); }, [text]);
-  return text ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>{text}</Text> : null;
+  return text ? <View style={{ gap: 8 }}>
+    <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>{text}</Text>
+    {speech && <>
+      <Button title={requested ? 'Replay message' : 'Hear message'} hint={text} onPress={() => { setRequestedText(text); speakResponse(text); }} disabled={recording} secondary />
+      {requested && <Button title="Stop message" onPress={stopSpokenOutput} secondary />}
+      {requested && state.error && <Text accessibilityRole="alert" style={styles.notice}>{state.error}</Text>}
+    </>}
+  </View> : null;
+}
+export function TextInput({ style, onFocus, onBlur, ...props }: TextInputProps) {
+  const [focused, setFocused] = useState(false);
+  return <NativeTextInput {...props} onFocus={(event) => { setFocused(true); onFocus?.(event); }} onBlur={(event) => { setFocused(false); onBlur?.(event); }} style={[style, focused && styles.focused]} />;
 }
 export function Button({ title, onPress, disabled = false, secondary = false, hint }: {
   title: string; onPress: () => void; disabled?: boolean; secondary?: boolean; hint?: string;

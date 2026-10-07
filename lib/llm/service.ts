@@ -1,6 +1,7 @@
 import type { TasteContext } from '@/types/taste';
 import { z } from 'zod';
 import { answerSchema } from '@/schemas/context';
+import { evidenceSelectionsSchema } from '@/schemas/answer-plan';
 import type { AskRequest, CulturalEvidence, LocationContext } from '@/types/context';
 
 export const investigationSchema = z.discriminatedUnion('tool', [
@@ -11,7 +12,7 @@ export const investigationSchema = z.discriminatedUnion('tool', [
   z.object({ tool: z.literal('resolveEntity'), name: z.string().trim().min(1).max(500), category: z.string().trim().min(1).max(100) }),
 ]);
 export const agentTurnSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('answer'), result: answerSchema }),
+  z.object({ kind: z.literal('answer'), result: answerSchema.extend({ evidenceSelections: evidenceSelectionsSchema.optional() }) }),
   z.object({ kind: z.literal('investigate'), action: investigationSchema }),
 ]);
 export type AgentTurn = z.infer<typeof agentTurnSchema>;

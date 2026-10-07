@@ -6,23 +6,24 @@ import { tasteContextSchema } from '@/schemas/taste';
 import { assertCurrentSession, useContextStore } from '@/stores/context';
 import { Body, Notice } from './ui';
 export function TasteEvidence() {
-  const { scene, locationContext, profile, personalization, tasteContext, generation, setTasteContext } = useContextStore();
+  const { scene, locality, locationContext, profile, personalization, tasteContext, tasteError, generation, setTasteContext, setTasteError } = useContextStore();
   const focused = useIsFocused();
   const query = useQuery({
     queryKey: ['taste-evidence', generation, scene?.id, profile?.signature],
-    enabled: focused && personalization && Boolean(profile && (scene || locationContext)) && !tasteContext,
+    enabled: focused && personalization && Boolean(profile && (scene || locationContext)) && !tasteContext && !tasteError,
     gcTime: 0, staleTime: Infinity, retry: false,
     queryFn: async () => {
-      const result = await postApi('/api/taste/context', { profile, scene: scene ?? undefined, locationContext: locationContext ?? undefined }, tasteContextSchema);
+      const result = await postApi('/api/taste/context', { profile, scene: scene ?? undefined, locality: locality ?? undefined, locationContext: locationContext ?? undefined }, tasteContextSchema);
       assertCurrentSession(generation); return result;
     },
   });
-  useEffect(() => { if (query.data && useContextStore.getState().generation === generation) setTasteContext(query.data); }, [generation, query.data, setTasteContext]);
+  useEffect(() => { if (focused && query.data && useContextStore.getState().generation === generation) setTasteContext(query.data); }, [focused, generation, query.data, setTasteContext]);
+  useEffect(() => { if (focused && query.error && useContextStore.getState().generation === generation) setTasteError(query.error.message); }, [focused, generation, query.error, setTasteError]);
   if (!personalization) return null;
   return <>
     {query.isFetching && <Body>Finding connections to your interests…</Body>}
-    <Notice text={query.error?.message} />
+    <Notice text={tasteError ?? undefined} />
     {tasteContext?.warnings.map((warning) => <Notice key={warning} text={warning} />)}
-    {tasteContext && !tasteContext.connections.length && <Body>No supported interest connections were returned. All scene references remain available.</Body>}
+    {tasteContext && !tasteContext.connections.length && <Notice text="No supported interest connections were returned. All scene references remain available." />}
   </>;
 }
