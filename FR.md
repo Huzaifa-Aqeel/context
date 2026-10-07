@@ -8,6 +8,8 @@ It is an accessible Expo mobile application for iOS and Android.
 
 It helps users understand the **cultural context of visual environments and local areas**, not just the physical objects present.
 
+It also connects that world to **culture the user already knows or is interested in**, using a small, voluntarily provided taste profile.
+
 Existing vision systems can answer:
 
 > “What is in front of me?”
@@ -18,13 +20,16 @@ Context should additionally answer:
 > “What kind of place is this?”  
 > “Which visual references matter?”  
 > “How are these references connected?”  
-> “Explain this reference to me.”
+> “Explain this reference to me.”\
+> “What here connects to things I know?”\
+> “What here would stand out to me?”
 
 Context combines:
 
 - Computer vision for visual recognition
 - Qloo for cultural entities, affinities, and cross-domain relationships
 - Foreground location, when permitted, for locality context
+- Voluntary cultural interests, resolved through Qloo, for personal taste context
 - An LLM for interpretation and conversation
 - Text-to-speech for accessible output
 
@@ -91,6 +96,10 @@ Context should help explain that these references may collectively indicate conn
 
 The system must not claim that such interpretations are absolute facts.
 
+There is also an attention problem: a sighted person can scan many references in parallel, while spoken descriptions are heard one at a time. Listing every reference can overwhelm the user. Context must prioritize meaningful information, including references connected to stated interests when personalization is enabled.
+
+Personal taste must help users notice relevant references and understand unfamiliar culture through familiar examples, while preserving access to references beyond their interests.
+
 ---
 
 # 4. Primary User Experience
@@ -98,6 +107,10 @@ The system must not claim that such interpretations are absolute facts.
 The main interaction should be:
 
 ```text
+User optionally shares a few cultural interests, or skips taste onboarding
+        ↓
+Qloo resolves supported interests; user controls whether personalization is enabled
+        ↓
 User captures a scene or asks about the local area
         ↓
 App requests foreground location when relevant
@@ -110,7 +123,9 @@ System selects culturally meaningful entities
         ↓
 Qloo resolves and analyzes relevant entities and relationships
         ↓
-System combines visual, Qloo, and available locality evidence when relevant
+System combines visual, Qloo, available locality, and enabled taste evidence when relevant
+        ↓
+System prioritizes references and selects supported familiar explanations
         ↓
 Context generates a concise explanation
         ↓
@@ -118,7 +133,7 @@ Explanation is spoken to the user
         ↓
 User may ask follow-up questions
         ↓
-Agent performs additional entity, relationship, reference, or locality investigation when needed
+Agent performs additional entity, relationship, reference, locality, or taste-affinity investigation when needed
 ```
 
 The experience should be conversational.
@@ -126,6 +141,8 @@ The experience should be conversational.
 ---
 
 # 5. Main User Modes
+
+Personal Taste is a shared context layer across these five modes. It must not introduce a separate recommendation section or require a sixth user mode. Every mode must remain usable without a taste profile or with personalization disabled.
 
 ## 5.1 Scene Context
 
@@ -139,6 +156,7 @@ Example user questions:
 - “What cultural context am I missing?”
 - “What is important here?”
 - “Give me the vibe of this place.”
+- “What here would stand out to me?”
 
 Expected behavior:
 
@@ -147,8 +165,9 @@ Expected behavior:
 3. Remove irrelevant objects.
 4. Resolve culturally relevant entities through Qloo.
 5. Analyze relationships between those entities.
-6. Generate a short cultural-context explanation.
-7. Read the response aloud.
+6. When personalization is enabled, use supported taste affinities to help prioritize references without omitting culturally significant information.
+7. Generate a short cultural-context explanation.
+8. Read the response aloud.
 
 Example:
 
@@ -168,13 +187,14 @@ Example questions:
 - “Why is that brand important?”
 - “Explain the music reference.”
 - “Tell me more about the thing on the wall.”
+- “Explain this through something I already know.”
 
 Expected behavior:
 
 1. Identify the requested entity.
 2. Resolve the entity through Qloo.
 3. Retrieve relevant cultural context.
-4. Explain it in simple language.
+4. Explain it in simple language, using a comparison to a stated interest when Qloo evidence supports that comparison.
 5. Allow follow-up questions.
 
 ---
@@ -190,6 +210,7 @@ Example questions:
 - “How do these things connect?”
 - “Does the poster relate to the music?”
 - “Why do these references appear together?”
+- “What here connects to my interests?”
 
 Expected behavior:
 
@@ -197,6 +218,7 @@ Expected behavior:
 2. Query Qloo for affinities and relationships.
 3. Find meaningful cross-domain connections.
 4. Explain only relationships supported by available evidence.
+5. Distinguish relationships among visible references from relationships between those references and the profile.
 
 Example:
 
@@ -219,9 +241,14 @@ Expected behavior:
 1. Analyze the scene.
 2. Rank culturally meaningful references.
 3. Ignore ordinary objects unless relevant.
-4. Explain the strongest theme first.
+4. Offer a choice to start with familiar interests or discover something new when supported taste evidence is available; otherwise explain the strongest theme first.
 5. Identify important individual references.
 6. Allow the user to choose what to explore next.
+7. Respect the chosen exploration strategy without hiding references outside the user's interests.
+
+Personalized opening, when supported by Qloo evidence:
+
+> “I found six references. Two connect to interests you've shared. Would you like to start with those or explore something new?”
 
 Example conversation:
 
@@ -258,6 +285,8 @@ Example questions:
 - “What kind of area am I in?”
 - “What is culturally significant about this neighborhood?”
 - “How does what I'm seeing relate to this area?”
+- “What in this area connects to things I know?”
+- “Does this environment overlap with the interests I've shared?”
 
 Expected behavior:
 
@@ -268,6 +297,7 @@ Expected behavior:
 5. Explain supported cultural significance and communicate uncertainty.
 6. If location permission is denied or location is unavailable, continue using available scene context and allow the user to provide an area name.
 7. Read the response aloud and support follow-up exploration.
+8. When personalization is enabled, explain supported overlap between locality or scene evidence and stated interests. A lack of overlap must not be presented as proof that the user is unfamiliar with an area.
 
 ---
 
@@ -381,7 +411,7 @@ The explanation may include:
 
 ## FR-07 — Conversational Follow-Up
 
-The system must retain the current scene and available locality context during the conversation.
+The system must retain the current scene, available locality context, and enabled taste context during the conversation. Changes to the profile or personalization setting must take effect on subsequent answers; disabled or removed interests must not continue to influence them through cached taste evidence.
 
 The user should be able to ask questions such as:
 
@@ -390,6 +420,9 @@ The user should be able to ask questions such as:
 - “Why is that important?”
 - “How does it connect to the music?”
 - “Which reference matters most?”
+- “What here connects to something I know?”
+- “Start with something familiar.”
+- “Help me discover something new.”
 
 The user should not have to recapture the image for every follow-up.
 
@@ -397,7 +430,7 @@ The user should not have to recapture the image for every follow-up.
 
 ## FR-08 — Agentic Exploration
 
-The system must support multi-step exploration when a user's question requires additional entity, relationship, reference, or locality investigation.
+The system must support multi-step exploration when a user's question requires additional entity, relationship, reference, locality, or taste-affinity investigation.
 
 The system must determine which actions are needed to answer the question and carry relevant context across those steps.
 
@@ -409,6 +442,8 @@ Possible actions include:
 - Explore one reference
 - Compare detected references
 - Investigate locality context and its relationship to detected references
+- Investigate Qloo affinities between scene or locality references and voluntarily provided interests
+- Find an evidence-supported familiar reference to explain an unfamiliar one
 - Request additional visual information
 
 The agent must only perform additional investigation when it improves the user's answer.
@@ -428,6 +463,16 @@ Priority may consider:
 - Strength of relationships
 - Relevance to the user's question
 - Distinctiveness within the scene
+- Relevance to voluntarily provided cultural interests, when personalization is enabled
+
+Personalized prioritization must follow this order:
+
+1. Necessary environmental information already available to the system, including relevant safety information.
+2. The user's explicit question.
+3. Cultural significance and evidence quality.
+4. Personal taste relevance.
+
+Taste affinity must not turn an uncertain visual detection or ambiguous Qloo match into a confirmed identification. References outside the profile must remain available for exploration. This ordering does not make Context a navigation, obstacle-avoidance, or emergency-assistance system.
 
 The system should avoid overwhelming the user with unnecessary details.
 
@@ -469,6 +514,10 @@ The system must communicate uncertainty when:
 - Cultural relationships are weak
 - Too few meaningful references exist
 - Location or locality context is unavailable or uncertain
+- A taste interest cannot be resolved uniquely or is unsupported by Qloo
+- A comparison to stated interests has weak or missing Qloo evidence
+
+No profile match means only that the available evidence does not show overlap with the interests the user shared. It must not imply that the user dislikes, does not know, or cannot understand a reference or area.
 
 Example:
 
@@ -489,6 +538,57 @@ When relevant to the user's question, the system must combine locality context w
 The system must continue working if location permission is denied or location is unavailable. It must explain the limitation, use available scene and Qloo evidence, and allow the user to provide an area name for locality exploration.
 
 Location access must follow the privacy requirements in Section 12. The system must communicate uncertainty and avoid unsupported cultural claims about an area or the people there.
+
+When personalization is enabled, locality and scene evidence may also be compared with resolved taste interests to support cultural orientation. Claims of overlap must be grounded in Qloo evidence.
+
+---
+
+## FR-14 — Personal Taste Profile
+
+The system must support a small voluntary personal taste profile as part of the MVP. Building the capability is required; providing interests and enabling personalization are optional for the user.
+
+### Onboarding and control
+
+The app must offer a short, accessible onboarding prompt:
+
+> “Tell Context a few things you're into so it can recognize cultural references that matter to you.”
+
+- Suggest 5–10 interests, allow fewer, and support up to 10 interests in the MVP. The user must be able to skip onboarding entirely.
+- Speak the onboarding guidance when automatic spoken output is enabled. Microphone recording must begin only after the explicit **Start speaking** action; never auto-start it.
+- After transcription, use the LLM to extract candidate interests; Qloo must resolve them before they can become profile entities.
+- Accept text or voice input for interests such as films, music, artists, books, games, sports, brands, fashion, restaurants, or places where Qloo supports their resolution.
+- Resolve interests through Qloo and retain confirmed entity IDs, names, and types. Unsupported or ambiguous interests must be explained and offered for clarification; they must not silently become confirmed profile entries.
+- Show three resolution states: **Matched / Needs clarification / No match**. Let users leave unresolved interests out and continue with matched ones, or skip the profile; do not require fixing every item.
+- Let the user review, add, edit, and remove interests, and clear the profile.
+- Provide an accessible **“Personalize cultural context”** control. Explain how the profile is used and obtain the user's choice before using it.
+- Keep all five modes available when onboarding is skipped, the profile is empty, or personalization is disabled.
+
+### Required uses when relevant
+
+When personalization is enabled and evidence supports it, the system must be able to use the profile to:
+
+- Prioritize meaningful scene references connected to stated interests, supporting selective attention without listing everything.
+- Identify connections between visible references and the user's resolved interests.
+- Explain unfamiliar references through familiar cultural anchors, with connections established by Qloo evidence. The LLM must not invent an analogy to a profile interest.
+- Personalize guided exploration by offering a choice between starting with familiar interests and discovering something new.
+- Explain supported cultural overlap between scene/locality evidence and the profile to help the user orient themselves in an environment.
+
+Example questions include:
+
+- “What here would stand out to me?”
+- “What here connects to things I know?”
+- “Explain this through something I already know.”
+- “Does this place connect to my interests?”
+
+### Evidence and boundaries
+
+- Taste must prioritize and contextualize information, never hide important environmental information or override the explicit question and cultural significance.
+- Toggling personalization must keep detected references unchanged. Only presentation ordering, highlighting, and explanation strategy may change.
+- Vision determines what is present; a profile affinity is not proof that an object is visible. Clearly distinguish visible references, profile interests, and related Qloo entities.
+- Treat interests as user-stated context, not a complete record of their knowledge or preferences. Ask or qualify comparisons when familiarity is uncertain.
+- Do not infer sensitive characteristics, personality, income, identity, or preferences the user did not provide.
+- Do not automatically recommend products, media, or places. Recommendations require a separately defined future feature.
+- Follow the privacy requirements in Section 12. Scene exploration must continue normally if taste resolution or affinity investigation is unavailable, with the limitation communicated.
 
 ---
 
@@ -520,6 +620,9 @@ Qloo should be used for:
 - Related cultural entities
 - Cultural clustering
 - Contextual relationships between multiple detected entities
+- Resolution of voluntarily provided taste interests
+- Evidence-supported affinities between scene/locality references and profile interests
+- Familiar cultural anchors for explaining unfamiliar references
 
 Qloo should not be used for:
 
@@ -541,6 +644,8 @@ The LLM is responsible for:
 - Determining when Qloo queries are required
 - Combining Qloo evidence
 - Combining available locality context with visual and Qloo evidence when relevant
+- Using enabled taste evidence to prioritize attention and select supported familiar explanations
+- Respecting the choice to start with familiar interests or explore something new
 - Producing concise explanations
 - Managing follow-up conversation
 - Expressing uncertainty
@@ -584,6 +689,7 @@ Requirements:
 - Focus states must be clear.
 - Screen-reader navigation must follow a logical order.
 - Users must be able to replay the most recent response.
+- Taste onboarding, interest review/editing, and the personalization control must support screen readers and voice input without requiring visual interaction.
 
 ---
 
@@ -605,6 +711,8 @@ It must not infer:
 
 The system should describe **cultural relationships between recognized entities**, not make claims about the people present.
 
+Voluntarily provided tastes must not be used to infer sensitive traits, personality, or a person's likely behavior. Personalization must not suppress necessary environmental information already available to the system. Context remains a cultural companion, not a safety or navigation tool.
+
 Incorrect:
 
 > “This person is wealthy and politically progressive.”
@@ -623,11 +731,18 @@ Location access must be foreground only and require the user's permission. The a
 
 Precise location must not be stored permanently by default. Location permission denial must not prevent use of the app's other features.
 
+Taste personalization must be optional and transparent. Only interests deliberately provided or confirmed by the user may enter the profile; the app must not silently build a behavioral or demographic profile from images, location, or conversation history.
+
+The app must explain that interest names are sent to Qloo for resolution and affinity analysis, and that relevant taste context may be sent to the explanation provider when personalization is enabled. Send only the interests needed for the requested explanation.
+
+Taste data must remain in session memory by default. Any storage across sessions requires explicit user opt-in, separate from scene/image retention. Users must be able to remove interests, delete the profile, and disable personalization; subsequent analysis must stop using disabled or deleted taste context.
+
 The product should clearly communicate when:
 
 - A camera is active
 - An image is being analyzed
 - Location is requested or used to derive locality context
+- Taste interests are collected, sent to providers, or used to personalize an explanation
 - Data is sent to external APIs
 
 The MVP should avoid:
@@ -685,6 +800,18 @@ Example:
 
 ---
 
+## Taste profile skipped, disabled, or unresolved
+
+The system must continue with ordinary scene and locality exploration. If an interest cannot be resolved, request clarification without inventing a match.
+
+If no supported overlap is found, explain the evidence limit and leave all culturally meaningful references available.
+
+Example:
+
+> “I don't have enough Qloo evidence to connect these references to the interests you've shared, but I can still explain the scene or explore a specific reference.”
+
+---
+
 # 14. MVP Scope
 
 The hackathon MVP should include:
@@ -702,6 +829,10 @@ The hackathon MVP should include:
 - Conversational follow-ups
 - Multi-step agentic exploration when needed to answer the user's question
 - Location-aware cultural context
+- Small voluntary personal taste profile with Qloo resolution and an enable/disable control
+- Taste-aware attention and evidence-supported explanations through familiar cultural references
+- Personalized guided exploration with a familiar-or-new choice
+- Evidence-supported comparison of scene/locality context with stated interests
 - Voice input
 - Text-to-speech output
 - Accessible Expo mobile application for iOS and Android
@@ -712,7 +843,6 @@ The hackathon MVP should include:
 - Video analysis
 - Media audio-description mode
 - Scene history
-- User preference profiles
 
 ---
 
@@ -736,6 +866,10 @@ Context is not intended to replace:
 ```text
 Open Context
       ↓
+Optionally provide cultural interests or skip taste onboarding
+      ↓
+Resolve supported interests through Qloo and choose whether to personalize
+      ↓
 Capture image or choose Location Context
       ↓
 Ask a scene or locality question
@@ -752,7 +886,9 @@ Qloo resolves entities
       ↓
 Qloo analyzes relationships
       ↓
-Combine visual, Qloo, and available locality evidence when relevant
+Combine visual, Qloo, available locality, and enabled taste evidence when relevant
+      ↓
+Prioritize culturally significant references and supported familiar explanations
       ↓
 Context generates explanation
       ↓
@@ -760,7 +896,7 @@ Response is spoken
       ↓
 User asks follow-up
       ↓
-Agent performs multi-step entity, relationship, reference, or locality exploration when needed
+Agent performs multi-step entity, relationship, reference, locality, or taste-affinity exploration when needed
 ```
 
 ---
@@ -799,6 +935,24 @@ Agent performs multi-step entity, relationship, reference, or locality explorati
 
 > Uses Qloo relationships between the detected entities and explains the strongest supported connections.
 
+Personalized variation, when the user has supplied interests and Qloo supports the relationship:
+
+**User**
+
+> “What here would stand out to me?”
+
+**Context**
+
+> Highlights a confirmed reference connected to a stated interest, briefly mentions other significant references, and offers to explore familiar interests or discover something new.
+
+**User**
+
+> “Explain the unfamiliar one through something I know.”
+
+**Context**
+
+> Investigates a supported Qloo relationship to a profile interest and uses it as an explanatory anchor. If no comparison is supported, explains the reference directly and states the limitation.
+
 ---
 
 # 18. Product Principle
@@ -807,6 +961,10 @@ Context should not attempt to describe everything.
 
 Its purpose is to identify and explain **meaningful cultural information about visual environments and local areas that a blind or low-vision user may otherwise miss**.
 
+Context must also help connect that world to the culture the user already knows. Personal taste provides attention and explanatory context across the product, while preserving access to unfamiliar and culturally significant references.
+
+> **Don't just describe unfamiliar culture. Anchor it in culture the user already knows, when the evidence supports it.**
+
 The core distinction is:
 
-> **Vision identifies what is there. Qloo helps establish how those things relate culturally. Context explains why those relationships may matter.**
+> **Vision identifies what is there. Location supplies locality. Qloo establishes cultural relationships, including connections to voluntary taste interests. Context explains what matters and helps the user explore it.**

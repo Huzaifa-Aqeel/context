@@ -1,3 +1,4 @@
+import type { TasteContext } from '@/types/taste';
 import { z } from 'zod';
 import { answerSchema } from '@/schemas/context';
 import type { AskRequest, CulturalEvidence, LocationContext } from '@/types/context';
@@ -5,7 +6,9 @@ import type { AskRequest, CulturalEvidence, LocationContext } from '@/types/cont
 export const investigationSchema = z.discriminatedUnion('tool', [
   z.object({ tool: z.literal('exploreReference'), entityId: z.string().min(1).max(500) }),
   z.object({ tool: z.literal('analyzeConnections') }),
+  z.object({ tool: z.literal('analyzeTaste') }),
   z.object({ tool: z.literal('getLocationContext') }),
+  z.object({ tool: z.literal('resolveEntity'), name: z.string().trim().min(1).max(500), category: z.string().trim().min(1).max(100) }),
 ]);
 export const agentTurnSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('answer'), result: answerSchema }),
@@ -17,8 +20,10 @@ export type ReasoningInput = {
   request: AskRequest;
   evidence: CulturalEvidence;
   locationContext?: LocationContext;
+  tasteContext?: TasteContext;
   completedActions: string[];
   allowInvestigation: boolean;
+  warnings?: string[];
 };
 
 export interface LlmService {

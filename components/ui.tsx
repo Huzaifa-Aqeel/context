@@ -1,5 +1,5 @@
-import { useState, type PropsWithChildren } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState, type PropsWithChildren } from 'react';
+import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const colors = { ink: '#182C30', paper: '#F6F3EC', muted: '#475D60', border: '#C1CDC7', accent: '#91401F', surface: '#FFFFFF' };
@@ -13,6 +13,7 @@ export function Heading({ children }: PropsWithChildren) { return <Text accessib
 export function Body({ children }: PropsWithChildren) { return <Text style={styles.body}>{children}</Text>; }
 export function Card({ children }: PropsWithChildren) { return <View style={styles.card}>{children}</View>; }
 export function Notice({ text }: { text?: string }) {
+  useEffect(() => { if (text && Platform.OS === "ios") AccessibilityInfo.announceForAccessibility(text); }, [text]);
   return text ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>{text}</Text> : null;
 }
 export function Button({ title, onPress, disabled = false, secondary = false, hint }: {

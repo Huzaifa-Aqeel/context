@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useIsFocused } from 'expo-router';
@@ -11,6 +11,11 @@ export default function CameraScreen() {
   const camera = useRef<CameraView>(null);
   const focused = useIsFocused();
   const [ready, setReady] = useState(false);
+  const [active, setActive] = useState(AppState.currentState === 'active');
+  useEffect(() => {
+    const listener = AppState.addEventListener('change', (state) => { setActive(state === 'active'); setReady(false); });
+    return () => listener.remove();
+  }, []);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const setImage = useContextStore((state) => state.setImage);
@@ -38,11 +43,11 @@ export default function CameraScreen() {
     <Heading>Capture a scene</Heading>
     <Body>Point your camera toward the references you want to explore, then capture one image.</Body>
     <View style={cameraStyles.preview} accessible={false} importantForAccessibility="no-hide-descendants">
-      {focused && <CameraView ref={camera} style={StyleSheet.absoluteFill} facing="back" mode="picture"
+      {focused && active && <CameraView ref={camera} style={StyleSheet.absoluteFill} facing="back" mode="picture"
         onCameraReady={() => setReady(true)} onMountError={() => setError('The camera is unavailable. Choose a photo from the home screen.')} />}
     </View>
     <Body>Camera preview is active. No video is recorded.</Body>
-    <Button title={pending ? 'Preparing scene…' : 'Capture image'} onPress={() => { void capture(); }} disabled={!ready || pending} />
+    <Button title={pending ? 'Preparing scene…' : 'Capture image'} onPress={() => { void capture(); }} disabled={!focused || !active || !ready || pending} />
     <Notice text={error} />
     <Button title="Cancel capture" onPress={() => router.back()} secondary />
   </Screen>;

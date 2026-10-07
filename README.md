@@ -2,7 +2,7 @@
 
 **Understand the culture around you.**
 
-Context is an accessible iOS and Android companion for blind and low-vision users. It connects what a camera sees with cultural knowledge and local context, helping users explore references, understand relationships, and ask follow-up questions through conversation.
+Context is an accessible iOS and Android companion for blind and low-vision users. It connects what a camera sees with cultural knowledge, local context, and voluntarily shared interests, helping users explore references, understand relationships, and connect unfamiliar culture to things they already know.
 
 Recognizing a poster, brand, or landmark is only the beginning. Context helps answer what that reference means, how it connects to its surroundings, and why it might matter.
 
@@ -17,6 +17,8 @@ Most visual assistance begins with “What is in front of me?” Context also as
 - “How do these things connect?”
 - “What is culturally significant about this neighborhood?”
 - “How does what I'm seeing relate to this area?”
+- “What here connects to things I know?”
+- “What here would stand out to me?”
 
 A music poster, an independent film reference, a fashion label, and a neighborhood can each contribute evidence. Context brings those signals together into an explanation the user can explore at their own pace.
 
@@ -43,12 +45,21 @@ Context is an open-source hackathon project focused on **accessible, conversatio
 
 The conversation carries the current scene context forward, so users do not need to recapture an image for every question. Additional investigation is used when the question needs it; existing evidence supports direct answers when sufficient.
 
+## Culture that connects to you
+
+Optionally share a few interests—films, artists, books, games, brands, places, or other references Qloo can resolve. Onboarding suggests 5–10 interests and can be skipped. Review or change your interests and control whether **Personalize cultural context** is enabled.
+
+Taste works across all five modes. It helps Context surface meaningful references, explain unfamiliar ones through supported connections to your interests, and offer guided exploration that starts with something familiar or discovers something new. Scene and locality evidence can also show where an environment overlaps with the interests you shared.
+
+Your explicit question and cultural significance take priority over taste. References outside your interests remain available, and no profile match is treated as a lack of knowledge or a dislike. This supports attention and understanding without turning Context into a shopping or place-recommendation feed.
+
 ## Built for accessibility
 
 - VoiceOver and TalkBack support through accessible labels, controls, and logical navigation.
 - Large touch targets and support for dynamic text sizing.
 - Spoken questions and text input.
-- Text-to-speech responses with replay and stop controls.
+- Groq Orpheus spoken responses with replay and stop controls.
+- Selectable voice personas and vocal directions for tone and pacing.
 - Important information expressed in text and speech, without relying on color.
 - An accessible camera flow and the option to choose an existing image.
 
@@ -60,7 +71,8 @@ Each part of Context has a specific role:
 | --- | --- |
 | **Vision** | Identify what is visually present. |
 | **Location** | Derive useful locality information. |
-| **Qloo** | Supply cultural entities, affinities, and cross-domain relationships. |
+| **Personal taste** | Provide voluntary interests for attention and familiar explanations. |
+| **Qloo** | Supply cultural entities, affinities, and cross-domain relationships, including supported connections to stated interests. |
 | **LLM** | Understand the question, select relevant investigations, and explain the evidence. |
 | **Expo** | Provide the mobile camera, audio, location, accessibility, and conversation experience. |
 | **EAS** | Support native builds, API hosting, deployment, and distribution. |
@@ -76,6 +88,9 @@ Uncertain identifications and weak relationships should be communicated clearly.
 - Locality information is used in conversation without retaining precise coordinates.
 - Microphone and camera use are initiated by the user.
 - Provider API keys remain on the server.
+- Taste personalization is optional, transparent, and can be disabled; interests can be edited or deleted.
+- Taste profiles stay in session memory by default; retaining them across sessions requires explicit opt-in.
+- Interests are provided or confirmed by the user, without silent behavioral or demographic profiling.
 
 Context is for cultural understanding. It does not replace navigation, obstacle avoidance, emergency assistance, or screen readers, and it does not identify people or infer sensitive personal characteristics.
 
@@ -88,7 +103,7 @@ Context is for cultural understanding. It does not replace navigation, obstacle 
 | Camera and images | Expo Camera, Image Picker, Image Manipulator |
 | Location | Expo Location and reverse geocoding |
 | Voice | Expo Audio and server-side transcription |
-| Spoken output | Expo Speech |
+| Spoken output | Groq Orpheus (`canopylabs/orpheus-v1-english`) + Expo Audio |
 | Application state | Zustand |
 | API state | TanStack Query |
 | Validation | Zod |

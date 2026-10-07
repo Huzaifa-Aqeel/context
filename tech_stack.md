@@ -45,7 +45,7 @@ The project should remain primarily within the Expo and TypeScript ecosystem.
 | Image Selection | expo-image-picker |
 | Location | expo-location |
 | Audio Recording | Expo Audio |
-| Text-to-Speech | expo-speech |
+| Text-to-Speech | Groq Orpheus + Expo Audio |
 | State | Zustand |
 | Server State | TanStack Query |
 | Backend API | Expo Router API Routes |
@@ -81,6 +81,7 @@ The mobile app handles:
 - Spoken responses
 - Accessible UI
 - Active scene conversation
+- Voluntary cultural-interest onboarding and personalization controls
 - User permissions
 
 The same Expo project will contain server API routes where practical.
@@ -238,7 +239,7 @@ Speech transcription should happen through a server-side provider so provider AP
 Use:
 
 ```text
-expo-speech
+Groq Orpheus (`canopylabs/orpheus-v1-english`) through a server API, with Expo Audio playback
 ```
 
 Primary responses should support automatic spoken output.
@@ -828,9 +829,20 @@ Qloo entities
 Cultural evidence
 Location context
 Conversation messages
+Enabled taste profile and supported taste-affinity evidence
 ```
 
 The user should not have to recapture the scene for every question.
+
+## Personal Taste context
+
+FR-14 makes a small voluntary taste profile a required MVP capability across all five modes. Onboarding suggests 5–10 interests, accepts fewer, supports up to 10, and can be skipped. Resolve supported interests through Qloo and retain confirmed IDs, names, and types; clarify ambiguous or unsupported names.
+
+The client must provide accessible interest review/edit/delete and a **Personalize cultural context** control. Keep the profile and active setting in Zustand session state by default; persistent accounts or a database are not required. Any retention across sessions requires explicit opt-in.
+
+Server requests must receive only the relevant enabled interests. Authenticate resolved taste evidence alongside other client-carried provider evidence, and distinguish profile interests from visible scene entities and related Qloo references. Profile changes, deletion, or disabling personalization must invalidate derived taste evidence for subsequent answers.
+
+Use verified Qloo affinities for taste-aware reference prioritization, familiar explanatory anchors, familiar-or-new guided exploration, and scene/locality overlap. Do not assume that an absent match proves unfamiliarity, and do not infer personal traits or silently recommend products or places. Retain the ordering in FR-09: necessary available environmental information, explicit question, cultural significance/evidence quality, then personal taste relevance.
 
 ---
 
@@ -1229,6 +1241,10 @@ Cultural relevance filtering
 Qloo entity resolution
 Qloo affinity analysis
 Qloo locality analysis
+Voluntary personal taste profile and Qloo interest resolution
+Taste-aware attention and familiar cultural explanations
+Personalized guided exploration and scene/locality overlap
+Personalization enable/disable and profile editing/deletion
 Conversational follow-up
 Reference exploration
 Connection exploration
@@ -1266,7 +1282,8 @@ Location
 
 Qloo
 → How do the recognized entities and locality
-  relate culturally?
+  relate culturally, including supported
+  connections to voluntarily shared interests?
 
 LLM
 → What does the user want to understand,

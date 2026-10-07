@@ -32,6 +32,7 @@ export default function HomeScreen() {
     <Button title={pending ? 'Preparing image…' : 'Choose a photo'} onPress={() => { void chooseImage(); }} disabled={pending} secondary />
     {scene && <Button title="Continue exploring the current scene" onPress={() => router.push('/conversation')} secondary />}
     <Notice text={error} />
+    <Button title="Add cultural interests · Optional" onPress={() => router.push('/taste')} secondary />
     <Heading>Choose your exploration</Heading>
     {modes.map((item) => <Pressable key={item.id} accessibilityRole="radio"
       accessibilityLabel={item.title} accessibilityHint={item.description}

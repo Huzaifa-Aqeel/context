@@ -25,6 +25,7 @@ export function useLocality() {
       const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       if (AppState.currentState !== 'active') return;
       const addresses = await Location.reverseGeocodeAsync(position.coords);
+      if (AppState.currentState !== 'active') return;
       if (!addresses[0]) throw new Error('Your area could not be identified. Enter an area name or continue with a scene.');
       // Drop coordinates and exact address immediately after deriving the locality.
       const locality = deriveLocality(addresses[0]);

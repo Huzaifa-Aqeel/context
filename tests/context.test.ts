@@ -25,7 +25,7 @@ function providers(turns: AgentTurn[]): Providers {
   let next = 0;
   return {
     vision: { inspectScene: unexpected },
-    qloo: { resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected },
+    qloo: { analyzeTaste: unexpected, resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected },
     llm: { nextTurn: async () => { assert.ok(next < turns.length); return turns[next++]; } },
   };
 }
@@ -55,6 +55,10 @@ test('malformed API requests fail before reaching providers and never become cac
 });
 
 test('valid requests report unavailable providers instead of fabricated analysis', async () => {
+  const originalGroq = process.env.GROQ_API_KEY;
+  const originalQloo = process.env.QLOO_API_KEY;
+  delete process.env.GROQ_API_KEY; delete process.env.QLOO_API_KEY;
+  try {
   const results = await Promise.all([
     analyzeRoute(jsonRequest('/api/scene/analyze', { image: 'data:image/jpeg;base64,YQ==' })),
     askRoute(jsonRequest('/api/scene/ask', { scene, question: 'Tell me more.' })),
@@ -65,13 +69,17 @@ test('valid requests report unavailable providers instead of fabricated analysis
     assert.equal(response.headers.get('cache-control'), 'no-store');
     assert.equal((await response.json()).error.code, 'PROVIDERS_NOT_CONFIGURED');
   }
+  } finally { if (originalGroq === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = originalGroq; if (originalQloo === undefined) delete process.env.QLOO_API_KEY; else process.env.QLOO_API_KEY = originalQloo; }
 });
 
 test('audio route rejects non-audio input and reports missing transcription honestly', async () => {
   const bad = new FormData(); bad.append('audio', new Blob(['private text'], { type: 'text/plain' }), 'text.txt');
   assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: bad }))).status, 400);
+  const originalGroq = process.env.GROQ_API_KEY; delete process.env.GROQ_API_KEY;
+  try {
   const good = new FormData(); good.append('audio', new Blob(['recording'], { type: 'audio/mp4' }), 'question.m4a');
   assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: good }))).status, 503);
+  } finally { if (originalGroq === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = originalGroq; }
 });
 
 test('existing evidence supports a direct answer without extra investigation', async () => {
@@ -114,9 +122,51 @@ test('scene analysis filters generic objects and excludes uncertain matches from
     assert.deepEqual(entities.map((entity) => entity.label), ['Test poster', 'Uncertain logo']);
     return [...evidence.entities, { detectedName: 'Uncertain logo', detectedCategory: 'brand', visionConfidence: 0.65, qlooId: 'uncertain', matchConfidence: 0.4 }];
   };
-  // With only one confirmed entity, relationship analysis must not be invoked.
+  // A single confirmed reference still supplies cultural metadata.
+  service.qloo.analyzeConnections = async (entities) => { assert.equal(entities.length, 1); return evidence; };
   const result = await analyzeScene({ image: 'test-image', mode: 'scene' }, service);
   assert.equal(result.culturalEvidence.entities.length, 2);
   assert.deepEqual(result.culturalEvidence.relationships, []);
   assert.equal(result.summary, answerTurn.result.answer);
+});
+
+test('reference investigation retains scene evidence and separates related references from visible ones', async () => {
+  const service = providers([{ kind: 'investigate', action: { tool: 'exploreReference', entityId: 'confirmed-reference' } }, answerTurn]);
+  service.qloo.exploreReference = async () => ({
+    ...evidence, entities: [{ ...evidence.entities[0], source: 'qloo', visionConfidence: 0 }, { detectedName: 'Related film', detectedCategory: 'film', qlooId: 'related', visionConfidence: 0, source: 'qloo', matchConfidence: 1 }],
+    facts: [{ entityId: 'confirmed-reference', name: 'Test poster', category: 'film', tags: ['Drama'], source: 'qloo' }],
+    relationships: [{ source: 'confirmed-reference', target: 'related', description: 'A related reference, not necessarily visible.', strength: 0.6, evidenceSource: 'qloo', kind: 'affinity' }],
+  });
+  const result = await explore({ question: 'Explore it.', scene, messages: [], mode: 'reference' }, service);
+  assert.equal(result.scene?.culturalEvidence.entities[0].visionConfidence, 0.95);
+  assert.equal(result.scene?.culturalEvidence.entities.find((item) => item.qlooId === 'related')?.source, 'qloo');
+  assert.equal(result.scene?.culturalEvidence.facts?.length, 1);
+});
+
+test('location-only conversations retrieve evidence once, then reuse it for follow-ups', async () => {
+  const service = providers([answerTurn]); let lookups = 0;
+  service.qloo.getLocationContext = async (locality) => { lookups++; return { locality, culturalThemes: ['Art'], relatedEntities: ['Museum'], confidence: 'medium', facts: [{ entityId: 'museum', name: 'Museum', category: 'place', tags: ['Art'], source: 'qloo' }] }; };
+  const first = await explore({ question: 'What is culturally significant here?', locality: { city: 'Test city' }, mode: 'location', messages: [] }, service);
+  assert.equal(lookups, 1); assert.equal(first.locationContext?.facts?.length, 1); assert.equal(first.scene, undefined);
+  await explore({ question: 'What do we know about the area?', locality: { city: 'Test city' }, locationContext: first.locationContext, mode: 'location', messages: [] }, providers([answerTurn]));
+});
+
+test('an explicitly named reference can be clarified and investigated; invented names cannot', async () => {
+  const action: AgentTurn = { kind: 'investigate', action: { tool: 'resolveEntity', name: 'Agatha Christie', category: 'author' } };
+  const service = providers([action, answerTurn]);
+  service.qloo.resolveEntities = async () => [{ detectedName: 'Agatha Christie', detectedCategory: 'author', visionConfidence: 1, qlooId: 'author', matchConfidence: 0.95, source: 'vision' }];
+  service.qloo.analyzeConnections = async (entities) => ({ entities, facts: [{ entityId: 'author', name: 'Agatha Christie', category: 'author', tags: ['Mystery'], source: 'qloo' }], relationships: [], themes: ['Mystery'], confidence: 0.5 });
+  const result = await explore({ question: 'The author is Agatha Christie. Can you explain?', scene, mode: 'reference', messages: [] }, service);
+  assert.equal(result.scene?.culturalEvidence.entities.find((item) => item.qlooId === 'author')?.source, 'user');
+  await assert.rejects(explore({ question: 'Explain the unnamed poster.', scene, mode: 'reference', messages: [] }, providers([action])), /Name the reference/);
+});
+
+test('a changed locality discards old local evidence and a generic scene returns an honest fallback', async () => {
+  const service = providers([answerTurn]);
+  service.qloo.getLocationContext = async (locality) => { assert.equal(locality.city, 'New area'); return { locality, culturalThemes: [], relatedEntities: [], confidence: 'low' }; };
+  const result = await explore({ question: 'What kind of area is this?', locality: { city: 'New area' }, locationContext: { locality: { city: 'Old area' }, culturalThemes: ['Old theme'], relatedEntities: [], confidence: 'medium' }, mode: 'location', messages: [] }, service);
+  assert.equal(result.locationContext?.locality.city, 'New area');
+  const generic = providers([]); generic.vision.inspectScene = async () => [{ label: 'Chair', category: 'furniture', culturallyRelevant: false, confidence: 1 }];
+  const empty = await analyzeScene({ image: 'fixture', mode: 'scene' }, generic);
+  assert.equal(empty.confidence, 'low'); assert.match(empty.summary, /could not identify/);
 });

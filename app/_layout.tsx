@@ -15,6 +15,7 @@ export default function RootLayout() {
       <Stack.Screen name="scene" options={{ title: 'Scene context' }} />
       <Stack.Screen name="conversation" options={{ title: 'Explore together' }} />
       <Stack.Screen name="location" options={{ title: 'Location context' }} />
+      <Stack.Screen name="taste" options={{ title: 'Your cultural interests' }} />
       <Stack.Screen name="settings" options={{ title: 'Settings & privacy' }} />
     </Stack>
   </QueryClientProvider></SafeAreaProvider>;

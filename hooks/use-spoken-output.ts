@@ -1,15 +1,14 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
-import * as Speech from 'expo-speech';
+import { clearSpokenOutput, getSpeechState, speakResponse, stopSpokenOutput, subscribeSpeech } from '@/lib/audio/playback';
 import { useContextStore } from '@/stores/context';
 
 export function useSpokenOutput() {
   const autoSpeak = useContextStore((state) => state.autoSpeak);
-  const speak = useCallback((text: string) => { void Speech.stop(); Speech.speak(text); }, []);
-  const stop = useCallback(() => { void Speech.stop(); }, []);
+  const state = useSyncExternalStore(subscribeSpeech, getSpeechState, getSpeechState);
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => { if (state !== 'active') stop(); });
-    return () => { subscription.remove(); stop(); };
-  }, [stop]);
-  return { speak, stop, autoSpeak };
+    const subscription = AppState.addEventListener('change', (status) => { if (status !== 'active') clearSpokenOutput(); });
+    return () => { subscription.remove(); clearSpokenOutput(); };
+  }, []);
+  return { speak: speakResponse, stop: stopSpokenOutput, autoSpeak, state };
 }
