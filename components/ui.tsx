@@ -1,6 +1,7 @@
-import { useEffect, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { useIsFocused } from 'expo-router';
 import { AccessibilityInfo, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput as NativeTextInput, View, type TextInputProps } from 'react-native';
-import { getSpeechState, speakResponse, stopSpokenOutput, subscribeSpeech } from '@/lib/audio/playback';
+import { clearSpokenOutput, getSpeechState, getSpokenText, speakResponse, stopSpokenOutput, subscribeSpeech } from '@/lib/audio/playback';
 import { useContextStore } from '@/stores/context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,11 +20,14 @@ export function Notice({ text, speech = true }: { text?: string; speech?: boolea
   const [requestedText, setRequestedText] = useState('');
   const requested = Boolean(text && requestedText === text);
   const recording = useContextStore((state) => Boolean(state.recordingOwner));
-  useEffect(() => { if (text && Platform.OS === "ios") AccessibilityInfo.announceForAccessibility(text); }, [text]);
+  const focused = useIsFocused();
+  const ownedText = useRef('');
+  useEffect(() => { if (focused && text && Platform.OS === "ios") AccessibilityInfo.announceForAccessibility(text); }, [focused, text]);
+  useEffect(() => () => { if (ownedText.current && getSpokenText() === ownedText.current) clearSpokenOutput(); }, [focused, text]);
   return text ? <View style={{ gap: 8 }}>
-    <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.notice}>{text}</Text>
+    <Text accessibilityRole="alert" accessibilityLiveRegion={focused ? 'polite' : 'none'} style={styles.notice}>{text}</Text>
     {speech && <>
-      <Button title={requested ? 'Replay message' : 'Hear message'} hint={text} onPress={() => { setRequestedText(text); speakResponse(text); }} disabled={recording} secondary />
+      <Button title={requested ? 'Replay message' : 'Hear message'} hint={text} onPress={() => { setRequestedText(text); ownedText.current = text; speakResponse(text); }} disabled={!focused || recording} secondary />
       {requested && <Button title="Stop message" onPress={stopSpokenOutput} secondary />}
       {requested && state.error && <Text accessibilityRole="alert" style={styles.notice}>{state.error}</Text>}
     </>}
@@ -37,7 +41,7 @@ export function Button({ title, onPress, disabled = false, secondary = false, hi
   title: string; onPress: () => void; disabled?: boolean; secondary?: boolean; hint?: string;
 }) {
   const [focused, setFocused] = useState(false);
-  return <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityHint={hint}
+  return <Pressable focusable={!disabled} accessibilityRole="button" accessibilityLabel={title} accessibilityHint={hint}
     accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
     style={({ pressed }) => [styles.button, secondary && styles.secondary, disabled && styles.disabled,

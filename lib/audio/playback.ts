@@ -19,8 +19,9 @@ const sequence = new SpeechSequence({
     const bytes = await withRequestSignal(async (requestSignal) => {
     const response = await fetch(apiUrl('/api/audio/speak'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, ...preferences }), signal: requestSignal });
     if (!response.ok) {
-      const error = apiErrorSchema.safeParse(await response.json());
-      throw new Error(error.success ? error.data.error.message : 'Spoken output is unavailable. Try replay.');
+      const payload = await response.json().catch(() => null);
+      const error = apiErrorSchema.safeParse(payload);
+      throw new Error(error.success ? error.data.error.message : 'Context’s API server is unavailable. Start the Expo server or configure EXPO_PUBLIC_API_URL.');
     }
     return response.arrayBuffer();
     }, 35_000, signal);
@@ -53,6 +54,21 @@ const sequence = new SpeechSequence({
   },
 });
 
-export const speakResponse = (text: string) => { if (!useContextStore.getState().recordingOwner) void sequence.speak(text, useContextStore.getState().speechPreferences); };
-export const stopSpokenOutput = () => sequence.stop();
-export const clearSpokenOutput = () => sequence.clear();
+let lifecycleInstalled = false;
+let currentText = '';
+export const getSpokenText = () => currentText;
+export const speakResponse = async (text: string, signal?: AbortSignal) => {
+  if (useContextStore.getState().recordingOwner || signal?.aborted) return false;
+  if (!lifecycleInstalled) {
+    lifecycleInstalled = true;
+    // Install on first playback, not at module load: safe for server rendering.
+    AppState.addEventListener('change', (status) => { if (status !== 'active') clearSpokenOutput(); });
+  }
+  currentText = text;
+  const cancel = () => { if (currentText === text) stopSpokenOutput(); };
+  signal?.addEventListener('abort', cancel, { once: true });
+  try { return await sequence.speak(text, useContextStore.getState().speechPreferences); }
+  finally { signal?.removeEventListener('abort', cancel); }
+};
+export const stopSpokenOutput = () => { currentText = ''; sequence.stop(); };
+export const clearSpokenOutput = () => { currentText = ''; sequence.clear(); };

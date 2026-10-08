@@ -19,14 +19,14 @@ export function errorResponse(error: unknown): Response {
   return privateJson({ error: { code: 'INTERNAL_ERROR', message: 'Context could not complete the request. Please try again.' } }, 500);
 }
 
-export function jsonRoute<Input, Output>(input: z.ZodType<Input>, output: z.ZodType<Output>, handler: (value: Input) => Promise<Output>) {
+export function jsonRoute<Input, Output>(input: z.ZodType<Input>, output: z.ZodType<Output>, handler: (value: Input) => Promise<Output>, maxRequestLength = 8_100_000) {
   return async (request: Request) => {
     try {
       if (!request.headers.get('content-type')?.includes('application/json')) {
         throw new ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Send this request as JSON.');
       }
       const text = await request.text();
-      if (text.length > 8_100_000) throw new ApiError(413, 'REQUEST_TOO_LARGE', 'Choose a smaller image and try again.');
+      if (text.length > maxRequestLength) throw new ApiError(413, 'REQUEST_TOO_LARGE', 'This full-resolution photo is too large to analyze. Try another image or move closer to the reference.');
       const value = input.parse(JSON.parse(text));
       const result = await handler(value);
       const parsed = output.safeParse(result);

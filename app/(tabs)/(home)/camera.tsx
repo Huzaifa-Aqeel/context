@@ -4,7 +4,7 @@ import { AppState, StyleSheet, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useIsFocused } from 'expo-router';
 import { Body, Button, Heading, Notice, Screen } from '@/components/ui';
-import { discardTemporaryFile, prepareImage } from '@/lib/images';
+import { discardTemporaryFile, ImageTooLargeError, prepareImage } from '@/lib/images';
 import { useContextStore } from '@/stores/context';
 
 export default function CameraScreen() {
@@ -27,16 +27,16 @@ export default function CameraScreen() {
     const ticket = task.begin();
     let temporaryUri: string | undefined;
     try {
-      const image = await camera.current?.takePictureAsync({ quality: 0.8 });
+      const image = await camera.current?.takePictureAsync({ quality: 1 });
       if (!image) throw new Error('Camera did not return an image.');
       temporaryUri = image.uri;
       if (!ticket.current()) return;
-      const prepared = await prepareImage(image.uri, image.width, image.height);
+      const prepared = await prepareImage(image.uri);
       if (!ticket.current()) return;
       setImage(prepared);
       router.replace('/scene');
-    } catch { if (ticket.current()) setError('The image could not be captured. Please try again or choose a photo.'); }
-    finally { discardTemporaryFile(temporaryUri); if (task.mounted()) setPending(false); }
+    } catch (cause) { if (ticket.current()) setError(cause instanceof ImageTooLargeError ? cause.message : 'The image could not be captured. Please try again or choose a photo.'); }
+    finally { discardTemporaryFile(temporaryUri); if (task.mounted() && ticket.current()) setPending(false); }
   }
   if (!permission?.granted) return <Screen>
     <Heading>Capture what’s around you</Heading>
@@ -47,7 +47,7 @@ export default function CameraScreen() {
   </Screen>;
   return <Screen>
     <Heading>Capture a scene</Heading>
-    <Body>Point your camera toward the references you want to explore, then capture one image.</Body>
+    <Body>Point your camera toward the references you want to explore. Capturing one photo sends it for analysis and starts your conversation.</Body>
     <View style={cameraStyles.preview} accessible={false} importantForAccessibility="no-hide-descendants">
       {focused && active && <CameraView ref={camera} style={StyleSheet.absoluteFill} facing="back" mode="picture"
         onCameraReady={() => setReady(true)} onMountError={() => setError('The camera is unavailable. Choose a photo from the home screen.')} />}

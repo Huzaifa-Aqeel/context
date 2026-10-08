@@ -1,3 +1,4 @@
+// Backward-compatible API intent hints and default questions, never a navigation menu.
 export const modes = [
   { id: 'scene', title: 'Scene Context', description: 'Understand the cultural context around you.', question: 'What cultural context am I missing?' },
   { id: 'reference', title: 'Reference Explorer', description: 'Explore a poster, brand, artwork, or other reference.', question: 'Which reference matters most here?' },

@@ -2,15 +2,27 @@ import { ApiError } from '@/lib/api/server';
 import type { QlooService } from '@/lib/qloo/service';
 import type { TasteDraft, TasteProfile } from '@/types/taste';
 
-export async function resolveTasteInterests(inputs: { label: string; category: string }[], qloo: QlooService): Promise<TasteDraft> {
-  const detections = inputs.slice(0, 10).map((interest) => ({ ...interest, confidence: 1, culturallyRelevant: true }));
-  const resolved = [...await qloo.resolveEntities(detections.slice(0, 8)), ...(detections.length > 8 ? await qloo.resolveEntities(detections.slice(8)) : [])];
+export async function resolveTasteInterests(inputs: { label: string; category: string }[], qloo: QlooService, allowUnavailable = false): Promise<TasteDraft> {
+  const detections = inputs.slice(0, 100).map((interest) => ({ ...interest, confidence: 1, culturallyRelevant: true }));
+  const resolved: Awaited<ReturnType<QlooService['resolveEntities']>> = [];
+  let unavailable = false;
+  for (let offset = 0; offset < detections.length; offset += 8) {
+    const batch = detections.slice(offset, offset + 8);
+    try { resolved.push(...await qloo.resolveEntities(batch)); }
+    catch (error) {
+      if (!allowUnavailable) throw error;
+      unavailable = true;
+      // Preserve every stated interest, and stop repeating calls during an outage.
+      resolved.push(...detections.slice(offset).map((item) => ({ detectedName: item.label, detectedCategory: item.category, visionConfidence: 1 })));
+      break;
+    }
+  }
   return { candidates: resolved.map((entity) => {
     const base = { label: entity.detectedName, category: entity.detectedCategory };
     if (entity.qlooId && entity.qlooName && entity.qlooType && (entity.matchConfidence ?? 0) >= 0.75) return { ...base, status: 'matched' as const, entity: { id: entity.qlooId, name: entity.qlooName, type: entity.qlooType } };
     if (entity.candidates?.length) return { ...base, status: 'clarify' as const, candidates: entity.candidates };
     return { ...base, status: 'no_match' as const };
-  }) };
+  }), ...(unavailable ? { warnings: ['Some interest connections are unavailable right now.'] } : {}) };
 }
 export function confirmTasteProfile(draft: TasteDraft, includedIds: string[], clarified: { label: string; entityId: string }[] = []): TasteProfile {
   const selected = clarified.map((choice) => {

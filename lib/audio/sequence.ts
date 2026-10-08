@@ -40,7 +40,7 @@ export class SpeechSequence {
   }
   async speak(text: string, preferences: SpeechPreferences = defaultSpeechPreferences) {
     this.stop();
-    if (!this.dependencies.isActive() || !text.trim()) return;
+    if (!this.dependencies.isActive() || !text.trim()) return false;
     const cacheKey = JSON.stringify({ text, preferences });
     if (this.text !== cacheKey) { this.clear(); this.text = cacheKey; }
     const controller = new AbortController();
@@ -60,12 +60,15 @@ export class SpeechSequence {
         this.dependencies.onState({ status: 'playing' });
         await this.dependencies.play(asset.uri, signal);
       }
+      const completed = this.controller === controller && !signal.aborted && this.dependencies.isActive();
       if (this.controller === controller) { this.controller = undefined; this.dependencies.onState({ status: 'idle' }); }
+      return completed;
     } catch (error) {
       if (!signal.aborted && this.controller === controller) {
         this.controller = undefined;
         this.dependencies.onState({ status: 'error', error: error instanceof Error ? error.message : 'Spoken output is unavailable. You can read the response or try replay.' });
       }
+      return false;
     }
   }
 }

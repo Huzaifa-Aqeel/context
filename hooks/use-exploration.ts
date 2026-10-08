@@ -1,18 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import { postApi } from '@/lib/api/client';
 import { answerSchema, askRequestSchema } from '@/schemas/context';
-import { activeTasteRequest, assertCurrentSession, conversationForRequest, useContextStore } from '@/stores/context';
-import { useForegroundTask } from './use-foreground-task';
+import { activeTasteRequest, assertCurrentSession, conversationForRequest, includeLocality, useContextStore } from '@/stores/context';
+import { useContextRequest } from './use-context-request';
 export function useExploration() {
-  const task = useForegroundTask();
+  const begin = useContextRequest();
   return useMutation({
     mutationFn: async (question: string) => {
-      const state = useContextStore.getState(); const generation = state.generation;
-      const ticket = task.begin();
-      const result = await postApi('/api/scene/ask', askRequestSchema.parse({ question, scene: state.scene ?? undefined, locality: state.locality ?? undefined, locationContext: state.locationContext ?? undefined, messages: conversationForRequest(), mode: state.mode, ...activeTasteRequest() }), answerSchema);
-      assertCurrentSession(generation);
-      if (!ticket.current()) throw new Error('This exploration was cancelled. Ask again when you return.');
-      return result;
+      const request = await begin(); const { state } = request;
+      const result = await postApi('/api/scene/ask', askRequestSchema.parse({ question, scene: state.scene ?? undefined, locality: includeLocality(state) ? state.locality ?? undefined : undefined, locationContext: includeLocality(state) ? state.locationContext ?? undefined : undefined, useLocality: includeLocality(state), messages: conversationForRequest(), ...activeTasteRequest() }), answerSchema);
+      assertCurrentSession(state.generation);
+      if (!request.current()) throw new Error('This exploration was cancelled. Ask again when you return.');
+      return { ...result, warnings: [...new Set([...(result.warnings ?? []), ...(request.warning ? [request.warning] : [])])] };
     },
     onSuccess: (result, question) => {
       const state = useContextStore.getState();

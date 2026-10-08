@@ -12,6 +12,8 @@ export function scenePresentation(scene: Scene, profile: TasteProfile | null, co
   const asked = ranked.filter((entity) => question.toLowerCase().includes((entity.qlooName ?? entity.detectedName).toLowerCase()));
   const meaningful = (asked.length ? asked : ranked).filter((entity) => isConfirmed(entity) && interestConnection(entity.qlooId, context));
   const sentences = [scene.summary];
+  const necessary = scene.environmentalObservations?.filter((item) => item.necessaryInformation && item.confidence >= 0.7) ?? [];
+  if (necessary.length && !necessary.some((item) => scene.summary.includes(item.label))) sentences.unshift(`The image appears to contain ${necessary.map((item) => item.label).join(', ')}.`);
   const focus = meaningful[0];
   const connection = focus ? interestConnection(focus.qlooId, context) : undefined;
   const anchor = profile.entities.find((interest) => interest.id === connection?.interestId);

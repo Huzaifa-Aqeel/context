@@ -1,13 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { z } from 'zod';
 import { POST as analyzeRoute } from '../app/api/scene/analyze+api';
 import { POST as askRoute } from '../app/api/scene/ask+api';
 import { POST as locationRoute } from '../app/api/location/context+api';
 import { POST as transcribeRoute } from '../app/api/audio/transcribe+api';
 import { deriveLocality } from '../lib/location/locality';
+import { jsonRoute } from '../lib/api/server';
+import { MAX_SCENE_REQUEST_LENGTH } from '../lib/image-limits';
 import { analyzeScene, explore, type Providers } from '../lib/orchestration/context';
 import type { AgentTurn } from '../lib/llm/service';
-import { askRequestSchema, localitySchema } from '../schemas/context';
+import { analyzeRequestSchema, askRequestSchema, localitySchema } from '../schemas/context';
 import type { CulturalEvidence, Scene } from '../types/context';
 
 const evidence: CulturalEvidence = {
@@ -39,10 +42,10 @@ test('locality extraction discards precise coordinates and exact addresses', () 
   assert.deepEqual(localitySchema.parse({ city: 'Test city', latitude: 24.123, longitude: 67.456, street: 'Private street' }), { city: 'Test city' });
 });
 
-test('follow-ups work without location but require some scene or locality context', () => {
+test('conversation accepts scene, area, or standalone reference questions', () => {
   assert.equal(askRequestSchema.safeParse({ scene, question: 'Explain that reference.' }).success, true);
   assert.equal(askRequestSchema.safeParse({ locality: { city: 'Test city' }, question: 'What is culturally significant here?' }).success, true);
-  assert.equal(askRequestSchema.safeParse({ question: 'What is here?' }).success, false);
+  assert.equal(askRequestSchema.safeParse({ question: 'Explain Agatha Christie.' }).success, true);
 });
 
 test('malformed API requests fail before reaching providers and never become cached', async () => {
@@ -52,6 +55,15 @@ test('malformed API requests fail before reaching providers and never become cac
   assert.equal((await response.json()).error.code, 'INVALID_REQUEST');
   const malformed = await askRoute(new Request('https://context.test/api/scene/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{broken' }));
   assert.equal(malformed.status, 400);
+});
+
+test('full-resolution scene payloads above the former 8 MB cap reach image validation', async () => {
+  const image = `data:image/jpeg;base64,${'A'.repeat(8_200_000)}`;
+  const request = () => jsonRequest('/api/scene/analyze', { image });
+  const accepted = jsonRoute(analyzeRequestSchema, z.object({ accepted: z.boolean() }), async () => ({ accepted: true }), MAX_SCENE_REQUEST_LENGTH);
+  assert.equal((await accepted(request())).status, 200);
+  const defaultLimit = jsonRoute(analyzeRequestSchema, z.object({ accepted: z.boolean() }), async () => ({ accepted: true }));
+  assert.equal((await defaultLimit(request())).status, 413);
 });
 
 test('valid requests report unavailable providers instead of fabricated analysis', async () => {
@@ -75,10 +87,20 @@ test('valid requests report unavailable providers instead of fabricated analysis
 test('audio route rejects non-audio input and reports missing transcription honestly', async () => {
   const bad = new FormData(); bad.append('audio', new Blob(['private text'], { type: 'text/plain' }), 'text.txt');
   assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: bad }))).status, 400);
+  const empty = new FormData(); empty.append('audio', new Blob([], { type: 'audio/mp4' }), 'question.m4a');
+  const emptyResponse = await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: empty }));
+  assert.equal(emptyResponse.status, 400);
+  assert.equal((await emptyResponse.json()).error.code, 'EMPTY_AUDIO');
   const originalGroq = process.env.GROQ_API_KEY; delete process.env.GROQ_API_KEY;
   try {
   const good = new FormData(); good.append('audio', new Blob(['recording'], { type: 'audio/mp4' }), 'question.m4a');
   assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: good }))).status, 503);
+  const web = new FormData(); web.append('audio', new Blob(['recording'], { type: 'audio/webm;codecs=opus' }), 'question.webm');
+  assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: web }))).status, 503);
+  const native = new FormData(); native.append('audio', new Blob([Uint8Array.from([0, 0, 0, 16, 102, 116, 121, 112, 77, 52, 65, 32])], { type: 'application/octet-stream' }), 'question.m4a');
+  assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: native }))).status, 503);
+  const generic = new FormData(); generic.append('audio', new Blob([Uint8Array.from([82, 73, 70, 70, 0, 0, 0, 0, 87, 65, 86, 69])]), 'blob');
+  assert.equal((await transcribeRoute(new Request('https://context.test/api/audio/transcribe', { method: 'POST', body: generic }))).status, 503);
   } finally { if (originalGroq === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = originalGroq; }
 });
 
@@ -126,6 +148,7 @@ test('scene analysis filters generic objects and excludes uncertain matches from
   service.qloo.analyzeConnections = async (entities) => { assert.equal(entities.length, 1); return evidence; };
   const result = await analyzeScene({ image: 'test-image', mode: 'scene' }, service);
   assert.equal(result.culturalEvidence.entities.length, 2);
+  assert.equal(result.environmentalObservations?.[0].label, 'Chair');
   assert.deepEqual(result.culturalEvidence.relationships, []);
   assert.match(result.summary, /not have enough Qloo facts/);
 });

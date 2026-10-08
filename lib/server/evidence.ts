@@ -4,7 +4,7 @@ import type { Answer, AskRequest, Scene } from '@/types/context';
 // Stateless authentication: submitted provider evidence must be issued by this server.
 // Key rotation invalidates old sessions. No database or retained scene is required.
 async function signingKey() {
-  const secret = process.env.SESSION_SIGNING_KEY?.trim() || process.env.GROQ_API_KEY?.trim();
+  const secret = process.env.SESSION_SIGNING_KEY?.trim() || process.env.GROQ_API_KEY?.trim() || process.env.LLM_API_KEY?.trim();
   if (!secret) throw new ApiError(503, 'PROVIDERS_NOT_CONFIGURED', 'Analysis is not configured. Please try again later.');
   return crypto.subtle.importKey('raw', new TextEncoder().encode(`context-evidence-v1:${secret}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }

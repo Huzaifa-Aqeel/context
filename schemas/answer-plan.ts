@@ -6,6 +6,7 @@ export const evidenceSelectionSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('taste'), referenceId: id, interestId: id }),
   z.object({ kind: z.literal('theme'), tag: id }),
   z.object({ kind: z.literal('locality') }),
+  z.object({ kind: z.literal('observation'), label: id }),
 ]);
 export const evidenceSelectionsSchema = z.array(evidenceSelectionSchema).max(5);
 export type EvidenceSelection = z.infer<typeof evidenceSelectionSchema>;

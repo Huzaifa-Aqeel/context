@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { explorationStrategySchema, tasteProfileSchema, tasteContextSchema } from './taste';
 import { directionPrefix, speechStyles, speechVoices } from '@/lib/audio/options';
+import { MAX_SCENE_IMAGE_DATA_URI_LENGTH } from '@/lib/image-limits';
 
 export const confidenceSchema = z.enum(['low', 'medium', 'high']);
 export const modeSchema = z.enum(['scene', 'reference', 'connection', 'guided', 'location']);
@@ -11,12 +12,13 @@ const shortText = z.string().trim().min(1).max(500);
 export const localitySchema = z.object({
   neighborhood: shortText.optional(), city: shortText.optional(),
   region: shortText.optional(), country: shortText.optional(),
-}).strip().refine((value) => Object.values(value).some(Boolean), 'Provide an area name or locality.');
+}).strip().refine((value) => Object.values(value).some(Boolean), 'Locality is required.');
 
 export const visionEntitySchema = z.object({
   label: shortText, category: shortText, confidence: scoreSchema,
   culturallyRelevant: z.boolean(),
   position: shortText.optional(),
+  necessaryInformation: z.boolean().optional(),
 });
 export const resolvedEntitySchema = z.object({
   detectedName: shortText, detectedCategory: shortText,
@@ -52,28 +54,31 @@ export const locationContextSchema = z.object({
   warnings: z.array(z.string().max(1000)).max(10).optional(),
 });
 export const sceneSchema = z.object({
+  origin: z.enum(['image', 'conversation']).optional(),
   signature: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   id: shortText, createdAt: z.iso.datetime(), summary: z.string().min(1).max(8000),
   culturalEvidence: evidenceSchema, locationContext: locationContextSchema.optional(),
   confidence: confidenceSchema,
   warnings: z.array(z.string().max(1000)).max(10).optional(),
+  environmentalObservations: z.array(z.object({ label: shortText, confidence: scoreSchema, position: shortText.optional(), necessaryInformation: z.boolean().optional() })).max(5).optional(),
 });
 export const messageSchema = z.object({
   role: z.enum(['user', 'assistant']), content: z.string().min(1).max(8000),
 });
 export const analyzeRequestSchema = z.object({
-  image: z.string().max(8_000_000).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/, 'Provide a supported base64 image.'),
+  image: z.string().max(MAX_SCENE_IMAGE_DATA_URI_LENGTH).regex(/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/, 'Provide a supported base64 image.'),
   locality: localitySchema.optional(), mode: modeSchema.default('scene'),
   question: z.string().trim().min(1).max(2000).optional(),
 });
 export const askRequestSchema = z.object({
+  useLocality: z.boolean().optional(),
   question: z.string().trim().min(1).max(2000), scene: sceneSchema.optional(),
   locality: localitySchema.optional(), messages: z.array(messageSchema).max(20).default([]),
   mode: modeSchema.default('scene'),
   profile: tasteProfileSchema.optional(), tasteContext: tasteContextSchema.optional(),
   strategy: explorationStrategySchema.optional(),
   locationContext: locationContextSchema.optional(),
-}).refine((value) => value.scene || value.locality, 'Capture a scene or provide an area first.');
+});
 export const referenceRequestSchema = z.object({
   profile: tasteProfileSchema.optional(), tasteContext: tasteContextSchema.optional(),
   strategy: explorationStrategySchema.optional(),
@@ -103,4 +108,4 @@ export const speechRequestSchema = z.object({
   style: z.enum(speechStyles).default('natural'),
 }).refine((input) => directionPrefix(input.style).length + input.text.length <= 200, 'Shorten the text to leave room for vocal direction.');
 
-export const tasteContextRequestSchema = z.object({ profile: tasteProfileSchema, scene: sceneSchema.optional(), locality: localitySchema.optional(), locationContext: locationContextSchema.optional() }).refine((value) => value.scene || value.locationContext, "Explore a scene or locality first.");
+export const tasteContextRequestSchema = z.object({ useLocality: z.boolean().optional(), profile: tasteProfileSchema, scene: sceneSchema.optional(), locality: localitySchema.optional(), locationContext: locationContextSchema.optional() }).refine((value) => value.scene || value.locationContext, "Explore a scene or locality first.");

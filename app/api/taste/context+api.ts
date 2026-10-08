@@ -7,5 +7,6 @@ import { tasteContextRequestSchema } from '@/schemas/context';
 import { tasteContextSchema } from '@/schemas/taste';
 export const POST = jsonRoute(tasteContextRequestSchema, tasteContextSchema, async (input) => {
   await verifyEvidence(input);
-  return sealDocument(await investigateTaste(input.profile, tasteReferences(input.scene, input.locationContext, input.locality), new QlooClient(qlooConfig())), 'taste-context');
+  const scene = input.useLocality === false && input.scene ? { ...input.scene, locationContext: undefined } : input.scene;
+  return sealDocument(await investigateTaste(input.profile, tasteReferences(scene, input.useLocality === false ? undefined : input.locationContext, input.useLocality === false ? undefined : input.locality), new QlooClient(qlooConfig())), 'taste-context');
 });

@@ -13,6 +13,7 @@ import { modes, type UserMode } from '@/lib/modes';
 
 export type Providers = { vision: VisionService; qloo: QlooService; llm: LlmService };
 const emptyEvidence = (): CulturalEvidence => ({ entities: [], relationships: [], themes: [], confidence: 0 });
+const conversationScene = (): Scene => ({ origin: 'conversation', id: crypto.randomUUID(), createdAt: new Date().toISOString(), summary: 'A conversation with Context.', confidence: 'low', culturalEvidence: emptyEvidence() });
 export { isConfirmed } from '@/lib/qloo/confirmed';
 const normalize = (text: string) => text.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 const sameLocality = (a?: Locality, b?: Locality) => JSON.stringify(a) === JSON.stringify(b);
@@ -31,6 +32,8 @@ export function mergeEvidence(previous: CulturalEvidence, incoming: CulturalEvid
 }
 
 export async function explore(request: AskRequest, providers: Providers): Promise<Answer> {
+  if (request.useLocality === false) request = { ...request, locality: undefined, locationContext: undefined, scene: request.scene ? { ...request.scene, locationContext: undefined } : undefined };
+  if (!request.scene && !request.locality && !request.locationContext) request = { ...request, scene: conversationScene() };
   let evidence = request.scene?.culturalEvidence ?? emptyEvidence();
   let locationContext = request.locationContext ?? request.scene?.locationContext;
   if (request.locality && locationContext && !sameLocality(request.locality, locationContext.locality)) locationContext = undefined;
@@ -48,11 +51,12 @@ export async function explore(request: AskRequest, providers: Providers): Promis
   }
   async function lookupLocation() {
     const locality = request.locality ?? locationContext?.locality;
-    if (!locality) throw new ApiError(422, 'LOCALITY_UNAVAILABLE', 'Tell me an area name to explore local context.');
-    locationContext = locationContextSchema.parse(await providers.qloo.getLocationContext(locality));
+    if (!locality) throw new ApiError(422, 'LOCALITY_UNAVAILABLE', 'Enable location context to explore your area.');
+    try { locationContext = locationContextSchema.parse(await providers.qloo.getLocationContext(locality)); }
+    catch { locationContext = { locality, culturalThemes: [], relatedEntities: [], facts: [], confidence: 'low', warnings: ['Local cultural evidence is unavailable right now. I can still explore available scene references.'] }; }
     completedActions.push(JSON.stringify({ tool: 'getLocationContext' }));
   }
-  // Location-only requests always obtain evidence; follow-ups reuse it.
+  // The area endpoint obtains evidence; unified conversation investigates locality only as needed.
   if (request.mode === 'location' && !locationContext) await lookupLocation();
   const references = tasteReferences(request.scene, locationContext, request.locality);
   if (tasteContext && JSON.stringify(tasteContext.referenceIds) !== JSON.stringify(references.map((entity) => entity.id).sort())) tasteContext = undefined;
@@ -77,7 +81,7 @@ export async function explore(request: AskRequest, providers: Providers): Promis
       const allWarnings = [...new Set([...warnings, ...(locationContext?.warnings ?? []), ...(tasteContext?.warnings ?? [])])].slice(0, 10);
       return {
         answer: grounded.answer, confidence, locationContext, tasteContext, usedTasteConnections: grounded.usedTasteConnections, warnings: allWarnings,
-        scene: request.scene ? { ...request.scene, culturalEvidence: evidence, locationContext, warnings: allWarnings } : undefined,
+        scene: request.scene ? { ...request.scene, ...(request.scene.origin === 'conversation' ? { summary: grounded.answer, confidence } : {}), culturalEvidence: evidence, locationContext, warnings: allWarnings } : undefined,
       };
     }
     const key = JSON.stringify(turn.action);
@@ -112,6 +116,7 @@ export async function explore(request: AskRequest, providers: Providers): Promis
         if (!explicitlyNamed && !detected) throw new ApiError(422, 'UNSUPPORTED_REFERENCE', 'Name the reference you want to investigate.');
         const resolved = resolvedEntitySchema.array().parse(await providers.qloo.resolveEntities([{ label: name, category, confidence: detected?.visionConfidence ?? 1, culturallyRelevant: true }]));
         const confirmed = resolved.map((entity) => ({ ...entity, source: explicitlyNamed ? 'user' as const : entity.source }));
+        if (!request.scene) request = { ...request, scene: conversationScene() };
         evidence = { ...evidence, entities: [...evidence.entities.filter((entity) => normalize(entity.detectedName) !== normalizedName), ...confirmed].slice(0, 30) };
         if (confirmed.some(isConfirmed)) evidence = mergeEvidence(evidence, evidenceSchema.parse(await providers.qloo.analyzeConnections(confirmed.filter(isConfirmed))));
         else warnings.push(`The reference “${name}” could not be matched uniquely. Clarify its exact name and type.`);
@@ -126,21 +131,28 @@ export async function explore(request: AskRequest, providers: Providers): Promis
 export async function analyzeScene(input: { image: string; locality?: Locality; mode: UserMode; question?: string }, providers: Providers): Promise<Scene> {
   const detected = visionEntitySchema.array().max(100).parse(await providers.vision.inspectScene(input.image));
   const meaningful = detected.filter((entity) => entity.culturallyRelevant).slice(0, 30);
+  const environmentalObservations = detected.filter((entity) => !entity.culturallyRelevant).sort((a, b) => Number(Boolean(b.necessaryInformation)) - Number(Boolean(a.necessaryInformation))).slice(0, 5).map(({ label, confidence, position, necessaryInformation }) => ({ label, confidence, position, necessaryInformation }));
   const shortlist = meaningful.filter((entity) => entity.confidence >= 0.5).sort((a, b) => Number((input.question ?? '').toLowerCase().includes(b.label.toLowerCase())) - Number((input.question ?? '').toLowerCase().includes(a.label.toLowerCase())) || b.confidence - a.confidence).slice(0, 8);
   const resolved = shortlist.length ? resolvedEntitySchema.array().max(30).parse(await providers.qloo.resolveEntities(shortlist)) : [];
   const entities = meaningful.map((entity) => resolved.find((item) => normalize(item.detectedName) === normalize(entity.label)) ?? { detectedName: entity.label, detectedCategory: entity.category, visionConfidence: entity.confidence, source: 'vision' as const, resolutionPending: true, ...(entity.position ? { position: entity.position } : {}) });
   const confirmed = entities.filter(isConfirmed);
   const connections = confirmed.length ? evidenceSchema.parse(await providers.qloo.analyzeConnections(confirmed)) : emptyEvidence();
-  const locationContext = input.locality ? locationContextSchema.parse(await providers.qloo.getLocationContext(input.locality)) : undefined;
+  let locationContext;
+  if (input.locality) {
+    try { locationContext = locationContextSchema.parse(await providers.qloo.getLocationContext(input.locality)); }
+    catch { locationContext = { locality: input.locality, culturalThemes: [], relatedEntities: [], facts: [], confidence: 'low' as const, warnings: ['Local cultural evidence is unavailable right now. Scene exploration can continue.'] }; }
+  }
   const scene: Scene = {
+    origin: 'image',
     id: crypto.randomUUID(), createdAt: new Date().toISOString(),
     summary: 'There is not enough cultural evidence yet.', confidence: 'low',
     culturalEvidence: { ...connections, entities }, locationContext,
-    warnings: meaningful.length > shortlist.length ? ['All returned cultural detections are retained. Qloo initially checks up to eight identifiable references; name another reference to investigate it.'] : undefined,
+    environmentalObservations,
+    warnings: [...(meaningful.length > shortlist.length ? ['I found more possible references than I could check right now. Ask about a specific one to explore it.'] : []), ...(locationContext?.warnings ?? [])],
   };
   if (!confirmed.length && !locationContext?.facts?.length) return {
-    ...scene, summary: entities.length ? 'I could not confidently match the visible references to cultural records. Tell me a reference’s exact name and type, or try a closer image.' : 'I could not identify distinctive cultural references in this image. Try a readable poster, book title, brand, or landmark, or explore an area by name.',
-    warnings: [...(scene.warnings ?? []), ...(locationContext?.warnings ?? [])],
+    ...scene, summary: `${environmentalObservations.filter((item) => item.confidence >= 0.7).length ? `The image appears to contain ${environmentalObservations.filter((item) => item.confidence >= 0.7).map((item) => item.label).join(', ')}. ` : ''}${entities.length ? 'I could not confidently identify the cultural references in this image. Tell me the name of something you noticed, or try a closer image.' : 'I could not identify distinctive cultural references in this image. Try a readable poster, book title, brand, or landmark.'}`,
+    warnings: [...new Set([...(scene.warnings ?? []), ...(locationContext?.warnings ?? [])])],
   };
   const result = await explore({
     question: input.question || modes.find((mode) => mode.id === input.mode)!.question, scene,

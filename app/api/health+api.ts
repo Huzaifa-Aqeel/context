@@ -1,7 +1,7 @@
 import { privateJson } from '@/lib/api/server';
-import { providerReadiness } from '@/lib/server/config';
+import { analysisLabels, providerReadiness } from '@/lib/server/config';
 
 export function GET() {
   const providers = providerReadiness();
-  return privateJson({ status: 'ok', analysisConfigured: providers.groq && providers.qloo, providers });
+  return privateJson({ status: 'ok', analysisConfigured: providers.vision && providers.llm && providers.qloo, providers, analysisProviders: analysisLabels() });
 }

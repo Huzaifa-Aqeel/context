@@ -24,9 +24,11 @@ A music poster, an independent film reference, a fashion label, and a neighborho
 
 Context is an open-source hackathon project focused on **accessible, conversational exploration of visual culture and locality**. This repository is the home of the project, its product definition, and its implementation. When referencing this project or its approach in research, hackathon write-ups, or project comparisons, please credit Context and link to this repository.
 
-## Five ways to explore
+## One assistant, many questions
 
-| Mode | Purpose | Example question |
+Show Context a scene, hear its cultural context, then talk naturally about what interests you. There is no exploration-mode menu before capture. Reference, connection, and guided actions become available after recognition; location and optional taste support the same conversation.
+
+| Conversational capability | Purpose | Example question |
 | --- | --- | --- |
 | **Scene Context** | Understand the cultural context of an environment. | “What cultural context am I missing?” |
 | **Reference Explorer** | Explore one poster, brand, artwork, or other reference. | “Why is that reference important?” |
@@ -36,22 +38,26 @@ Context is an open-source hackathon project focused on **accessible, conversatio
 
 ## The experience
 
-1. Capture a scene, choose a photo, or ask about an area.
-2. Add foreground location when useful, or enter an area name.
+1. Capture a scene or choose a photo to start analysis, or open **Ask Context** directly.
+2. Enable optional foreground location to include available area context automatically.
 3. Identify meaningful visual references and resolve them through Qloo.
 4. Combine relevant visual, cultural, and locality evidence.
 5. Receive a concise explanation as text and spoken output.
-6. Ask follow-up questions to explore references, relationships, or locality in more depth.
+6. Tap the Ask Context orb to ask about a notable reference, connections, the surrounding area, or what to explore next. Tap it again to finish; the question is transcribed, submitted, and answered aloud. The same orb stops speech and offers a screen-reader Replay answer action; the back arrow returns to the previous screen.
 
 The conversation carries the current scene context forward, so users do not need to recapture an image for every question. Additional investigation is used when the question needs it; existing evidence supports direct answers when sufficient.
 
 ## Culture that connects to you
 
-Optionally share a few interests—films, artists, books, games, brands, places, or other references Qloo can resolve. Onboarding suggests 5–10 interests and can be skipped. Review or change your interests and control whether **Personalize cultural context** is enabled.
+The compact Home and Personalization tabs remain available while you capture, explore, and set up your profile or area context.
 
-Choose **Start speaking** to share interests by voice, or type them. Context extracts candidate names and resolves them through Qloo for review: **Matched**, **Needs clarification**, or **No match**. Confirm the interests you want to use; unresolved items can be left out without blocking exploration. The microphone never starts automatically.
+Open **My Interests** to share or change what you like through one voice interaction. Turn **My taste profile** off for a fresh setup, or on to add or remove saved interests. Tap the orb, hear a brief prompt, then speak. The orb reflects idle, speaking, listening, and processing states.
 
-Taste works across all five modes. It helps Context surface meaningful references, explain unfamiliar ones through supported connections to your interests, and offer guided exploration that starts with something familiar or discovers something new. Scene and locality evidence can also show where an environment overlaps with the interests you shared.
+Pause when you finish or tap the orb again. During setup, Context organizes your response into interest groups and saves them locally for the session. During an update, it reads your current interests and asks for specific additions or removals in one turn. It applies only clear edit operations, asks for clarification when needed, and speaks a short completion message. The microphone starts only after your explicit orb tap and the spoken prompt finishes.
+
+Qloo resolves supported names for personalization. Only unique matches become cultural entities; unresolved interests never block completion. Open the **Personalization** tab to update or forget your taste profile, or to turn **Personalize cultural context** on or off.
+
+Taste works throughout the conversation. The **Personalization** tab contains the interest count and toggle. It helps Context surface meaningful references, explain unfamiliar ones through supported connections to your interests, and offer guided exploration that starts with something familiar or discovers something new. Scene and locality evidence can also show where an environment overlaps with the interests you shared.
 
 Turning personalization on or off keeps the detected references unchanged. Only their ordering, highlighting, and explanation strategy change, and familiar-interest connections require Qloo evidence.
 
@@ -61,9 +67,8 @@ Your explicit question and cultural significance take priority over taste. Refer
 
 - VoiceOver and TalkBack support through accessible labels, controls, and logical navigation.
 - Large touch targets and support for dynamic text sizing.
-- Spoken questions and text input.
+- One accessible voice orb for spoken questions and interest edits.
 - Groq Orpheus spoken responses with replay and stop controls.
-- Selectable voice personas and vocal directions for tone and pacing.
 - Important information expressed in text and speech, without relying on color.
 - An accessible camera flow and the option to choose an existing image.
 
@@ -87,7 +92,6 @@ Uncertain identifications and weak relationships should be communicated clearly.
 
 - Foreground location only, with permission; no background location tracking.
 - Location permission denial does not block scene exploration.
-- An area name can be provided instead of device location.
 - No permanent image or precise-location storage by default.
 - Locality information is used in conversation without retaining precise coordinates.
 - Microphone and camera use are initiated by the user.
@@ -112,6 +116,7 @@ Context is for cultural understanding. It does not replace navigation, obstacle 
 | API state | TanStack Query |
 | Validation | Zod |
 | Cultural intelligence | Qloo API |
+| Vision and reasoning | Configurable OpenAI-compatible models |
 | Server | Expo Router API routes on EAS Hosting |
 | Native delivery | EAS Build, Submit, and Update |
 
@@ -136,7 +141,15 @@ npm run ios
 
 Opening the iOS simulator locally requires macOS. EAS Build supports cloud builds for both platforms.
 
-Configure provider credentials server-side. Only the public API origin belongs in `EXPO_PUBLIC_API_URL`; provider secrets must never use the `EXPO_PUBLIC_` prefix. Local environment files are excluded from version control.
+Configure provider credentials server-side. During native development, Context uses the Expo server address for API routes. Native release builds require the deployed HTTPS API origin in `EXPO_PUBLIC_API_URL`. Only that public address belongs under the `EXPO_PUBLIC_` prefix; provider secrets must never use it. Local environment files are excluded from version control.
+
+Set `LLM_API_KEY`, `LLM_API_URL`, and `LLM_MODEL` to choose the provider and model for reasoning, interest extraction, and image analysis. `LLM_API_URL` is the HTTPS API root ending before `/chat/completions`. Changing these settings and restarting the server switches providers without changing application code. Hosted releases need updated server environment settings and a redeployment.
+
+Use `VISION_MODEL` for a separate image model on the same provider, or provide `VISION_API_URL` and `VISION_API_KEY` for an independent image provider. Image analysis requires image input; conversational exploration requires function calling. Both must produce the validated JSON responses. There is no model-name allowlist. Providers with a different API protocol require an adapter.
+
+The optional `LLM_TOKEN_PARAMETER`, `LLM_JSON_MODE`, and `LLM_REQUEST_OPTIONS` settings adjust provider-specific parameters; vision has equivalent `VISION_*` settings. See [.env.example](.env.example) for defaults and examples. Disabling JSON mode only omits the provider's JSON-mode parameter; application validation remains active.
+
+Transcription and speech retain Groq Whisper/Orpheus defaults independently of analysis. `TRANSCRIPTION_*` and `TTS_*` settings can select compatible audio endpoints and models. Speech models must support WAV output and the configured voice and vocal directions. The Personalization tab explains how shared interest names are matched. Use a stable `SESSION_SIGNING_KEY` to keep authenticated context independent of API-key rotation.
 
 ## Checks and builds
 

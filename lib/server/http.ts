@@ -9,7 +9,7 @@ export function providerData<T>(schema: z.ZodType<T>, value: unknown): T {
 }
 
 export class ProviderHttp {
-  constructor(private baseUrl: string, private headers: Record<string, string>, private provider: 'GROQ' | 'QLOO', private fetcher: ProviderFetch = globalThis.fetch) {}
+  constructor(private baseUrl: string, private headers: Record<string, string>, private provider: 'GROQ' | 'QLOO' | 'AI', private fetcher: ProviderFetch = globalThis.fetch) {}
 
   async response(path: string, init: RequestInit = {}): Promise<Response> {
     let response: Response;

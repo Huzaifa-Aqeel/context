@@ -69,6 +69,7 @@ Blind users can use vision systems to identify objects such as:
 - Posters
 - Clothing
 - Brands
+- books
 - Artwork
 - Products
 - Logos
@@ -113,7 +114,7 @@ Qloo resolves supported interests; user controls whether personalization is enab
         ↓
 User captures a scene or asks about the local area
         ↓
-App requests foreground location when relevant
+App includes locality when device location is enabled and permitted
         ↓
 If permitted, derive locality context; if denied, continue without location
         ↓
@@ -136,15 +137,25 @@ User may ask follow-up questions
 Agent performs additional entity, relationship, reference, locality, or taste-affinity investigation when needed
 ```
 
-The experience should be conversational.
+The experience must be one conversation. Scene understanding is the default; reference, connection, guided, and area exploration are capabilities within it, not modes the user must select before capture.
 
 ---
 
-# 5. Main User Modes
+# 5. One Assistant, Conversational Exploration
 
-Personal Taste is a shared context layer across these five modes. It must not introduce a separate recommendation section or require a sixth user mode. Every mode must remain usable without a taste profile or with personalization disabled.
+Context must present one assistant: **show it a scene, receive cultural understanding, then explore through conversation**. The capabilities below must not appear as five top-level modes before capture.
 
-## 5.1 Scene Context
+The home screen must make **Capture a scene** and **Choose a photo** primary actions, with **Ask Context** available as an explicitly started voice conversation. Capturing or choosing a photo starts analysis; communicate this before the action. The microphone must never start automatically.
+
+Show taste profile setup, an accessible personalization control, and an interest count in the Personalization tab. Changing personalization must preserve the same detections while allowing different ordering, highlighting, and supported explanations.
+
+Show **Location context** as an optional evidence preference, not a separate exploration mode. Enabling device location explicitly requests foreground permission. When enabled and already permitted, derive available locality for scene analysis and conversational questions without repeatedly requesting permission.
+
+After recognition, show a concise answer, one contextual speech control that stops active playback or replays a completed answer, and a simple list of confirmed notable references only when any exist. Do not show a separate confidence label, an empty reference section, preset exploration buttons, or a mode menu. The orb is the Ask Context control: tap once to record, tap again to stop, transcribe with Whisper, submit the question automatically, and speak the answer. On the conversation screen, the orb also stops current speech and exposes an accessible Replay answer action without another visible button; the native header provides a back arrow to the prior screen. There must be no separate Start speaking, Stop recording, or Ask Context submit button. Questions about references, connections, guided exploration, and the surrounding area continue the same scene conversation. Keep a clear action to capture another scene. On native devices, move screen-reader focus to the new answer after analysis; announce listening, processing, speaking, loading, and errors accessibly.
+
+Personal Taste is a shared context layer across these capabilities. It must not introduce a separate experience or recommendation section. Every capability must remain usable without a taste profile or with personalization disabled.
+
+## 5.1 Scene Understanding — Default Behavior
 
 Purpose:
 
@@ -175,7 +186,7 @@ Example:
 
 ---
 
-## 5.2 Reference Explorer
+## 5.2 Explain a Reference — Follow-up Action
 
 Purpose:
 
@@ -199,7 +210,7 @@ Expected behavior:
 
 ---
 
-## 5.3 Connection Explorer
+## 5.3 Connect References — Follow-up Question
 
 Purpose:
 
@@ -226,7 +237,7 @@ Example:
 
 ---
 
-## 5.4 Guided Exploration
+## 5.4 Guided Exploration — Conversational Behavior
 
 Purpose:
 
@@ -274,7 +285,7 @@ Example conversation:
 
 ---
 
-## 5.5 Location Context
+## 5.5 Location Context — Evidence Layer
 
 Purpose:
 
@@ -290,12 +301,12 @@ Example questions:
 
 Expected behavior:
 
-1. Request foreground location permission when locality information is needed.
+1. Request foreground permission only when the user explicitly enables device location; automatic use checks existing permission without prompting.
 2. If permitted, obtain the current location and derive locality context, such as the neighborhood or surrounding area.
 3. Investigate relevant cultural entities and relationships through Qloo where applicable.
 4. Combine locality context with visual and Qloo evidence when relevant to the question.
 5. Explain supported cultural significance and communicate uncertainty.
-6. If location permission is denied or location is unavailable, continue using available scene context and allow the user to provide an area name.
+6. If location permission is denied or location is unavailable, continue using available scene context.
 7. Read the response aloud and support follow-up exploration.
 8. When personalization is enabled, explain supported overlap between locality or scene evidence and stated interests. A lack of overlap must not be presented as proof that the user is unfamiliar with an area.
 
@@ -310,7 +321,7 @@ The system must allow the user to:
 - Capture an image using the device camera
 - Upload an existing image
 
-The captured image must be sent for visual analysis.
+The captured or selected image must be sent for visual analysis without reducing its pixel dimensions in the app. If the full-resolution image exceeds the supported request size, explain the limit and let the user choose or capture another image; do not silently downscale it.
 
 ---
 
@@ -535,7 +546,9 @@ The app must be able to request foreground location permission and, when granted
 
 When relevant to the user's question, the system must combine locality context with available visual and Qloo evidence to explain the area's cultural significance or how detected references relate to it.
 
-The system must continue working if location permission is denied or location is unavailable. It must explain the limitation, use available scene and Qloo evidence, and allow the user to provide an area name for locality exploration.
+Location must be integrated as an evidence layer in the unified assistant, without requiring a Location Context mode. Automatic refresh must not open permission dialogs; explicit opt-in requests foreground permission.
+
+The system must continue working if location permission is denied, location is unavailable, or locality cultural evidence cannot be retrieved. It must explain the limitation and use available scene and Qloo evidence.
 
 Location access must follow the privacy requirements in Section 12. The system must communicate uncertainty and avoid unsupported cultural claims about an area or the people there.
 
@@ -549,19 +562,21 @@ The system must support a small voluntary personal taste profile as part of the 
 
 ### Onboarding and control
 
-The app must offer a short, accessible onboarding prompt:
+Cultural Interests is accessed through one **My Interests** entry in Personalization. Its voice screen keeps the app's visual style and shows only a **My taste profile** switch, the voice orb, and brief interaction feedback. With the switch on, the orb reads the saved interests and accepts additions or removals. With it off, the orb starts the normal taste onboarding flow; a completed response replaces the prior grouped interests. This switch chooses the voice workflow; the separate **Personalize cultural context** setting in Personalization controls whether saved interests affect exploration. Do not show separate Start conversation, End conversation, forms, text inputs, chips, category cards, step indicators, or a manual match-review flow.
 
-> “Tell Context a few things you're into so it can recognize cultural references that matter to you.”
-
-- Suggest 5–10 interests, allow fewer, and support up to 10 interests in the MVP. The user must be able to skip onboarding entirely.
-- Speak the onboarding guidance when automatic spoken output is enabled. Microphone recording must begin only after the explicit **Start speaking** action; never auto-start it.
-- After transcription, use the LLM to extract candidate interests; Qloo must resolve them before they can become profile entities.
-- Accept text or voice input for interests such as films, music, artists, books, games, sports, brands, fashion, restaurants, or places where Qloo supports their resolution.
-- Resolve interests through Qloo and retain confirmed entity IDs, names, and types. Unsupported or ambiguous interests must be explained and offered for clarification; they must not silently become confirmed profile entries.
-- Show three resolution states: **Matched / Needs clarification / No match**. Let users leave unresolved interests out and continue with matched ones, or skip the profile; do not require fixing every item.
-- Let the user review, add, edit, and remove interests, and clear the profile.
-- Provide an accessible **“Personalize cultural context”** control. Explain how the profile is used and obtain the user's choice before using it.
-- Keep all five modes available when onboarding is skipped, the profile is empty, or personalization is disabled.
+- The orb remains visible in idle, speaking, listening, and processing states. Tap once to hear the prompt and then record; tap again while listening to finish or while speaking to end the conversation. Its accessible label changes with the state, including **Set up my interests** or **Update my interests**, **Stop recording**, **Processing**, and **End conversation**. State must be available to VoiceOver/TalkBack without relying on motion or color; respect reduced motion.
+- The first tap explicitly authorizes the voice session. Request microphone permission only after that action. With no profile, speak one prompt inviting anything the user likes across movies/TV, music, books/podcasts, food/dining, places/travel, brands, video games, and other interests. Tell them they can mention as many or as few as they want, with a brief example.
+- With an existing profile, speak its current interests and prompt one edit response with a clear format such as “Delete from movies and TV Interstellar. Add to movies and TV Black Panther.” Allow clear category-wide removal. Do not insert a separate yes/no turn.
+- Wait for the entire prompt to finish before recording one response. Never record before the explicit orb tap or capture the assistant's own prompt. A natural pause or second orb tap finishes the response.
+- Reuse existing Expo audio, Groq Whisper transcription, configurable reasoning/extraction, Orpheus speech, API routes, and local Zustand session storage. Do not introduce a different speech provider or a separate onboarding architecture.
+- Organize the stated interests into arrays under `movies_tv`, `music_artists`, `books_podcasts`, `dining_food`, `places_travel`, `brands`, `video_games`, and `other`, allowing multiple entries in every category. Leave unused categories empty. Preserve only explicitly provided interests; do not infer new interests or sensitive traits. Support more than the previous ten-interest cap, within the response-size and recording safeguards.
+- Save the complete grouped interests locally and give a short completion message. The grouped interests are voluntarily stated context, not verified cultural entities.
+- Qloo must still resolve interests before they become personalization entities. Automatically use only unique confirmed matches. Ambiguous/unmatched items remain in the locally saved groups but do not become verified entities; do not force users to repair them. A Qloo outage must not prevent saving the grouped response.
+- Empty/failed/cancelled responses must not overwrite an existing profile. Navigation, backgrounding, session clearing, or cancellation must stop recording and discard late results and temporary audio.
+- Editing must extract explicit add, remove, or clear-category operations instead of regenerating the whole profile. Preserve untouched interests and existing Qloo matches; resolve newly added interests through Qloo before using them as personalization entities. If an instruction is ambiguous, ask one clarification and make no changes. Users may skip this screen, edit interests through another orb interaction, disable personalization, and forget the profile in the **Personalization** tab. Keep the accessible **Personalize cultural context** control and interest count in that tab only. The tab must place the explanation before the switch in screen-reader order.
+- The **Personalization** tab contains the optional taste profile and location controls. Each explanation must precede its left-aligned switch in visual and TalkBack reading order. These controls must not be repeated on Home, Scene, Conversation, or area-entry screens. Home and Personalization are compact, adjacent horizontal bottom tabs on Android and remain visible throughout capture, exploration, and the voice subpages.
+- Location context is controlled only by the foreground-location toggle in Personalization. The app does not offer manual area-name entry.
+- All exploration capabilities remain available when interests are skipped, unsupported, or personalization is disabled. Keep Cultural Interests free of provider and implementation language; explain the relevant interest matching in the Personalization tab.
 
 ### Required uses when relevant
 
@@ -792,11 +807,11 @@ The system should ask the user to:
 
 ## Location denied or unavailable
 
-The system must continue with available scene and Qloo evidence, explain that automatic locality context is unavailable, and allow the user to provide an area name.
+The system must continue with available scene and Qloo evidence and explain that locality context is unavailable.
 
 Example:
 
-> “I don't have your location, but I can still explore the scene. You can tell me the neighborhood or area if you'd like local context.”
+> “I don't have your location, but I can still explore the scene. You can enable location context if you'd like local context.”
 
 ---
 
@@ -870,13 +885,11 @@ Optionally provide cultural interests or skip taste onboarding
       ↓
 Resolve supported interests through Qloo and choose whether to personalize
       ↓
-Capture image or choose Location Context
+Capture a scene or choose a photo to start analysis, or Ask Context directly
       ↓
-Ask a scene or locality question
+Include locality when location context is enabled and permitted
       ↓
-Request foreground location when relevant
-      ↓
-If permitted, derive locality context; if denied, continue without location
+If location is denied or unavailable, continue with other evidence
       ↓
 Vision identifies entities when an image is available
       ↓

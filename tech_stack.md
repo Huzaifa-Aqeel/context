@@ -30,7 +30,7 @@ Expo Mobile App
 Text + Spoken Response
 ```
 
-The project should remain primarily within the Expo and TypeScript ecosystem.
+The project should remain primarily within the Expo and TypeScript ecosystem. The mobile experience presents one assistant: scene understanding by default, with reference, connection, guided, and area follow-ups in the same conversation. Location and optional personal taste are evidence layers, not top-level modes.
 
 ---
 
@@ -100,11 +100,16 @@ Suggested routes:
 
 ```text
 app/
-├── index.tsx
-├── camera.tsx
-├── scene.tsx
-├── conversation.tsx
-├── settings.tsx
+├── (tabs)/
+│   ├── (home)/
+│   │   ├── index.tsx
+│   │   ├── camera.tsx
+│   │   ├── scene.tsx
+│   │   └── conversation.tsx
+│   └── personalization/
+│       ├── index.tsx
+│       ├── taste.tsx
+│       └── location.tsx
 │
 ├── api/
 │   ├── scene/
@@ -120,9 +125,9 @@ Home
   ↓
 Capture Scene
   ↓
-Cultural Context
+Automatic Cultural Understanding
   ↓
-Conversation
+Notable References + One Conversation
 ```
 
 ---
@@ -182,6 +187,8 @@ Scene + Location Analysis
 ```
 
 Location-aware cultural context is required for the MVP. Granting foreground location permission remains optional for the user.
+
+Device location is explicitly enabled through an accessible preference. Automatic requests check existing foreground permission without prompting, derive coarse locality, and discard precise coordinates. Locality-provider failures return warnings while retaining scene evidence.
 
 The core camera experience must work when the user denies location permission.
 
@@ -647,6 +654,8 @@ Isolated entities
 
 The LLM should explain this evidence rather than invent relationships independently.
 
+The implementation uses an evidence-selection plan for final responses. The reasoning model chooses current facts, shared tags, measured relationships, locality records, or supported taste pairs; the server validates those selections and renders source-backed spoken sentences. Free-form model prose is not emitted as cultural fact. Weak affinities are qualified and cannot become authorship, collaboration, or stylistic analogy. Taste evidence is revalidated after every investigation step, and only relevant supported anchors reach the reasoning provider.
+
 ---
 
 # 22. Location-Aware Cultural Context
@@ -1107,11 +1116,16 @@ A single Expo repository is preferred.
 context/
 │
 ├── app/
-│   ├── index.tsx
-│   ├── camera.tsx
-│   ├── scene.tsx
-│   ├── conversation.tsx
-│   ├── settings.tsx
+│   ├── (tabs)/
+│   │   ├── (home)/
+│   │   │   ├── index.tsx
+│   │   │   ├── camera.tsx
+│   │   │   ├── scene.tsx
+│   │   │   └── conversation.tsx
+│   │   └── personalization/
+│   │       ├── index.tsx
+│   │       ├── taste.tsx
+│   │       └── location.tsx
 │   │
 │   └── api/
 │       ├── scene/
@@ -1300,3 +1314,20 @@ EAS
 ```
 
 The LLM must not invent cultural relationships when Qloo does not provide sufficient supporting evidence.
+
+## Configurable provider implementation
+
+Vision, reasoning and interest extraction share a provider-neutral OpenAI-compatible Chat Completions adapter in `lib/ai/`. `LLM_API_KEY`, `LLM_API_URL` and `LLM_MODEL` select the shared provider/model; `VISION_*` may override the image model or the full image provider connection. Explicit generic configuration takes precedence over legacy Groq analysis defaults. Model names are not allowlisted; vision must accept images and reasoning must support validated function calls.
+
+Provider dialect settings are optional: `*_TOKEN_PARAMETER`, `*_JSON_MODE`, `*_REQUEST_OPTIONS` and `*_PROVIDER_NAME` for LLM/vision. Alibaba's non-thinking default and token-parameter normalization do not change the evidence schemas or agent workflow. Completed investigations are removed from subsequent tool menus; other confirmed references remain available. Completed actions are also represented as native assistant tool calls and tool-result messages backed by current evidence, rather than relying only on a textual completed-action list. Server-side duplicate and step-limit guards remain authoritative.
+
+`TRANSCRIPTION_*` and `TTS_*` independently configure compatible audio API roots, keys and models, retaining current Groq Whisper/Orpheus defaults. Speech continues to use WAV output and the app's selected voices/directions. Endpoints with incompatible audio or chat protocols require another adapter; an environment change cannot make a text-only model process images. New endpoints must have explicitly supplied credentials rather than silently inheriting another provider's key.
+
+Health returns readiness and safe provider names for privacy disclosures, never keys or endpoint URLs. All settings remain server-side; local changes require a server restart, and hosted changes require updated environment settings/redeployment. `SESSION_SIGNING_KEY` can keep evidence authentication independent of API-key rotation.
+
+
+## Voice-first cultural interests
+
+The Cultural Interests route presents one explicit Start conversation → spoken prompt → single recorded response → transcription → grouped-interest extraction → local save/completion flow. The orb is mounted only during the active conversation and responds to idle, speaking, listening and processing, with live accessible status text and reduced-motion support. End hides it immediately; during recording, End submits the captured response. Native metering supports a six-second end-of-response pause; explicit End remains available where metering is unavailable.
+
+Reuse Expo Audio, the existing Groq Whisper/Orpheus-compatible audio routes and shared SpeechSequence; configured reasoning models extract the eight requested interest arrays through the existing taste resolve route's categorized format. Preserve all stated groups in Zustand session memory. Resolve names through Qloo in batches of at most eight, auto-confirm only unique matches, and retain unresolved names only as stated local interests. Support up to 100 extracted names for a bounded single response, with a two-minute recording safeguard. No disk persistence or new storage provider is introduced; clear/forget removes grouped interests and verified profile.

@@ -45,3 +45,12 @@ test('reasoning receives only supported anchors for explicitly requested referen
   assert.deepEqual(minimal.profile?.entities, profile.entities);
   assert.equal(reasoningTaste({ instructions: '', request: { ...request, profile: many }, evidence: scene.culturalEvidence, completedActions: [], allowInvestigation: false }).profile, undefined);
 });
+
+test('necessary observed information precedes taste without becoming navigation or an invented observation', () => {
+  const observed = { ...scene, environmentalObservations: [{ label: 'Exit sign', confidence: 0.95, necessaryInformation: true }, { label: 'Chair', confidence: 0.6 }] };
+  const result = renderGroundedAnswer({ ...request, scene: observed }, scene.culturalEvidence, undefined, taste, [{ kind: 'taste', referenceId: 'brand', interestId: 'artist' }]);
+  assert.match(result.answer, /^The image appears to contain Exit sign/);
+  assert.doesNotMatch(result.answer, /walk|navigate|safe route/);
+  assert.match(renderGroundedAnswer({ ...request, scene: observed }, scene.culturalEvidence, undefined, undefined, [{ kind: 'observation', label: 'Chair' }]).answer, /identification is uncertain/);
+  assert.throws(() => renderGroundedAnswer({ ...request, scene: observed }, scene.culturalEvidence, undefined, undefined, [{ kind: 'observation', label: 'Invented object' }]), /verified/);
+});

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { analyzeScene, type Providers } from '../lib/orchestration/context';
+import { analyzeScene, mergeEvidence, type Providers } from '../lib/orchestration/context';
 import { orderedReferences } from '../lib/taste/presentation';
 import type { Scene } from '../types/context';
 const unexpected = async (): Promise<never> => { throw new Error('Unexpected investigation'); };
@@ -15,7 +15,7 @@ test('analysis retains every returned reference while limiting Qloo work and pri
   assert.equal(queried.length, 8); assert.equal(queried[0], 'Reference 9');
   assert.equal(result.culturalEvidence.entities.length, 12);
   assert.equal(result.culturalEvidence.entities.find((entity) => entity.detectedName === 'Reference 11')?.resolutionPending, true);
-  assert.match(result.warnings!.join(' '), /retained/);
+  assert.match(result.warnings!.join(' '), /more possible references/);
   assert.equal(orderedReferences(result, undefined, 'balanced', 'Explain Reference 9.')[0].detectedName, 'Reference 9');
 });
 test('cultural evidence and confidence outrank taste without mutating the signed detections', () => {
@@ -25,4 +25,12 @@ test('cultural evidence and confidence outrank taste without mutating the signed
   assert.equal(orderedReferences(scene, taste, 'familiar')[0].qlooId, 'important');
   assert.equal(orderedReferences(scene, taste, 'familiar', 'Explain favorite.')[0].qlooId, 'favorite');
   assert.strictEqual(scene.culturalEvidence.entities, entities); assert.equal(entities[0].qlooId, 'important');
+});
+
+test('related-reference retrieval cannot evict visible detections at the scene limit', () => {
+  const visible = Array.from({ length: 30 }, (_, index) => ({ detectedName: `Reference ${index}`, detectedCategory: 'brand', qlooId: `id-${index}`, visionConfidence: 0.9, matchConfidence: 0.95, source: 'vision' as const }));
+  const previous = { entities: visible, relationships: [], themes: [], facts: [], confidence: 0.5 };
+  const incoming = { ...previous, entities: [{ ...visible[0], qlooId: 'related', source: 'qloo' as const }], facts: [{ entityId: 'related', name: 'Related', category: 'brand', tags: [], source: 'qloo' as const }] };
+  const merged = mergeEvidence(previous, incoming);
+  assert.deepEqual(merged.entities, visible); assert.deepEqual(merged.facts, []);
 });
