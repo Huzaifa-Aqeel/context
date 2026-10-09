@@ -9,6 +9,7 @@ import { normalizeSpeechWav } from '../lib/groq/wav';
 import { QlooClient, selectQlooMatch } from '../lib/qloo/client';
 import { groqConfig, qlooConfig } from '../lib/server/config';
 import { ProviderHttp } from '../lib/server/http';
+import { TavilyClient } from '../lib/research/tavily';
 import { sealAnswer, sealScene, verifyEvidence } from '../lib/server/evidence';
 import { sceneSchema } from '../schemas/context';
 import { SpeechSequence, splitSpeech, type SpeechState } from '../lib/audio/sequence';
@@ -17,7 +18,7 @@ import { withRequestSignal } from '../lib/api/timeout';
 import { POST as speakRoute } from '../app/api/audio/speak+api';
 
 const config = groqConfig({ GROQ_API_KEY: 'test-secret', vision_model: 'fixture-vision', GROQ_TXT_SPEECH: 'canopylabs/orpheus-v1-english' });
-const entity = (id: string, name: string, type = 'urn:entity:author') => ({ entity_id: id, name, types: [type],
+const entity = (id: string, name: string, type = 'urn:entity:person') => ({ entity_id: id, name, types: [type],
   properties: { short_description: 'Public cultural description.' },
   tags: [{ tag_id: 'urn:tag:genre:book:mystery', name: 'Mystery' }, { tag_id: 'urn:tag:demographics:income:high', name: 'High income' }] });
 const detection = { label: 'Agatha Christie', category: 'author', confidence: 0.95, culturallyRelevant: true };
@@ -51,6 +52,20 @@ test('provider HTTP errors sanitize credentials, private text, quota and model p
   await assert.rejects(broken.request('/'), /unreadable/);
 });
 
+test('Tavily remains a generic event research provider with bounded HTTPS sources', async () => {
+  const client = new TavilyClient({ apiKey: 'fixture', baseUrl: 'https://tavily.test' }, async (input, init) => {
+    assert.equal(String(input), 'https://tavily.test/search');
+    assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer fixture');
+    assert.match(String(init?.body), /event schedule official venue/);
+    return Response.json({ results: [
+      { title: 'Venue', url: 'https://venue.example/event', content: 'Event details.' },
+      { title: 'Unsafe', url: 'http://other.example', content: 'Ignore this.' },
+    ] });
+  });
+  const sources = await client.search('event schedule official venue');
+  assert.deepEqual(sources.map((source) => source.url), ['https://venue.example/event']);
+});
+
 test('vision sends image privately and validates actual JSON-mode responses', async () => {
   const vision = new GroqVision(new GroqClient(config, async (url, init) => {
     assert.equal(String(url), `${config.baseUrl}/chat/completions`);
@@ -59,7 +74,7 @@ test('vision sends image privately and validates actual JSON-mode responses', as
     assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer test-secret');
     return completion({ content: JSON.stringify({ entities: [detection] }) });
   }));
-  assert.deepEqual(await vision.inspectScene('data:image/jpeg;base64,YQ=='), [detection]);
+  assert.deepEqual(await vision.inspectScene('data:image/jpeg;base64,YQ=='), { sceneType: 'general', entities: [detection] });
   await assert.rejects(new GroqVision(new GroqClient(config, async () => completion({ content: '{bad' }))).inspectScene('fixture'), /could not be read/);
   await assert.rejects(new GroqVision(new GroqClient(config, async () => completion({ content: '{}' }, 'length'))).inspectScene('fixture'), /fully analyzed/);
 });
@@ -101,7 +116,7 @@ test('Qloo pairs use returned affinities, filter sensitive tags, and reuse reque
     const url = new URL(String(input)); assert.equal(new Headers(init?.headers).get('X-Api-Key'), 'fixture');
     if (url.pathname === '/search') {
       searches++; const book = url.searchParams.get('types') === 'urn:entity:book';
-      return Response.json({ results: [entity(book ? 'book' : 'author', book ? 'Murder on the Orient Express' : detection.label, book ? 'urn:entity:book' : 'urn:entity:author')] });
+      return Response.json({ results: [entity(book ? 'book' : 'author', book ? 'Murder on the Orient Express' : detection.label, book ? 'urn:entity:book' : 'urn:entity:person')] });
     }
     assert.equal(url.pathname, '/v2/insights'); insights++;
     assert.equal(url.searchParams.get('signal.interests.entities'), 'author');

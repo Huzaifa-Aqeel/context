@@ -8,7 +8,7 @@ test('analysis retains every returned reference while limiting Qloo work and pri
   let queried: string[] = [];
   const provider: Providers = {
     vision: { inspectScene: async () => Array.from({ length: 12 }, (_, index) => ({ label: `Reference ${index}`, category: 'brand', culturallyRelevant: true, confidence: index === 11 ? 0.3 : 0.9 })) },
-    qloo: { resolveEntities: async (items) => { queried = items.map((item) => item.label); return items.map((item) => ({ detectedName: item.label, detectedCategory: item.category, qlooName: item.label, qlooId: item.label, visionConfidence: item.confidence, matchConfidence: 0.95, source: 'vision' })); }, analyzeConnections: async (items) => ({ entities: items, relationships: [], themes: [], facts: [], confidence: 0.5 }), analyzeTaste: unexpected, getLocationContext: unexpected, exploreReference: unexpected },
+    qloo: { resolveEntities: async (items) => { queried = items.map((item) => item.label); return items.map((item) => ({ detectedName: item.label, detectedCategory: item.category, qlooName: item.label, qlooId: item.label, visionConfidence: item.confidence, matchConfidence: 0.95, source: 'vision' })); }, analyzeConnections: async (items) => ({ entities: items, relationships: [], themes: [], facts: [], confidence: 0.5 }), analyzeTaste: unexpected, getEntityFact: unexpected, getLocationContext: unexpected, exploreReference: unexpected },
     llm: { nextTurn: async () => ({ kind: 'answer', result: { answer: 'Ignored prose.', confidence: 'low' } }) },
   };
   const result = await analyzeScene({ image: 'fixture', mode: 'scene', question: 'Explain Reference 9.' }, provider);

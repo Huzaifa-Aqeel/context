@@ -8,7 +8,7 @@ import { tasteDraftSchema, tasteResolveRequestSchema } from '@/schemas/taste';
 export const POST = jsonRoute(tasteResolveRequestSchema, tasteDraftSchema, async ({ text, format }) => {
   if (format === 'categorized') {
     const structuredInterests = await extractStructuredTasteInterests(text);
-    const categories = { movies_tv: 'unknown', music_artists: 'artist', books_podcasts: 'unknown', dining_food: 'unknown', places_travel: 'unknown', brands: 'brand', video_games: 'game', other: 'unknown' } as const;
+    const categories = { movies_tv: 'unknown', music_artists: 'artist', books_podcasts: 'book_or_podcast', dining_food: 'unknown', places_travel: 'unknown', brands: 'brand', video_games: 'game', other: 'unknown' } as const;
     const candidates = [...new Map(Object.entries(structuredInterests).flatMap(([group, names]) => names.map((label) => [label.toLowerCase(), { label, category: categories[group as keyof typeof categories] }] as const))).values()];
     let draft;
     try { draft = await resolveTasteInterests(candidates, new QlooClient(qlooConfig()), true); }

@@ -19,11 +19,15 @@ export class ChatClient implements CompletionClient {
     this.http = new ProviderHttp(settings.baseUrl, { Authorization: `Bearer ${settings.apiKey}` }, new URL(settings.baseUrl).hostname === 'api.groq.com' ? 'GROQ' : 'AI', fetcher);
   }
   async completion(body: Record<string, unknown>) {
-    const { max_completion_tokens, max_tokens, response_format, ...rest } = body;
+    const { max_completion_tokens, max_tokens, response_format, enable_thinking, ...rest } = body;
     const params = { ...rest, ...this.settings.requestOptions, model: body.model ?? this.model,
+      ...(enable_thinking !== undefined ? { enable_thinking } : {}),
       ...(max_completion_tokens !== undefined || max_tokens !== undefined ? { [this.settings.tokenParameter]: max_completion_tokens ?? max_tokens } : {}),
       ...(this.settings.jsonMode && response_format ? { response_format } : {}),
     };
-    return providerData(completionSchema, await this.http.json('/chat/completions', params)).choices[0];
+    return providerData(completionSchema, await this.http.request('/chat/completions', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(params),
+      ...(this.settings.timeoutMs ? { signal: AbortSignal.timeout(this.settings.timeoutMs) } : {}),
+    })).choices[0];
   }
 }

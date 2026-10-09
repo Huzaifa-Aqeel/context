@@ -3,7 +3,12 @@ import type { QlooService } from '@/lib/qloo/service';
 import type { TasteDraft, TasteProfile } from '@/types/taste';
 
 export async function resolveTasteInterests(inputs: { label: string; category: string }[], qloo: QlooService, allowUnavailable = false): Promise<TasteDraft> {
-  const detections = inputs.slice(0, 100).map((interest) => ({ ...interest, confidence: 1, culturallyRelevant: true }));
+  const detections = inputs.slice(0, 100).map((interest) => {
+    const namedBook = ['book', 'book_or_podcast'].includes(interest.category) ? interest.label.match(/^(.+?)\s+by\s+(.+)$/i) : null;
+    return { ...interest, label: namedBook ? namedBook[1].trim() : interest.label,
+      ...(namedBook ? { relatedName: namedBook[2].trim(), relatedCategory: 'author' } : {}),
+      confidence: 1, culturallyRelevant: true, allowBroadSearch: interest.category === 'unknown' };
+  });
   const resolved: Awaited<ReturnType<QlooService['resolveEntities']>> = [];
   let unavailable = false;
   for (let offset = 0; offset < detections.length; offset += 8) {
@@ -17,8 +22,9 @@ export async function resolveTasteInterests(inputs: { label: string; category: s
       break;
     }
   }
-  return { candidates: resolved.map((entity) => {
-    const base = { label: entity.detectedName, category: entity.detectedCategory };
+  unavailable ||= resolved.some((entity) => entity.resolutionPending);
+  return { candidates: resolved.map((entity, index) => {
+    const base = { label: inputs[index].label, category: entity.detectedCategory };
     if (entity.qlooId && entity.qlooName && entity.qlooType && (entity.matchConfidence ?? 0) >= 0.75) return { ...base, status: 'matched' as const, entity: { id: entity.qlooId, name: entity.qlooName, type: entity.qlooType } };
     if (entity.candidates?.length) return { ...base, status: 'clarify' as const, candidates: entity.candidates };
     return { ...base, status: 'no_match' as const };
@@ -35,6 +41,6 @@ export function confirmTasteProfile(draft: TasteDraft, includedIds: string[], cl
   const ids = new Set(includedIds);
   if ([...ids].some((id) => !matched.some((entity) => entity.id === id))) throw new ApiError(400, 'UNRESOLVED_INTEREST', 'Only matched interests can be added. You can leave unresolved interests out and continue.');
   const entities = [...new Map(matched.filter((entity) => ids.has(entity.id)).map((entity) => [entity.id, entity])).values()];
-  if (!entities.length) throw new ApiError(400, 'EMPTY_PROFILE', 'Choose a matched interest or continue without a profile.');
+  if (!entities.length) throw new ApiError(400, 'EMPTY_PROFILE', 'Add at least one matched interest to continue.');
   return { entities };
 }

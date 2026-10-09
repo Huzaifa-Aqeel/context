@@ -25,7 +25,7 @@ const scene: Scene = { id: 'unified-scene', createdAt: '2026-10-08T00:00:00.000Z
 const finish: AgentTurn = { kind: 'answer', result: { answer: 'Ignored free prose.', confidence: 'medium', evidenceSelections: [{ kind: 'fact', entityId: 'film' }] } };
 function services(turns: AgentTurn[]): Providers {
   let next = 0;
-  return { vision: { inspectScene: unavailable }, qloo: { resolveEntities: unavailable, analyzeConnections: unavailable, exploreReference: unavailable, getLocationContext: unavailable, analyzeTaste: unavailable }, llm: { nextTurn: async () => { assert.ok(next < turns.length); return turns[next++]; } } };
+  return { vision: { inspectScene: unavailable }, qloo: { resolveEntities: unavailable, analyzeConnections: unavailable, exploreReference: unavailable, getLocationContext: unavailable, analyzeTaste: unavailable, getEntityFact: unavailable }, llm: { nextTurn: async () => { assert.ok(next < turns.length); return turns[next++]; } } };
 }
 function locationAdapter(granted: boolean, calls: string[]): LocationAdapter {
   return {
@@ -100,16 +100,17 @@ test('a named reference can begin a conversation without being claimed as visual
   assert.match(result.answer, /Agatha Christie/); assert.doesNotMatch(result.answer, /visible|image contains/);
 });
 
-test('locality provider failure preserves viable scene analysis and later follow-ups', async () => {
+test('default scene skips locality lookup; an area follow-up degrades if Qloo fails', async () => {
   const service = services([finish]);
   service.vision.inspectScene = async () => [{ label: 'Film poster', category: 'film', confidence: 0.95, culturallyRelevant: true }];
   service.qloo.resolveEntities = async () => [evidence.entities[0]];
   service.qloo.analyzeConnections = async () => evidence;
   service.qloo.getLocationContext = async () => { throw new Error('Provider unavailable'); };
   const result = await analyzeScene({ image: 'fixture', mode: 'scene', locality: { city: 'Test city' } }, service);
-  assert.match(result.summary, /Film poster/); assert.match(result.warnings!.join(' '), /unavailable/);
+  assert.match(result.summary, /Film poster/); assert.doesNotMatch(result.warnings?.join(' ') ?? '', /unavailable/);
   assert.equal(result.culturalEvidence.entities.length, 1);
-  await explore({ scene: result, question: 'Explain Film poster.', mode: 'scene', messages: [] }, services([finish]));
+  const area = await explore({ scene: result, locality: { city: 'Test city' }, question: 'What kind of area am I in?', mode: 'scene', messages: [] }, service);
+  assert.match(area.warnings?.join(' ') ?? '', /unavailable/);
 });
 
 test('an available area does not force an irrelevant locality call or lose a named reference', async () => {
@@ -141,7 +142,7 @@ test('guided questions lead with a supported shared theme and invite the next re
 
 test('guided exploration offers a familiar/new choice only with valid, strong profile evidence', () => {
   const profile: TasteProfile = { entities: [{ id: 'anchor', name: 'My film interest', type: 'film' }], signature: 'a'.repeat(64) };
-  const taste: TasteContext = { profileSignature: profile.signature!, referenceIds: ['film', 'music'], warnings: [], connections: [{ referenceId: 'film', interestId: 'anchor', kind: 'affinity', strength: 0.8, evidenceSource: 'qloo', description: 'Supported affinity.' }] };
+  const taste: TasteContext = { profileSignature: profile.signature!, referenceIds: ['film', 'music'], warnings: [], connections: [{ referenceId: 'film', interestId: 'anchor', kind: 'affinity', strength: 0.8, sharedTags: ['Independent'], evidenceSource: 'qloo', description: 'Supported affinity.' }] };
   const request = { scene, profile, question: 'Guide me through this scene.', mode: 'scene' as const, messages: [] };
   const result = renderGroundedAnswer(request, evidence, undefined, taste, [{ kind: 'fact', entityId: 'film' }]);
   assert.match(result.answer, /start with something familiar or discover something new/);

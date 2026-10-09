@@ -20,7 +20,7 @@ export const tasteProfileSchema = z.object({ entities: z.array(tasteEntitySchema
   bindings: z.array(z.object({ category: z.enum(interestGroups), value: text, entityId: text })).max(100).optional(), signature });
 export const tasteConnectionSchema = z.object({
   referenceId: text, interestId: text, kind: z.enum(['exact', 'affinity']),
-  strength: z.number().min(0).max(1).optional(), description: z.string().max(1000), evidenceSource: z.literal('qloo'),
+  strength: z.number().min(0).max(1).optional(), sharedTags: z.array(text).max(3).optional(), description: z.string().max(1000), evidenceSource: z.literal('qloo'),
 });
 export const tasteContextSchema = z.object({
   profileSignature: z.string().regex(/^[a-f0-9]{64}$/), referenceIds: z.array(text).max(30),

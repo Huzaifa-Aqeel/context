@@ -1,0 +1,2900 @@
+{
+  "image": "image1.png",
+  "fixedProfileBeforeBothImages": {
+    "declared": [
+      {
+        "label": "Dune",
+        "category": "book",
+        "group": "books_podcasts"
+      },
+      {
+        "label": "The Hobbit",
+        "category": "book",
+        "group": "books_podcasts"
+      },
+      {
+        "label": "Hades",
+        "category": "game",
+        "group": "video_games"
+      },
+      {
+        "label": "Stardew Valley",
+        "category": "game",
+        "group": "video_games"
+      },
+      {
+        "label": "Radiohead",
+        "category": "artist",
+        "group": "music_artists"
+      },
+      {
+        "label": "Interstellar",
+        "category": "movie",
+        "group": "movies_tv"
+      }
+    ],
+    "resolved": [
+      {
+        "id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+        "name": "Dune (Dune, #1)",
+        "type": "urn:entity:book"
+      },
+      {
+        "id": "5AED339A-8815-402E-B524-C218D45E5BB9",
+        "name": "The Hobbit",
+        "type": "urn:entity:book"
+      },
+      {
+        "id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+        "name": "Hades",
+        "type": "urn:entity:videogame"
+      },
+      {
+        "id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+        "name": "Stardew Valley",
+        "type": "urn:entity:videogame"
+      },
+      {
+        "id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+        "name": "Radiohead",
+        "type": "urn:entity:artist"
+      },
+      {
+        "id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+        "name": "Interstellar",
+        "type": "urn:entity:movie"
+      }
+    ]
+  },
+  "rawStructuredVisionResult": {
+    "sceneType": "game_shelf",
+    "entities": [
+      {
+        "label": "The Last of Us Remastered",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for The Last of Us Remastered",
+        "visibleText": "THE LAST OF US REMASTERED",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "God of War",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for God of War",
+        "visibleText": "GOD OF WAR",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Horizon Zero Dawn",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Horizon Zero Dawn",
+        "visibleText": "HORIZON ZERO DAWN",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Marvel's Spider-Man",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Marvel's Spider-Man",
+        "visibleText": "MARVEL SPIDER-MAN",
+        "relatedName": "Marvel",
+        "relatedCategory": "brand",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Uncharted 4: A Thief's End",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Uncharted 4: A Thief's End",
+        "visibleText": "UNCHARTED 4 A Thief's End",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Red Dead Redemption II",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Red Dead Redemption II",
+        "visibleText": "RED DEAD REDEMPTION II",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Gran Turismo Sport",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Gran Turismo Sport",
+        "visibleText": "GRAN TURISMO SPORT",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Days Gone",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Days Gone",
+        "visibleText": "DAYS GONE",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Witcher 3: Wild Hunt",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for The Witcher 3: Wild Hunt",
+        "visibleText": "THE WITCHER WILD HUNT",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Assassin's Creed Odyssey",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Assassin's Creed Odyssey",
+        "visibleText": "ASSASSIN'S CREED ODYSSEY",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Far Cry 5",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Far Cry 5",
+        "visibleText": "FARCRY 5",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Call of Duty: Modern Warfare",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Call of Duty: Modern Warfare",
+        "visibleText": "CALL OF DUTY MODERN WARFARE",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Minecraft",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Minecraft",
+        "visibleText": "MINECRAFT",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "FIFA 21",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for FIFA 21",
+        "visibleText": "FIFA 21",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "NBA 2K21",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for NBA 2K21",
+        "visibleText": "NBA 2K21",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "UFC 4",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for UFC 4",
+        "visibleText": "EA SPORTS UFC 4",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Need for Speed Heat",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Need for Speed Heat",
+        "visibleText": "NEED FOR SPEED HEAT",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Battlefield V",
+        "category": "videogame",
+        "carrier": "product",
+        "visualDescription": "a blue PS4 game case for Battlefield V",
+        "visibleText": "BATTLEFIELD V",
+        "visiblePlatform": "PS4",
+        "confidence": 1,
+        "culturallyRelevant": true
+      }
+    ]
+  },
+  "production": {
+    "result": {
+      "status": 200,
+      "body": {
+        "origin": "image",
+        "signature": "5285918e93ff725ba1c92f33422de97a34076da0a8bdc36d8b5c4c7bb8773f14",
+        "id": "9cc2538a-db88-44ad-accb-3716fa967d80",
+        "createdAt": "2026-10-09T02:40:26.803Z",
+        "summary": "I can identify 18 games on this shelf. I cannot rank the full visible shelf reliably right now.",
+        "culturalEvidence": {
+          "entities": [
+            {
+              "detectedName": "The Last of Us Remastered",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "C0C351A2-5D67-4EC0-A095-2F472A923C24",
+              "qlooName": "The Last of Us Remastered",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for The Last of Us Remastered",
+              "visibleText": "THE LAST OF US REMASTERED",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "God of War",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "25B8D47A-4F85-4E8F-9CB1-75080FC4D986",
+              "qlooName": "God of War",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for God of War",
+              "visibleText": "GOD OF WAR",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Horizon Zero Dawn",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+              "qlooName": "Horizon Zero Dawn",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Horizon Zero Dawn",
+              "visibleText": "HORIZON ZERO DAWN",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Marvel's Spider-Man",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "56295582-8A56-410E-A64B-0E1836760D1C",
+              "qlooName": "Marvel's Spider-Man",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Marvel's Spider-Man",
+              "visibleText": "MARVEL SPIDER-MAN",
+              "relatedName": "Marvel",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Uncharted 4: A Thief's End",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "9E288B89-9DA7-48A1-AC89-E51F6B08672F",
+              "qlooName": "Uncharted 4: A Thief's End",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Uncharted 4: A Thief's End",
+              "visibleText": "UNCHARTED 4 A Thief's End",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Red Dead Redemption II",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Red Dead Redemption II",
+              "visibleText": "RED DEAD REDEMPTION II",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "Gran Turismo Sport",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Gran Turismo Sport",
+              "visibleText": "GRAN TURISMO SPORT",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "Days Gone",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+              "qlooName": "Days Gone",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Days Gone",
+              "visibleText": "DAYS GONE",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "The Witcher 3: Wild Hunt",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+              "qlooName": "The Witcher 3: Wild Hunt",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for The Witcher 3: Wild Hunt",
+              "visibleText": "THE WITCHER WILD HUNT",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Assassin's Creed Odyssey",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "1F9A98B1-8C4E-468E-A230-60EDA28A57D7",
+              "qlooName": "Assassin's Creed Odyssey",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Assassin's Creed Odyssey",
+              "visibleText": "ASSASSIN'S CREED ODYSSEY",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Far Cry 5",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "DE3E9AD5-25B4-4C75-8B5E-CCE99840E408",
+              "qlooName": "Far Cry 5",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Far Cry 5",
+              "visibleText": "FARCRY 5",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Call of Duty: Modern Warfare",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "6E5620D0-1A4E-4814-8B39-386613B88E9F",
+              "qlooName": "Call of Duty: Modern Warfare",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Call of Duty: Modern Warfare",
+              "visibleText": "CALL OF DUTY MODERN WARFARE",
+              "visiblePlatform": "PS4"
+            },
+            {
+              "detectedName": "Minecraft",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Minecraft",
+              "visibleText": "MINECRAFT",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "FIFA 21",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for FIFA 21",
+              "visibleText": "FIFA 21",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "NBA 2K21",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for NBA 2K21",
+              "visibleText": "NBA 2K21",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "UFC 4",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for UFC 4",
+              "visibleText": "EA SPORTS UFC 4",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "Need for Speed Heat",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "source": "vision",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Need for Speed Heat",
+              "visibleText": "NEED FOR SPEED HEAT",
+              "visiblePlatform": "PS4",
+              "resolutionPending": true
+            },
+            {
+              "detectedName": "Battlefield V",
+              "detectedCategory": "videogame",
+              "visionConfidence": 1,
+              "qlooId": "1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+              "qlooName": "Battlefield V",
+              "qlooType": "urn:entity:videogame",
+              "matchConfidence": 0.95,
+              "source": "vision",
+              "groundingBasis": "direct",
+              "carrier": "product",
+              "visualDescription": "a blue PS4 game case for Battlefield V",
+              "visibleText": "BATTLEFIELD V",
+              "visiblePlatform": "PS4"
+            }
+          ],
+          "relationships": [],
+          "themes": [],
+          "confidence": 0
+        },
+        "shelf": {
+          "kind": "game",
+          "inventory": [
+            {
+              "title": "The Last of Us Remastered",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "C0C351A2-5D67-4EC0-A095-2F472A923C24",
+              "qlooName": "The Last of Us Remastered",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.5909606117235888,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "God of War",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "25B8D47A-4F85-4E8F-9CB1-75080FC4D986",
+              "qlooName": "God of War",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.5777907267571075,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Horizon Zero Dawn",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+              "qlooName": "Horizon Zero Dawn",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.6328126050068943,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Marvel's Spider-Man",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "56295582-8A56-410E-A64B-0E1836760D1C",
+              "qlooName": "Marvel's Spider-Man",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.5778909400602745,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Uncharted 4: A Thief's End",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "9E288B89-9DA7-48A1-AC89-E51F6B08672F",
+              "qlooName": "Uncharted 4: A Thief's End",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.5803756772317993,
+              "contributingInterestIds": [
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Red Dead Redemption II",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "Gran Turismo Sport",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "Days Gone",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+              "qlooName": "Days Gone",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.6453246317200954,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "The Witcher 3: Wild Hunt",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+              "qlooName": "The Witcher 3: Wild Hunt",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.7139026360913234,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Assassin's Creed Odyssey",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "1F9A98B1-8C4E-468E-A230-60EDA28A57D7",
+              "qlooName": "Assassin's Creed Odyssey",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.6312760369527397,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Far Cry 5",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "DE3E9AD5-25B4-4C75-8B5E-CCE99840E408",
+              "qlooName": "Far Cry 5",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.6293144334892432,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Call of Duty: Modern Warfare",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "6E5620D0-1A4E-4814-8B39-386613B88E9F",
+              "qlooName": "Call of Duty: Modern Warfare",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.5251176583018315,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            },
+            {
+              "title": "Minecraft",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "FIFA 21",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "NBA 2K21",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "UFC 4",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "Need for Speed Heat",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "exactInterest": false,
+              "resolution": "unavailable"
+            },
+            {
+              "title": "Battlefield V",
+              "confidence": 1,
+              "visualProvenance": "VISIBLE",
+              "visiblePlatform": "PS4",
+              "qlooId": "1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+              "qlooName": "Battlefield V",
+              "qlooProvenance": "QLOO",
+              "exactInterest": false,
+              "resolution": "matched",
+              "affinity": 0.524056771970372,
+              "contributingInterestIds": [
+                "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+                "057DA9D9-399B-437E-8BCA-A80E499125EF",
+                "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+                "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+              ]
+            }
+          ],
+          "shortlistIds": [],
+          "rankingComplete": false,
+          "profileSignature": "b91cbca10225c9126db64997b55f9406bf86aa6ae01db6e02463ecb34038f5fc"
+        },
+        "confidence": "low"
+      }
+    },
+    "calls": [
+      {
+        "number": 1,
+        "provider": "Qwen",
+        "purpose": "vision",
+        "method": "POST",
+        "path": "/compatible-mode/v1/chat/completions",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 2,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Last of Us Remastered",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 3,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "God of War",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 4,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Horizon Zero Dawn",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 5,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Marvel's Spider-Man",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 6,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Uncharted 4: A Thief's End",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 7,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Red Dead Redemption II",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 8,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Gran Turismo Sport",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 9,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Days Gone",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 10,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Witcher 3: Wild Hunt",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 11,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Assassin's Creed Odyssey",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 12,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Far Cry 5",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 13,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Call of Duty: Modern Warfare",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 14,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Minecraft",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 15,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "FIFA 21",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 16,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "NBA 2K21",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 17,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "UFC 4",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 18,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Need for Speed Heat",
+        "status": 429,
+        "retryAfter": null
+      },
+      {
+        "number": 19,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Battlefield V",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 20,
+        "provider": "Qloo",
+        "method": "POST",
+        "path": "/v2/insights",
+        "status": 200,
+        "retryAfter": null
+      }
+    ]
+  },
+  "pacedDiagnostic": {
+    "note": "Real Qwen Vision output from earlier production call; production shelf orchestration, real Qloo/Tavily/Qwen calls; Qloo HTTP calls paced 3 seconds apart solely for rate-limit diagnosis",
+    "qlooResolutionAndPhysicalInventory": [
+      {
+        "title": "The Last of Us Remastered",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "C0C351A2-5D67-4EC0-A095-2F472A923C24",
+        "qlooName": "The Last of Us Remastered",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5909606117235888,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "God of War",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "25B8D47A-4F85-4E8F-9CB1-75080FC4D986",
+        "qlooName": "God of War",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5777907267571075,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Horizon Zero Dawn",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+        "qlooName": "Horizon Zero Dawn",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.6328126050068943,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Marvel's Spider-Man",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "56295582-8A56-410E-A64B-0E1836760D1C",
+        "qlooName": "Marvel's Spider-Man",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5778909400602745,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Uncharted 4: A Thief's End",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "9E288B89-9DA7-48A1-AC89-E51F6B08672F",
+        "qlooName": "Uncharted 4: A Thief's End",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5803756772317993,
+        "contributingInterestIds": [
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Red Dead Redemption II",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "0ED6691B-1F06-46D7-8F17-DB18826A5D0F",
+        "qlooName": "Red Dead Redemption 2",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.616853787731404,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Gran Turismo Sport",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "063DB951-13C7-422E-8D0B-960E6B172D62",
+        "qlooName": "Gran Turismo Sport",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.4576380857449237,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Days Gone",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+        "qlooName": "Days Gone",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.6453246317200954,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "The Witcher 3: Wild Hunt",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+        "qlooName": "The Witcher 3: Wild Hunt",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7139026360913234,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Assassin's Creed Odyssey",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "1F9A98B1-8C4E-468E-A230-60EDA28A57D7",
+        "qlooName": "Assassin's Creed Odyssey",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.6312760369527397,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Far Cry 5",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "DE3E9AD5-25B4-4C75-8B5E-CCE99840E408",
+        "qlooName": "Far Cry 5",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.6293144334892432,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Call of Duty: Modern Warfare",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "6E5620D0-1A4E-4814-8B39-386613B88E9F",
+        "qlooName": "Call of Duty: Modern Warfare",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5251176583018315,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Minecraft",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+        "qlooName": "Minecraft",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.6718089004406547,
+        "contributingInterestIds": [
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "FIFA 21",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "224FF80B-62C7-4769-8EC5-DA75EF448D5D",
+        "qlooName": "FIFA 21",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5048397380260785,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "NBA 2K21",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "18E1CB7C-553D-400B-873A-628A3676D368",
+        "qlooName": "NBA 2K21",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.45410132329690556,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "UFC 4",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "60D8D072-12C8-4F9B-AA4A-5A3014FDDA5D",
+        "qlooName": "EA SPORTS UFC 4",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.4988975960245507,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Need for Speed Heat",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "1BCD980C-D4B9-4CA6-AC31-B65F3C94FF90",
+        "qlooName": "Need for Speed Heat",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.5248403706210183,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Battlefield V",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visiblePlatform": "PS4",
+        "qlooId": "1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+        "qlooName": "Battlefield V",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.524056771970372,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      }
+    ],
+    "qlooRankingComplete": true,
+    "qlooInsightsRequest": {
+      "filter.type": "urn:entity:videogame",
+      "filter.results.entities": "C0C351A2-5D67-4EC0-A095-2F472A923C24,25B8D47A-4F85-4E8F-9CB1-75080FC4D986,7947EDE2-36A1-4577-A5D5-890D6AE67348,56295582-8A56-410E-A64B-0E1836760D1C,9E288B89-9DA7-48A1-AC89-E51F6B08672F,0ED6691B-1F06-46D7-8F17-DB18826A5D0F,063DB951-13C7-422E-8D0B-960E6B172D62,5466C6BB-1D84-4D44-BDC7-F87677A24B94,33B4926B-F0D2-445B-B6F2-33B17DBBF8EC,1F9A98B1-8C4E-468E-A230-60EDA28A57D7,DE3E9AD5-25B4-4C75-8B5E-CCE99840E408,6E5620D0-1A4E-4814-8B39-386613B88E9F,CDBDE254-71F0-4640-8D04-5373BEAE5278,224FF80B-62C7-4769-8EC5-DA75EF448D5D,18E1CB7C-553D-400B-873A-628A3676D368,60D8D072-12C8-4F9B-AA4A-5A3014FDDA5D,1BCD980C-D4B9-4CA6-AC31-B65F3C94FF90,1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+      "signal.interests.entities": [
+        "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+        "5AED339A-8815-402E-B524-C218D45E5BB9",
+        "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+        "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+        "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+        "057DA9D9-399B-437E-8BCA-A80E499125EF"
+      ],
+      "feature.explainability": true,
+      "take": 18
+    },
+    "qlooInsightsResults": [
+      {
+        "entityId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+        "name": "The Witcher 3: Wild Hunt",
+        "affinity": 0.7139026360913234,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.28306665929242353
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2579184416902347
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.23958760513265528
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.21942729388468626
+          }
+        ]
+      },
+      {
+        "entityId": "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+        "name": "Minecraft",
+        "affinity": 0.6718089004406547,
+        "contributingInterests": [
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.32735017379910214
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2473015969410802
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.2165546827592297
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.20879354650058798
+          }
+        ]
+      },
+      {
+        "entityId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+        "name": "Days Gone",
+        "affinity": 0.6453246317200954,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3415029089895282
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2923671922381121
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.19994461374801
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.16618528502434973
+          }
+        ]
+      },
+      {
+        "entityId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+        "name": "Horizon Zero Dawn",
+        "affinity": 0.6328126050068943,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.319528531153599
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.26985031414436067
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.2530384613217546
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.15758269338028563
+          }
+        ]
+      },
+      {
+        "entityId": "1F9A98B1-8C4E-468E-A230-60EDA28A57D7",
+        "name": "Assassin's Creed Odyssey",
+        "affinity": 0.6312760369527397,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3165557335918829
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.26042145979601977
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.24571327892482803
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.17730952768726937
+          }
+        ]
+      },
+      {
+        "entityId": "DE3E9AD5-25B4-4C75-8B5E-CCE99840E408",
+        "name": "Far Cry 5",
+        "affinity": 0.6293144334892432,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.30030366803908737
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2840267118498217
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.26541667851071726
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.15025294160037372
+          }
+        ]
+      },
+      {
+        "entityId": "0ED6691B-1F06-46D7-8F17-DB18826A5D0F",
+        "name": "Red Dead Redemption 2",
+        "affinity": 0.616853787731404,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.33613811309841024
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.2603371401370217
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2560518392829742
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.14747290748159397
+          }
+        ]
+      },
+      {
+        "entityId": "C0C351A2-5D67-4EC0-A095-2F472A923C24",
+        "name": "The Last of Us Remastered",
+        "affinity": 0.5909606117235888,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.31068087712665404
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.30637700659612443
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.22966771601275704
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.15327440026446437
+          }
+        ]
+      },
+      {
+        "entityId": "9E288B89-9DA7-48A1-AC89-E51F6B08672F",
+        "name": "Uncharted 4: A Thief's End",
+        "affinity": 0.5803756772317993,
+        "contributingInterests": [
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.319219307167067
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.28593704950507814
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.22148287322181476
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1733607701060402
+          }
+        ]
+      },
+      {
+        "entityId": "56295582-8A56-410E-A64B-0E1836760D1C",
+        "name": "Marvel's Spider-Man",
+        "affinity": 0.5778909400602745,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3431408923926252
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2622269312430617
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.24561648530910068
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.14901569105521237
+          }
+        ]
+      },
+      {
+        "entityId": "25B8D47A-4F85-4E8F-9CB1-75080FC4D986",
+        "name": "God of War",
+        "affinity": 0.5777907267571075,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3457996557189003
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2819816088085431
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.2085092759273167
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.16370945954523994
+          }
+        ]
+      },
+      {
+        "entityId": "6E5620D0-1A4E-4814-8B39-386613B88E9F",
+        "name": "Call of Duty: Modern Warfare",
+        "affinity": 0.5251176583018315,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.34459235167513674
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.25121983196535624
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.22375609213855266
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.18043172422095435
+          }
+        ]
+      },
+      {
+        "entityId": "1BCD980C-D4B9-4CA6-AC31-B65F3C94FF90",
+        "name": "Need for Speed Heat",
+        "affinity": 0.5248403706210183,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3410677203625425
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2988411340222118
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.23109638520023915
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.12899476041500657
+          }
+        ]
+      },
+      {
+        "entityId": "1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+        "name": "Battlefield V",
+        "affinity": 0.524056771970372,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3140626931744542
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2797057266311135
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.24417747243941454
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.16205410775501783
+          }
+        ]
+      },
+      {
+        "entityId": "224FF80B-62C7-4769-8EC5-DA75EF448D5D",
+        "name": "FIFA 21",
+        "affinity": 0.5048397380260785,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3497159195499712
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.30910644130175197
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2318351009944309
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.10934253815384574
+          }
+        ]
+      },
+      {
+        "entityId": "60D8D072-12C8-4F9B-AA4A-5A3014FDDA5D",
+        "name": "EA SPORTS UFC 4",
+        "affinity": 0.4988975960245507,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3578379506782561
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.22649454835511196
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.21337231013679836
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.20229519082983363
+          }
+        ]
+      },
+      {
+        "entityId": "063DB951-13C7-422E-8D0B-960E6B172D62",
+        "name": "Gran Turismo Sport",
+        "affinity": 0.4576380857449237,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.32694632281953534
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.27690848770730314
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.2621982748557889
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1339469146173726
+          }
+        ]
+      },
+      {
+        "entityId": "18E1CB7C-553D-400B-873A-628A3676D368",
+        "name": "NBA 2K21",
+        "affinity": 0.45410132329690556,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.3276473743439736
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.3263215757107713
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.20642780841716948
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.13960324152808568
+          }
+        ]
+      }
+    ],
+    "shortlistIds": [
+      "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+      "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+      "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+      "7947EDE2-36A1-4577-A5D5-890D6AE67348"
+    ],
+    "tavilyResearch": [
+      {
+        "query": "\"The Witcher 3: Wild Hunt\" video game official developer publisher platforms local co-op online co-op accessibility",
+        "status": 200,
+        "results": [
+          {
+            "title": "The Witcher 3: Wild Hunt - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+            "excerpt": "The Witcher 3: Wild Hunt‍ is a 2015 action role-playing game developed and published by CD Projekt. It is the sequel to the 2011 game The Witcher 2: Assassins of Kings and the third game in The Witcher video game series \"The Witcher (video "
+          },
+          {
+            "title": "The Witcher 3: Wild Hunt — Remastered available now! - CD PROJEKT RED",
+            "url": "https://www.cdprojekt.com/en/media/news/the-witcher-3-wild-hunt-remastered-available-now",
+            "excerpt": "CD PROJEKT RED\n\n CD Projekt RED\n Wersja polska\n European Union\n\n Capital Group\n Core Business\n Investors\n Sustainability\n Media\n Careers\n Contact\n Search\n\nNews\n\nStartNewsThe Witcher 3: Wild Hunt — Remastered available now!\n\n# The Witcher 3:"
+          },
+          {
+            "title": "Play the acclaimed open-world RPG: The Witcher 3: Wild Hunt",
+            "url": "https://www.thewitcher.com/mt/en/witcher3",
+            "excerpt": "The Remastered upgrade will be available on all current-generation platforms (PC, PlayStation 5, Xbox Series X|S, Nintendo Switch 2). [...] Explore the epic world of The Witcher in a new light with The Little Witcher, a delightful collectio"
+          },
+          {
+            "title": "The Witcher 3: Wild Hunt — Remastered | Official Announcement Trailer",
+            "url": "https://www.youtube.com/watch?v=IGk17XQ7IrQ&xstg=CAMSBhUDzO3xHw%3D%3D",
+            "excerpt": "# The Witcher 3: Wild Hunt — Remastered | Official Announcement Trailer\n## Channel: The Witcher (verified)\n618K subscribers\n218K likes\n\n### Description\n6,030,760 views\nPosted: 2026-08-25\nComing on September 29, this is the definitive way to"
+          },
+          {
+            "title": "Save 50% on The Witcher 3: Wild Hunt — Remastered on Steam",
+            "url": "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt__Remastered",
+            "excerpt": "STEAM\nLink to the Steam Homepage\n\n## This game may contain content not appropriate for all ages, or may not be appropriate for viewing at work.\n\n“The Witcher 3: Wild Hunt contains strong language, intense violence, blood and gore, as well a"
+          }
+        ]
+      },
+      {
+        "query": "\"Minecraft\" video game official developer publisher platforms local co-op online co-op accessibility",
+        "status": 200,
+        "results": [
+          {
+            "title": "Online Service Not Available | SSA",
+            "url": "https://secure.ssa.gov/ril/siview.action",
+            "excerpt": "About SSA\n   Accessibility statement\n   Civil rights and compliance\n   FOIA requests\n   Privacy policy\n   Performance reports\n   Office of the Inspector General\n   System status\n\nLooking for U.S. government information and services? Visit U"
+          },
+          {
+            "title": "Online Voter Application",
+            "url": "https://www.sec.state.ma.us/ovr",
+            "excerpt": "# Online Voter Registration System\n|||| ## What would you like to do today? Check Registration Information\n\nWilliam Francis Galvin Secretary of the Commonwealth of MassachusettsOne Ashburton Place Boston, MA 02108  \n\n1-800-392-6090  \ncis@se"
+          },
+          {
+            "title": "Iowa DOT online services",
+            "url": "https://mymvd.iowadot.gov",
+            "excerpt": "Make sure to enter your first name in the first box and last name in the second box\n Enter your name exactly as it appears on your license or identification card (e.g. Matthew instead of Matt)\n Be sure to use the LAST 5 digits of your socia"
+          },
+          {
+            "title": "O*NET OnLine",
+            "url": "https://www.onetonline.org",
+            "excerpt": "Find more options on the home page, or search the site:\n\nStay up to date with product releases, new features, database updates, and other important O\\NET project developments.\n\nU.S. Department of Labor\n\n### Loading...\n\nLoading... [...] Prof"
+          },
+          {
+            "title": "Get an employer identification number | Internal Revenue Service",
+            "url": "https://www.irs.gov/businesses/small-businesses-self-employed/get-an-employer-identification-number",
+            "excerpt": "Beware of websites that charge for an EIN. You never have to pay a fee for an EIN.\n\n## How it works\n\n## Who can use this tool\n\nUse this if all of these are correct:\n\nYou can't use this if either:\n\n## What you need\n\n## Get an EIN\n\nGet your E"
+          }
+        ]
+      },
+      {
+        "query": "\"Days Gone\" video game official developer publisher platforms local co-op online co-op accessibility",
+        "status": 200,
+        "results": [
+          {
+            "title": "Days Gone - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Days_Gone",
+            "excerpt": "Days Gone is a 2019 action-adventure video game developed by Bend Studio and published by Sony Interactive Entertainment. It is set in post-apocalyptic Oregon two years after the start of a pandemic that turned a portion of humanity into vi"
+          },
+          {
+            "title": "Days Gone 2 Details Revealed By Game's Director ...",
+            "url": "https://gameinformer.com/2021/04/12/days-gone-2-details-revealed-by-games-director-including-a-shared-universe-with-co-op",
+            "excerpt": "Days Gone 2 was officially pitched to Sony. Ross confirmed that the Days Gone 2 pitch included a \"shared universe with co-op play.\" He then"
+          },
+          {
+            "title": "Accessibility Tags are live for Days Gone!  You can now see ...",
+            "url": "https://www.instagram.com/reel/Cqveo-ZgGgG",
+            "excerpt": "Accessibility Tags are live for Days Gone! Play all new game modes including Speedrun, Permadeath, and Horde Assault"
+          },
+          {
+            "title": "Accessibility Tags are live for Days Gone!  You can now see ...",
+            "url": "https://www.facebook.com/BendStudio/videos/accessibility-tags-are-live-for-days-gone-you-can-now-see-detailed-insight-on-ac/612482574101776",
+            "excerpt": "You can now see detailed insight on accessibility features supported in our game and other games across the PlayStation Store for the PS5."
+          },
+          {
+            "title": "Welcome to Steam",
+            "url": "https://store.steampowered.com",
+            "excerpt": "Overcooked! 2\n\nMultiplayer, Local Co-Op, Online Co-Op, Co-op\n\nReleased: 7 Aug, 2018\n\n-75%\n\n3 300,00₸\n\n825,00₸\n\n-75%\n\n3 300,00₸\n\n825,00₸ Grand Theft Auto: The Trilogy – The Definitive Edition\n\nGrand Theft Auto: The Trilogy – The Definitive E"
+          }
+        ]
+      },
+      {
+        "query": "\"Horizon Zero Dawn\" video game official developer publisher platforms local co-op online co-op accessibility",
+        "status": 200,
+        "results": [
+          {
+            "title": "New Horizon Online Co-Op Game Confirmed In Job Listing - GameSpot",
+            "url": "https://www.gamespot.com/articles/new-horizon-online-co-op-game-confirmed-in-job-listing/1100-6510122",
+            "excerpt": "Title: New Horizon Online Co-Op Game Confirmed In Job Listing - GameSpot\n# New Horizon Online Co-Op Game Confirmed In Job Listing. GameSpot may receive revenue from affiliate and advertising partnerships for sharing this content and from pu"
+          },
+          {
+            "title": "Horizon Zero Dawn 2 to have online co-op, HZD trilogy planned",
+            "url": "https://www.tweaktown.com/news/72047/horizon-zero-dawn-2-to-have-online-co-op-hzd-trilogy-planned/index.html",
+            "excerpt": "Title: Horizon Zero Dawn 2 to have online co-op, HZD trilogy planned\n# Horizon Zero Dawn 2 to have online co-op, HZD trilogy planned. Guerrilla Games plans to inject live game co-op play with Horizon Zero Dawn's upcoming PS5 sequel. Horizon"
+          },
+          {
+            "title": "Co-Op Steam Survival Game is Like Horizon Zero Dawn Meets The Forest",
+            "url": "https://gamerant.com/co-op-steam-survival-game-elysium",
+            "excerpt": "# Co-Op Steam Survival Game is Like Horizon Zero Dawn Meets The Forest. Fans of the stunning sci-fi world of *Horizon Zero Dawn* and the challenging yet satisfying gameplay of *The Forest* can look forward to the two titles colliding in ***"
+          },
+          {
+            "title": "Horizon Zero Dawn 2 to feature co-op, “gigantic” world | JoyFreak",
+            "url": "https://www.joyfreak.com/threads/horizon-zero-dawn-2-to-feature-co-op-gigantic-world.6603/latest",
+            "excerpt": "Title: Horizon Zero Dawn 2 to feature co-op, “gigantic” world | JoyFreak\nHow to install the app on iOS. Follow along with the video below to see how to install our site as a web app on your home screen. **Note:** This feature may not be ava"
+          },
+          {
+            "title": "Alpha footage of Guerrilla's co-op Horizon game leaks online",
+            "url": "https://gamedeveloper.com/business/alpha-footage-of-guerrilla-s-co-op-horizon-game-leaks-online",
+            "excerpt": "Title: Alpha footage of Guerrilla's co-op Horizon game leaks online\n#### Recent in Trending. The lead characters in Crossfire. #### Recent in Latest News. Characters from Avatar battle it out. The Patch Notes logo overlaid on a screenshot o"
+          }
+        ]
+      }
+    ],
+    "qwenFactExtraction": [
+      {
+        "items": [
+          {
+            "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+            "facts": [
+              {
+                "field": "title",
+                "value": "The Witcher 3: Wild Hunt",
+                "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+                "supportingQuote": "The Witcher 3: Wild Hunt‍ is a 2015 action role-playing game"
+              },
+              {
+                "field": "genre",
+                "value": "Action role-playing",
+                "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+                "supportingQuote": "action role-playing game"
+              },
+              {
+                "field": "release_year",
+                "value": "2015",
+                "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+                "supportingQuote": "is a 2015 action role-playing game"
+              },
+              {
+                "field": "platforms",
+                "value": "PlayStation 4, Windows, Xbox One, Nintendo Switch, PlayStation 5, Xbox Series X/S, Nintendo Switch 2",
+                "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+                "supportingQuote": "Platforms |  PlayStation 4  Windows  Xbox One  Nintendo Switch  PlayStation 5  Xbox Series X/S  Nintendo Switch 2"
+              },
+              {
+                "field": "gameplay_style",
+                "value": "Open world with a third-person perspective",
+                "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+                "supportingQuote": "played in an open world with a third-person perspective"
+              }
+            ]
+          },
+          {
+            "qlooId": "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+            "facts": []
+          },
+          {
+            "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+            "facts": [
+              {
+                "field": "title",
+                "value": "Days Gone",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "Days Gone is a 2019 action-adventure video game"
+              },
+              {
+                "field": "genre",
+                "value": "Action-adventure",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "Genre | Action-adventure"
+              },
+              {
+                "field": "release_year",
+                "value": "2019",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "Days Gone is a 2019 action-adventure video game"
+              },
+              {
+                "field": "platforms",
+                "value": "PlayStation 4, Windows, PlayStation 5",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "Platforms |  PlayStation 4  Windows  PlayStation 5"
+              },
+              {
+                "field": "premise",
+                "value": "Set in post-apocalyptic Oregon two years after a pandemic turns humanity into zombie-like creatures; former outlaw biker Deacon St. John searches for his wife Sarah.",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "It is set in post-apocalyptic Oregon two years after the start of a pandemic that turned a portion of humanity into vicious zombie-like creatures. Former outlaw biker Deacon St. John discovers his wife Sarah, having been assumed dead, may still be alive and goes on a quest to find her."
+              },
+              {
+                "field": "gameplay_style",
+                "value": "Third-person perspective, open world exploration",
+                "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+                "supportingQuote": "The game is played from a third-person perspective in which the player can explore an open"
+              }
+            ]
+          },
+          {
+            "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+            "facts": []
+          }
+        ]
+      }
+    ],
+    "sceneBrief": {
+      "kind": "game",
+      "inventory": [
+        {
+          "title": "The Last of Us Remastered",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "C0C351A2-5D67-4EC0-A095-2F472A923C24",
+          "qlooName": "The Last of Us Remastered",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5909606117235888,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "God of War",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "25B8D47A-4F85-4E8F-9CB1-75080FC4D986",
+          "qlooName": "God of War",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5777907267571075,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Horizon Zero Dawn",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+          "qlooName": "Horizon Zero Dawn",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.6328126050068943,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Marvel's Spider-Man",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "56295582-8A56-410E-A64B-0E1836760D1C",
+          "qlooName": "Marvel's Spider-Man",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5778909400602745,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Uncharted 4: A Thief's End",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "9E288B89-9DA7-48A1-AC89-E51F6B08672F",
+          "qlooName": "Uncharted 4: A Thief's End",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5803756772317993,
+          "contributingInterestIds": [
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Red Dead Redemption II",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "0ED6691B-1F06-46D7-8F17-DB18826A5D0F",
+          "qlooName": "Red Dead Redemption 2",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.616853787731404,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Gran Turismo Sport",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "063DB951-13C7-422E-8D0B-960E6B172D62",
+          "qlooName": "Gran Turismo Sport",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.4576380857449237,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Days Gone",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+          "qlooName": "Days Gone",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.6453246317200954,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "The Witcher 3: Wild Hunt",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+          "qlooName": "The Witcher 3: Wild Hunt",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7139026360913234,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Assassin's Creed Odyssey",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "1F9A98B1-8C4E-468E-A230-60EDA28A57D7",
+          "qlooName": "Assassin's Creed Odyssey",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.6312760369527397,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Far Cry 5",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "DE3E9AD5-25B4-4C75-8B5E-CCE99840E408",
+          "qlooName": "Far Cry 5",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.6293144334892432,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Call of Duty: Modern Warfare",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "6E5620D0-1A4E-4814-8B39-386613B88E9F",
+          "qlooName": "Call of Duty: Modern Warfare",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5251176583018315,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Minecraft",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+          "qlooName": "Minecraft",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.6718089004406547,
+          "contributingInterestIds": [
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "FIFA 21",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "224FF80B-62C7-4769-8EC5-DA75EF448D5D",
+          "qlooName": "FIFA 21",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5048397380260785,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "NBA 2K21",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "18E1CB7C-553D-400B-873A-628A3676D368",
+          "qlooName": "NBA 2K21",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.45410132329690556,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "UFC 4",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "60D8D072-12C8-4F9B-AA4A-5A3014FDDA5D",
+          "qlooName": "EA SPORTS UFC 4",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.4988975960245507,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Need for Speed Heat",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "1BCD980C-D4B9-4CA6-AC31-B65F3C94FF90",
+          "qlooName": "Need for Speed Heat",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.5248403706210183,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Battlefield V",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visiblePlatform": "PS4",
+          "qlooId": "1C22C61A-7827-41A4-987E-9FF2C1FB6480",
+          "qlooName": "Battlefield V",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.524056771970372,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        }
+      ],
+      "shortlistIds": [
+        "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+        "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+        "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+        "7947EDE2-36A1-4577-A5D5-890D6AE67348"
+      ],
+      "rankingComplete": true,
+      "profileSignature": "b91cbca10225c9126db64997b55f9406bf86aa6ae01db6e02463ecb34038f5fc",
+      "briefItems": [
+        {
+          "qlooId": "33B4926B-F0D2-445B-B6F2-33B17DBBF8EC",
+          "facts": [
+            {
+              "field": "title",
+              "value": "The Witcher 3: Wild Hunt",
+              "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+              "retrievedAt": "2026-10-09T02:44:52.200Z",
+              "supportingQuote": "The Witcher 3: Wild Hunt‍ is a 2015 action role-playing game",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "genre",
+              "value": "Action role-playing",
+              "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+              "retrievedAt": "2026-10-09T02:44:52.200Z",
+              "supportingQuote": "action role-playing game",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "release_year",
+              "value": "2015",
+              "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+              "retrievedAt": "2026-10-09T02:44:52.200Z",
+              "supportingQuote": "is a 2015 action role-playing game",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "gameplay_style",
+              "value": "Open world with a third-person perspective",
+              "sourceUrl": "https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt",
+              "retrievedAt": "2026-10-09T02:44:52.200Z",
+              "supportingQuote": "played in an open world with a third-person perspective",
+              "provenance": "RESEARCHED"
+            }
+          ],
+          "unknownFields": [
+            "premise",
+            "platforms",
+            "single_player",
+            "multiplayer",
+            "local_coop",
+            "online_coop",
+            "accessibility_features"
+          ]
+        },
+        {
+          "qlooId": "CDBDE254-71F0-4640-8D04-5373BEAE5278",
+          "facts": [],
+          "unknownFields": [
+            "title",
+            "premise",
+            "genre",
+            "release_year",
+            "gameplay_style",
+            "platforms",
+            "single_player",
+            "multiplayer",
+            "local_coop",
+            "online_coop",
+            "accessibility_features"
+          ]
+        },
+        {
+          "qlooId": "5466C6BB-1D84-4D44-BDC7-F87677A24B94",
+          "facts": [
+            {
+              "field": "title",
+              "value": "Days Gone",
+              "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+              "retrievedAt": "2026-10-09T02:44:53.268Z",
+              "supportingQuote": "Days Gone is a 2019 action-adventure video game",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "genre",
+              "value": "Action-adventure",
+              "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+              "retrievedAt": "2026-10-09T02:44:53.268Z",
+              "supportingQuote": "Genre | Action-adventure",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "release_year",
+              "value": "2019",
+              "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+              "retrievedAt": "2026-10-09T02:44:53.268Z",
+              "supportingQuote": "Days Gone is a 2019 action-adventure video game",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "premise",
+              "value": "Set in post-apocalyptic Oregon two years after a pandemic turns humanity into zombie-like creatures; former outlaw biker Deacon St. John searches for his wife Sarah.",
+              "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+              "retrievedAt": "2026-10-09T02:44:53.268Z",
+              "supportingQuote": "It is set in post-apocalyptic Oregon two years after the start of a pandemic that turned a portion of humanity into vicious zombie-like creatures. Former outlaw biker Deacon St. John discovers his wife Sarah, having been assumed dead, may still be alive and goes on a quest to find her.",
+              "provenance": "RESEARCHED"
+            },
+            {
+              "field": "gameplay_style",
+              "value": "Third-person perspective, open world exploration",
+              "sourceUrl": "https://en.wikipedia.org/wiki/Days_Gone",
+              "retrievedAt": "2026-10-09T02:44:53.268Z",
+              "supportingQuote": "The game is played from a third-person perspective in which the player can explore an open",
+              "provenance": "RESEARCHED"
+            }
+          ],
+          "unknownFields": [
+            "platforms",
+            "single_player",
+            "multiplayer",
+            "local_coop",
+            "online_coop",
+            "accessibility_features"
+          ]
+        },
+        {
+          "qlooId": "7947EDE2-36A1-4577-A5D5-890D6AE67348",
+          "facts": [],
+          "unknownFields": [
+            "title",
+            "premise",
+            "genre",
+            "release_year",
+            "gameplay_style",
+            "platforms",
+            "single_player",
+            "multiplayer",
+            "local_coop",
+            "online_coop",
+            "accessibility_features"
+          ]
+        }
+      ],
+      "briefCreatedAt": "2026-10-09T02:45:09.022Z"
+    },
+    "exactInitialAnswer": "I can identify 18 games on this shelf. The Witcher 3: Wild Hunt and Minecraft stand out most for your interests.",
+    "calls": [
+      {
+        "number": 1,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Last of Us Remastered",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 2,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "God of War",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 3,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Horizon Zero Dawn",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 4,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Marvel's Spider-Man",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 5,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Uncharted 4: A Thief's End",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 6,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Red Dead Redemption II",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 7,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Gran Turismo Sport",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 8,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Days Gone",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 9,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Witcher 3: Wild Hunt",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 10,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Assassin's Creed Odyssey",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 11,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Far Cry 5",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 12,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Call of Duty: Modern Warfare",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 13,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Minecraft",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 14,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "FIFA 21",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 15,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "NBA 2K21",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 16,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "UFC 4",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 17,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Need for Speed Heat",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 18,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Battlefield V",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 19,
+        "provider": "Qloo",
+        "method": "POST",
+        "path": "/v2/insights",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 20,
+        "provider": "Tavily",
+        "method": "POST",
+        "path": "/search",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 21,
+        "provider": "Tavily",
+        "method": "POST",
+        "path": "/search",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 22,
+        "provider": "Tavily",
+        "method": "POST",
+        "path": "/search",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 23,
+        "provider": "Tavily",
+        "method": "POST",
+        "path": "/search",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 24,
+        "provider": "Qwen",
+        "purpose": "shelf_fact_extraction",
+        "method": "POST",
+        "path": "/compatible-mode/v1/chat/completions",
+        "status": 200,
+        "retryAfter": null
+      }
+    ]
+  },
+  "askContext": [
+    {
+      "questions": [
+        {
+          "question": "Why does The Witcher 3: Wild Hunt fit my interests?",
+          "status": 200,
+          "answer": "Qloo ranked The Witcher 3: Wild Hunt for your interests, including Hades and Interstellar. I cannot verify a more specific cultural link from that score alone.",
+          "calls": [
+            {
+              "number": 1,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "question": "Does Minecraft support local co-op?",
+          "status": 200,
+          "answer": "Qloo describes Minecraft: Players explore, gather resources, craft items, and build or survive in a procedurally generated blocky 3D world, solo or with others.",
+          "calls": [
+            {
+              "number": 2,
+              "provider": "Qwen",
+              "purpose": "reasoning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            },
+            {
+              "number": 3,
+              "provider": "Qloo",
+              "path": "/entities",
+              "status": 200
+            },
+            {
+              "number": 4,
+              "provider": "Qloo",
+              "path": "/v2/insights",
+              "status": 200
+            },
+            {
+              "number": 5,
+              "provider": "Qwen",
+              "purpose": "reasoning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "question": "Does Minecraft support local co-op?",
+          "status": 200,
+          "answer": "Qloo describes Minecraft: Players explore, gather resources, craft items, and build or survive in a procedurally generated blocky 3D world, solo or with others.",
+          "calls": [
+            {
+              "number": 6,
+              "provider": "Qwen",
+              "purpose": "reasoning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            },
+            {
+              "number": 7,
+              "provider": "Qwen",
+              "purpose": "reasoning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "why",
+            "itemIndices": [
+              8
+            ],
+            "fields": [
+              "genre",
+              "gameplay_style"
+            ],
+            "criterion": ""
+          }
+        },
+        {
+          "number": 2,
+          "provider": "Qwen",
+          "purpose": "reasoning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200
+        },
+        {
+          "number": 3,
+          "provider": "Qloo",
+          "method": "GET",
+          "path": "/entities",
+          "status": 200
+        },
+        {
+          "number": 4,
+          "provider": "Qloo",
+          "method": "GET",
+          "path": "/v2/insights",
+          "status": 200
+        },
+        {
+          "number": 5,
+          "provider": "Qwen",
+          "purpose": "reasoning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200
+        },
+        {
+          "number": 6,
+          "provider": "Qwen",
+          "purpose": "reasoning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200
+        },
+        {
+          "number": 7,
+          "provider": "Qwen",
+          "purpose": "reasoning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "questions": [
+        {
+          "question": "What genre is The Witcher 3: Wild Hunt?",
+          "status": 200,
+          "answer": "The Witcher 3: Wild Hunt: genre — Action role-playing.",
+          "calls": [
+            {
+              "number": 1,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "question": "Does The Witcher 3: Wild Hunt have couch co-op?",
+          "status": 200,
+          "answer": "I could not verify local co-op for The Witcher 3: Wild Hunt.",
+          "calls": [
+            {
+              "number": 2,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            },
+            {
+              "number": 3,
+              "provider": "Tavily",
+              "path": "/search",
+              "status": 200
+            },
+            {
+              "number": 4,
+              "provider": "Qwen",
+              "purpose": "targeted_fact_extraction",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "question": "Does The Witcher 3: Wild Hunt have couch co-op?",
+          "status": 200,
+          "answer": "I could not verify local co-op for The Witcher 3: Wild Hunt.",
+          "calls": [
+            {
+              "number": 5,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "fact",
+            "itemIndices": [
+              8
+            ],
+            "fields": [
+              "genre"
+            ]
+          }
+        },
+        {
+          "number": 2,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "fact",
+            "itemIndices": [
+              8
+            ],
+            "fields": [
+              "local_coop"
+            ],
+            "criterion": ""
+          }
+        },
+        {
+          "number": 3,
+          "provider": "Tavily",
+          "method": "POST",
+          "path": "/search",
+          "status": 200
+        },
+        {
+          "number": 4,
+          "provider": "Qwen",
+          "purpose": "targeted_fact_extraction",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200
+        },
+        {
+          "number": 5,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "fact",
+            "itemIndices": [
+              8
+            ],
+            "fields": [
+              "local_coop"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

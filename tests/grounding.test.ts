@@ -10,7 +10,7 @@ const scene: Scene = { id: 'test', createdAt: '2026-10-08T00:00:00.000Z', summar
 const profile: TasteProfile = { entities: [{ id: 'artist', name: 'Radiohead', type: 'urn:entity:artist' }], signature: 'a'.repeat(64) };
 const taste: TasteContext = { profileSignature: profile.signature!, referenceIds: ['brand'], connections: [{ referenceId: 'brand', interestId: 'artist', kind: 'affinity', strength: 0.4, description: 'Affinity only.', evidenceSource: 'qloo' }], warnings: [] };
 const unexpected = async (): Promise<never> => { throw new Error('Unexpected query'); };
-const services = (): Providers => ({ vision: { inspectScene: unexpected }, qloo: { resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected, analyzeTaste: unexpected }, llm: { nextTurn: async () => ({ kind: 'answer', result: { answer: 'Nike collaborated with Radiohead because of your personality.', confidence: 'high', usedTasteConnections: [] } }) } });
+const services = (): Providers => ({ vision: { inspectScene: unexpected }, qloo: { resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected, analyzeTaste: unexpected, getEntityFact: unexpected }, llm: { nextTurn: async () => ({ kind: 'answer', result: { answer: 'Nike collaborated with Radiohead because of your personality.', confidence: 'high', usedTasteConnections: [] } }) } });
 const request = { scene, profile, tasteContext: taste, question: 'Explain Nike.', mode: 'reference' as const, messages: [] };
 
 test('empty citations cannot smuggle invented prose or personal traits into a spoken explanation', async () => {
@@ -21,22 +21,51 @@ test('empty citations cannot smuggle invented prose or personal traits into a sp
 
 test('a weak affinity produces a qualified bridge and cannot become authorship or a stylistic analogy', () => {
   const result = renderGroundedAnswer(request, scene.culturalEvidence, undefined, taste, [{ kind: 'taste', referenceId: 'brand', interestId: 'artist' }]);
-  assert.match(result.answer, /limited cultural affinity/); assert.match(result.answer, /does not establish a specific similarity/);
-  assert.equal(result.limited, true); assert.equal(result.usedTasteConnections.length, 1);
-  assert.throws(() => renderGroundedAnswer(request, scene.culturalEvidence, undefined, taste, [{ kind: 'taste', referenceId: 'invented', interestId: 'artist' }]), /verified/);
-  assert.throws(() => renderGroundedAnswer(request, scene.culturalEvidence, undefined, taste, [{ kind: 'fact', entityId: 'invented' }]), /verified/);
+  assert.match(result.answer, /do not have a specific supported connection/);
+  assert.equal(result.limited, true); assert.equal(result.usedTasteConnections.length, 0);
+  assert.doesNotMatch(renderGroundedAnswer(request, scene.culturalEvidence, undefined, taste, [{ kind: 'taste', referenceId: 'invented', interestId: 'artist' }]).answer, /invented/);
+  assert.doesNotMatch(renderGroundedAnswer(request, scene.culturalEvidence, undefined, taste, [{ kind: 'fact', entityId: 'invented' }]).answer, /invented/);
+});
+
+test('a requested familiar comparison uses the stated interest record and shared Qloo tags', async () => {
+  const provider = services(); let lookups = 0;
+  provider.qloo.getEntityFact = async (id) => {
+    lookups++;
+    assert.equal(id, 'artist');
+    return { entityId: 'artist', name: 'Radiohead', category: 'urn:entity:artist', tags: ['Alternative'], description: 'An alternative rock band.', source: 'qloo' };
+  };
+  const relatedScene = { ...scene, culturalEvidence: { ...scene.culturalEvidence, facts: [{ ...scene.culturalEvidence.facts![0], tags: ['Alternative', 'Sportswear'] }] } };
+  const strongTaste: TasteContext = { ...taste, connections: [{ ...taste.connections[0], strength: 0.8 }] };
+  provider.llm.nextTurn = async () => ({ kind: 'answer', result: { answer: 'An invented analogy.', confidence: 'medium', evidenceSelections: [{ kind: 'taste', referenceId: 'brand', interestId: 'artist' }] } });
+  const result = await explore({ ...request, scene: relatedScene, tasteContext: strongTaste, question: 'Explain Nike through an interest I know.' }, provider);
+  assert.equal(lookups, 1);
+  assert.match(result.answer, /Nike and your interest in Radiohead share/);
+  assert.match(result.answer, /Alternative/);
+  assert.doesNotMatch(result.answer, /invented analogy|similar style/);
+});
+
+test('an ordinary question and failed anchor lookup do not block the scene answer', async () => {
+  const provider = services(); let lookups = 0;
+  provider.qloo.getEntityFact = async () => { lookups++; throw new Error('Qloo unavailable'); };
+  provider.llm.nextTurn = async () => ({ kind: 'answer', result: { answer: 'Provider prose.', confidence: 'medium', evidenceSelections: [{ kind: 'taste', referenceId: 'brand', interestId: 'artist' }] } });
+  const strongTaste: TasteContext = { ...taste, connections: [{ ...taste.connections[0], strength: 0.8 }] };
+  await explore({ ...request, tasteContext: strongTaste }, provider);
+  assert.equal(lookups, 0);
+  const result = await explore({ ...request, tasteContext: strongTaste, question: 'Explain Nike through an interest I know.' }, provider);
+  assert.equal(lookups, 1);
+  assert.match(result.answer, /do not have a specific supported connection/);
 });
 
 test('changing an entity inside exploration invalidates the old taste pair before the next answer', async () => {
   const provider = services(); let turn = 0;
-  provider.qloo.resolveEntities = async () => [{ ...entity, qlooId: 'new-brand' }];
+  provider.qloo.resolveEntities = async () => [{ ...entity, detectedName: 'New brand', qlooId: 'new-brand' }];
   provider.qloo.analyzeConnections = async () => ({ entities: [], relationships: [], facts: [], themes: [], confidence: 0 });
   provider.llm.nextTurn = async (input) => {
-    if (turn++ === 0) return { kind: 'investigate', action: { tool: 'resolveEntity', name: 'Nike', category: 'brand' } };
+    if (turn++ === 0) return { kind: 'investigate', action: { tool: 'resolveEntity', name: 'New brand', category: 'brand' } };
     assert.equal(input.tasteContext, undefined);
     return { kind: 'answer', result: { answer: 'Old connection.', confidence: 'high', usedTasteConnections: [{ referenceId: 'brand', interestId: 'artist' }] } };
   };
-  await assert.rejects(explore(request, provider), /could not be verified/);
+  await assert.rejects(explore({ ...request, question: 'How does New brand connect to my interests?' }, provider), /could not be verified/);
 });
 
 test('reasoning receives only supported anchors for explicitly requested references', () => {

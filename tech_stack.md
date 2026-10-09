@@ -1,5 +1,7 @@
 # Context — Tech Stack
 
+> Historical architecture notes for the earlier product scope. [FR_v2.md](FR_v2.md) is the current specification and supersedes conflicting decisions below.
+
 ## 1. Architecture
 
 Context will be an **Expo React Native mobile application** with its server APIs hosted through **EAS Hosting**.

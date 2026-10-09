@@ -224,7 +224,7 @@ test('categorized interests are locally saved without becoming unverified Qloo e
   try {
     useContextStore.getState().saveInterests(structuredInterestsSchema.parse(interests), null);
     assert.deepEqual(useContextStore.getState().interests, interests);
-    assert.equal(useContextStore.getState().personalization, false); assert.deepEqual(activeTasteRequest(), {});
+    assert.equal(useContextStore.getState().profile, null); assert.deepEqual(activeTasteRequest(), {});
     useContextStore.getState().clearTaste(); assert.equal(useContextStore.getState().interests, null);
     useContextStore.getState().saveInterests(interests, null); useContextStore.getState().clearSession(); assert.equal(useContextStore.getState().interests, null);
   } finally { useContextStore.getState().clearSession(); }
@@ -237,14 +237,13 @@ test('categorized interests are locally saved without becoming unverified Qloo e
   } finally { if (original === undefined) delete process.env.SESSION_SIGNING_KEY; else process.env.SESSION_SIGNING_KEY = original; }
 });
 
-test('editing interests preserves an existing personalization-off choice', () => {
+test('editing interests keeps a resolved profile active', () => {
   useContextStore.getState().clearSession();
   try {
     const profile = { entities: [{ id: 'film', name: 'Interstellar', type: 'urn:entity:movie' }] };
     useContextStore.getState().saveInterests({ ...emptyGroups(), movies_tv: ['Interstellar'] }, profile);
-    useContextStore.getState().setPersonalization(false);
     useContextStore.getState().updateInterests({ ...emptyGroups(), movies_tv: ['Interstellar', 'Black Panther'] }, profile);
-    assert.equal(useContextStore.getState().personalization, false);
+    assert.deepEqual(activeTasteRequest().profile?.entities, profile.entities);
     assert.deepEqual(useContextStore.getState().interests?.movies_tv, ['Interstellar', 'Black Panther']);
   } finally { useContextStore.getState().clearSession(); }
 });

@@ -9,6 +9,7 @@ import { deriveLocality } from '../lib/location/locality';
 import { jsonRoute } from '../lib/api/server';
 import { MAX_SCENE_REQUEST_LENGTH } from '../lib/image-limits';
 import { analyzeScene, explore, type Providers } from '../lib/orchestration/context';
+import { sealDocument } from '../lib/server/evidence';
 import type { AgentTurn } from '../lib/llm/service';
 import { analyzeRequestSchema, askRequestSchema, localitySchema } from '../schemas/context';
 import type { CulturalEvidence, Scene } from '../types/context';
@@ -28,7 +29,7 @@ function providers(turns: AgentTurn[]): Providers {
   let next = 0;
   return {
     vision: { inspectScene: unexpected },
-    qloo: { analyzeTaste: unexpected, resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected },
+    qloo: { analyzeTaste: unexpected, getEntityFact: unexpected, resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected },
     llm: { nextTurn: async () => { assert.ok(next < turns.length); return turns[next++]; } },
   };
 }
@@ -57,6 +58,16 @@ test('malformed API requests fail before reaching providers and never become cac
   assert.equal(malformed.status, 400);
 });
 
+test('Capture and Ask Context reject requests without a matched, signed profile', async () => {
+  const image = 'data:image/jpeg;base64,YQ==';
+  const capture = await analyzeRoute(jsonRequest('/api/scene/analyze', { image }));
+  const ask = await askRoute(jsonRequest('/api/scene/ask', { question: 'Find dinner nearby.' }));
+  assert.equal(capture.status, 403);
+  assert.equal(ask.status, 403);
+  assert.equal((await capture.json()).error.code, 'PROFILE_REQUIRED');
+  assert.equal((await ask.json()).error.code, 'PROFILE_REQUIRED');
+});
+
 test('full-resolution scene payloads above the former 8 MB cap reach image validation', async () => {
   const image = `data:image/jpeg;base64,${'A'.repeat(8_200_000)}`;
   const request = () => jsonRequest('/api/scene/analyze', { image });
@@ -69,11 +80,14 @@ test('full-resolution scene payloads above the former 8 MB cap reach image valid
 test('valid requests report unavailable providers instead of fabricated analysis', async () => {
   const originalGroq = process.env.GROQ_API_KEY;
   const originalQloo = process.env.QLOO_API_KEY;
+  const originalSigning = process.env.SESSION_SIGNING_KEY;
+  process.env.SESSION_SIGNING_KEY = 'fixture-signing-key';
+  const profile = await sealDocument({ signature: undefined, entities: [{ id: 'film', name: 'Interstellar', type: 'urn:entity:movie' }] }, 'taste-profile');
   delete process.env.GROQ_API_KEY; delete process.env.QLOO_API_KEY;
   try {
   const results = await Promise.all([
-    analyzeRoute(jsonRequest('/api/scene/analyze', { image: 'data:image/jpeg;base64,YQ==' })),
-    askRoute(jsonRequest('/api/scene/ask', { scene, question: 'Tell me more.' })),
+    analyzeRoute(jsonRequest('/api/scene/analyze', { image: 'data:image/jpeg;base64,YQ==', profile })),
+    askRoute(jsonRequest('/api/scene/ask', { question: 'Tell me more.', profile })),
     locationRoute(jsonRequest('/api/location/context', { locality: { city: 'Test city' }, question: 'What is this area?' })),
   ]);
   for (const response of results) {
@@ -81,7 +95,7 @@ test('valid requests report unavailable providers instead of fabricated analysis
     assert.equal(response.headers.get('cache-control'), 'no-store');
     assert.equal((await response.json()).error.code, 'PROVIDERS_NOT_CONFIGURED');
   }
-  } finally { if (originalGroq === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = originalGroq; if (originalQloo === undefined) delete process.env.QLOO_API_KEY; else process.env.QLOO_API_KEY = originalQloo; }
+  } finally { if (originalGroq === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = originalGroq; if (originalQloo === undefined) delete process.env.QLOO_API_KEY; else process.env.QLOO_API_KEY = originalQloo; if (originalSigning === undefined) delete process.env.SESSION_SIGNING_KEY; else process.env.SESSION_SIGNING_KEY = originalSigning; }
 });
 
 test('audio route rejects non-audio input and reports missing transcription honestly', async () => {
@@ -106,7 +120,7 @@ test('audio route rejects non-audio input and reports missing transcription hone
 
 test('existing evidence supports a direct answer without extra investigation', async () => {
   const result = await explore({ question: 'What do we know?', scene, messages: [], mode: 'scene' }, providers([answerTurn]));
-  assert.match(result.answer, /not have enough Qloo facts/);
+  assert.match(result.answer, /not have enough supported facts/);
   assert.deepEqual(result.scene?.culturalEvidence, evidence);
 });
 
@@ -150,7 +164,7 @@ test('scene analysis filters generic objects and excludes uncertain matches from
   assert.equal(result.culturalEvidence.entities.length, 2);
   assert.equal(result.environmentalObservations?.[0].label, 'Chair');
   assert.deepEqual(result.culturalEvidence.relationships, []);
-  assert.match(result.summary, /not have enough Qloo facts/);
+  assert.match(result.summary, /not have enough supported facts/);
 });
 
 test('reference investigation retains scene evidence and separates related references from visible ones', async () => {

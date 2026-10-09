@@ -6,8 +6,8 @@ import { styles } from '@/components/ui';
 import { useContextStore } from '@/stores/context';
 
 export default function TasteScreen() {
-  const { interests, profile } = useContextStore();
-  const hasInterests = Boolean(Object.values(interests ?? {}).flat().length || profile?.entities.length);
+  const profile = useContextStore((state) => state.profile);
+  const hasInterests = Boolean(profile?.entities.length);
   const [preferEdit, setPreferEdit] = useState(hasInterests);
   const editExisting = hasInterests && preferEdit;
   const voice = useTasteConversation(editExisting, () => setPreferEdit(true));

@@ -12,7 +12,7 @@ import { resolveApiUrl } from '../lib/api/origin';
 
 const env = { LLM_API_KEY: 'analysis-secret', LLM_API_URL: 'https://provider.test/v1', LLM_MODEL: 'any-future-model', GROQ_API_KEY: 'speech-secret', QLOO_API_KEY: 'cultural-secret' };
 const completion = (message: unknown) => Response.json({ choices: [{ message, finish_reason: 'stop' }] });
-const keys = [...Object.keys(env), 'VISION_API_KEY', 'VISION_API_URL', 'VISION_MODEL', 'SESSION_SIGNING_KEY', 'TRANSCRIPTION_API_KEY', 'TRANSCRIPTION_API_URL', 'TRANSCRIPTION_MODEL', 'TTS_API_KEY', 'TTS_API_URL', 'TTS_MODEL'];
+const keys = [...Object.keys(env), 'VISION_API_KEY', 'VISION_API_URL', 'VISION_MODEL', 'SHELF_API_KEY', 'SHELF_API_URL', 'SHELF_MODEL', 'DISPLAY_API_KEY', 'DISPLAY_API_URL', 'DISPLAY_MODEL', 'SESSION_SIGNING_KEY', 'TRANSCRIPTION_API_KEY', 'TRANSCRIPTION_API_URL', 'TRANSCRIPTION_MODEL', 'TTS_API_KEY', 'TTS_API_URL', 'TTS_MODEL'];
 
 test('native development API requests use the Expo server and release builds require a public origin', () => {
   assert.equal(resolveApiUrl('/api/audio/speak', undefined, '192.168.1.8:8081', true, true), 'http://192.168.1.8:8081/api/audio/speak');
@@ -39,13 +39,54 @@ test('model/provider swaps use generic settings without a model allowlist or Gro
   assert.throws(() => chatConfig('llm', { GROQ_API_KEY: 'legacy', LLM_MODEL: 'partial' }), /not configured/);
 });
 
+test('the shelf role uses Qwen Max on Alibaba independently of fast Vision and supports future model overrides', () => {
+  const ali = { ...env, LLM_API_URL: 'https://workspace.us-east-1.maas.aliyuncs.com/compatible-mode/v1', LLM_MODEL: 'qwen3.8-flash' };
+  assert.equal(chatConfig('vision', ali).model, 'qwen3.8-flash');
+  assert.equal(chatConfig('vision', ali).requestOptions.enable_thinking, false);
+  assert.equal(chatConfig('shelf', ali).model, 'qwen3.8-max');
+  assert.equal(chatConfig('shelf', ali).briefThinking, true);
+  assert.equal(chatConfig('shelf', ali).tokenParameter, 'max_completion_tokens');
+  assert.equal(chatConfig('shelf', { ...ali, SHELF_MODEL: 'future-shelf-model' }).model, 'future-shelf-model');
+  assert.equal(chatConfig('display', { ...ali, SHELF_MODEL: 'old-model', DISPLAY_MODEL: 'future-display-model' }).model, 'future-display-model');
+  assert.equal(chatConfig('shelf', { ...ali, SHELF_MODEL: 'future-shelf-model' }).briefThinking, false);
+  assert.equal(chatConfig('shelf', { ...ali, SHELF_BRIEF_THINKING: 'false' }).briefThinking, false);
+  assert.throws(() => chatConfig('shelf', { ...ali, SHELF_BRIEF_THINKING: 'maybe' }), /not configured correctly/);
+  assert.equal(chatConfig('shelf', ali).timeoutMs, 90_000);
+});
+
+test('Qwen Max shelf brief enables thinking while the Vision request remains non-thinking', async () => {
+  const ali = { ...env, LLM_API_URL: 'https://workspace.us-east-1.maas.aliyuncs.com/compatible-mode/v1', LLM_MODEL: 'qwen3.8-flash' };
+  const requests: Record<string, unknown>[] = [];
+  const capture = async (_url: string | URL | Request, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body)); requests.push(body);
+    return completion({ content: body.messages[1].content instanceof Array
+      ? '{"sceneType":"book_shelf","items":[]}'
+      : body.max_completion_tokens === 8000 ? '{"items":[]}' : '{"answer":"Dune is a science-fiction novel.","confidence":"high"}' });
+  };
+  const vision = new ChatVision(new ChatClient(chatConfig('vision', ali), capture));
+  const shelf = chatConfig('shelf', ali);
+  const reasoning = new ChatReasoning(new ChatClient(shelf, capture), shelf.model, shelf.briefThinking);
+  await vision.inspectScene('data:image/jpeg;base64,YQ==');
+  await reasoning.createShelfBrief({ kind: 'book', interests: [], inventory: [], items: [] });
+  assert.equal(requests[0].enable_thinking, false);
+  assert.equal(requests[1].enable_thinking, true);
+  assert.equal(requests[1].thinking_budget, 3000);
+  assert.equal(requests[1].max_completion_tokens, 8000);
+  assert.equal(requests[1].max_tokens, undefined);
+});
+
 test('vision overrides inherit only the same endpoint key; a different provider needs its own credentials', () => {
   assert.equal(chatConfig('vision', { ...env, VISION_MODEL: 'vision-only' }).model, 'vision-only');
+  assert.equal(chatConfig('vision', env).timeoutMs, 60_000);
+  assert.equal(chatConfig('vision', { ...env, VISION_TIMEOUT_MS: '75000' }).timeoutMs, 75_000);
+  assert.equal(chatConfig('llm', env).timeoutMs, undefined);
   assert.throws(() => chatConfig('vision', { ...env, VISION_API_URL: 'https://vision.test/v1', VISION_MODEL: 'vision-only' }), /credentials/);
   const separated = { ...env, VISION_API_URL: 'https://vision.test/v1', VISION_API_KEY: 'vision-secret', VISION_MODEL: 'vision-only' };
   assert.equal(chatConfig('vision', separated).apiKey, 'vision-secret'); assert.equal(chatConfig('llm', separated).apiKey, 'analysis-secret');
+  assert.equal(chatConfig('vision', separated).timeoutMs, 60_000);
   assert.equal(groqConfig(separated).apiKey, 'speech-secret');
   assert.equal(chatConfig('vision', { VISION_API_URL: 'https://vision.test/v1', VISION_API_KEY: 'vision-secret', VISION_MODEL: 'vision-only', LLM_MODEL: 'incomplete' }).model, 'vision-only');
+  assert.equal(chatConfig('vision', { GROQ_API_KEY: 'legacy' }).timeoutMs, 60_000);
 });
 
 test('provider dialect options normalize token limits, JSON mode and thinking without changing tools', async () => {

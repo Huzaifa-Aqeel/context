@@ -5,10 +5,11 @@ import { qlooConfig } from '@/lib/server/config';
 import { sealDocument, verifyDocument } from '@/lib/server/evidence';
 import { applyInterestEdits } from '@/lib/taste/edit';
 import { resolveTasteInterests } from '@/lib/taste/profile';
+import { bookClarification, bookClarificationPrompt } from '@/lib/taste/clarification';
 import { tasteEditRequestSchema, tasteEditResultSchema, tasteProfileSchema } from '@/schemas/taste';
 
 const normalize = (text: string) => text.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
-const categories = { movies_tv: 'unknown', music_artists: 'artist', books_podcasts: 'unknown', dining_food: 'unknown', places_travel: 'unknown', brands: 'brand', video_games: 'game', other: 'unknown' } as const;
+const categories = { movies_tv: 'unknown', music_artists: 'artist', books_podcasts: 'book_or_podcast', dining_food: 'unknown', places_travel: 'unknown', brands: 'brand', video_games: 'game', other: 'unknown' } as const;
 
 export const POST = jsonRoute(tasteEditRequestSchema, tasteEditResultSchema, async ({ text, interests, profile }) => {
   if (profile) await verifyDocument(profile, 'taste-profile');
@@ -40,6 +41,9 @@ export const POST = jsonRoute(tasteEditRequestSchema, tasteEditResultSchema, asy
   let addedEntities: typeof oldEntities = [];
   if (change.added.length) {
     const draft = await resolveTasteInterests(change.added.map(({ category, value }) => ({ label: value, category: categories[category] })), new QlooClient(qlooConfig()), true);
+    const ambiguousBook = bookClarification(draft);
+    if (ambiguousBook) return { interests, profile, applied: false,
+      clarification: bookClarificationPrompt(ambiguousBook).replace(/Say the author, or say skip\./, 'Say the full add instruction with the title and author, or leave it out.') };
     addedEntities = draft.candidates.flatMap((candidate) => candidate.status === 'matched' ? [candidate.entity] : []);
     for (const item of change.added) {
       const candidate = draft.candidates.find((entry) => normalize(entry.label) === normalize(item.value));

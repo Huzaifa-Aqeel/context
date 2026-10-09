@@ -6,6 +6,8 @@ import { router, useIsFocused } from 'expo-router';
 import { Body, Button, Heading, Notice, Screen } from '@/components/ui';
 import { discardTemporaryFile, ImageTooLargeError, prepareImage } from '@/lib/images';
 import { useContextStore } from '@/stores/context';
+import { hasRequiredTasteProfile } from '@/lib/taste/required';
+import { ProfileRequired } from '@/components/profile-required';
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -21,8 +23,9 @@ export default function CameraScreen() {
   const task = useForegroundTask(useCallback(() => setPending(false), []));
   const [error, setError] = useState('');
   const setImage = useContextStore((state) => state.setImage);
+  const profileReady = useContextStore((state) => hasRequiredTasteProfile(state.profile));
   async function capture() {
-    if (pending || AppState.currentState !== 'active') return;
+    if (!hasRequiredTasteProfile(useContextStore.getState().profile) || pending || AppState.currentState !== 'active') return;
     setPending(true); setError('');
     const ticket = task.begin();
     let temporaryUri: string | undefined;
@@ -33,11 +36,12 @@ export default function CameraScreen() {
       if (!ticket.current()) return;
       const prepared = await prepareImage(image.uri);
       if (!ticket.current()) return;
-      setImage(prepared);
+      setImage(prepared, 'camera');
       router.replace('/scene');
     } catch (cause) { if (ticket.current()) setError(cause instanceof ImageTooLargeError ? cause.message : 'The image could not be captured. Please try again or choose a photo.'); }
     finally { discardTemporaryFile(temporaryUri); if (task.mounted() && ticket.current()) setPending(false); }
   }
+  if (!profileReady) return <ProfileRequired />;
   if (!permission?.granted) return <Screen>
     <Heading>Capture what’s around you</Heading>
     <Body>Allow camera access to capture a single scene. You can also choose an existing photo from the home screen.</Body>

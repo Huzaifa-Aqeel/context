@@ -3,15 +3,32 @@ import { postApi } from '@/lib/api/client';
 import { answerSchema, askRequestSchema } from '@/schemas/context';
 import { activeTasteRequest, assertCurrentSession, conversationForRequest, includeLocality, useContextStore } from '@/stores/context';
 import { useContextRequest } from './use-context-request';
+import { asksAboutArea } from '@/lib/orchestration/intent';
+import { asksForDiningDiscovery, asksForAreaDiscovery, needsDevicePosition } from '@/lib/orchestration/intent';
+import { devicePosition } from '@/lib/location/position';
+import { createCalendarAction } from '@/lib/actions/calendar';
 export function useExploration() {
   const begin = useContextRequest();
   return useMutation({
     mutationFn: async (question: string) => {
-      const request = await begin(); const { state } = request;
-      const result = await postApi('/api/scene/ask', askRequestSchema.parse({ question, scene: state.scene ?? undefined, locality: includeLocality(state) ? state.locality ?? undefined : undefined, locationContext: includeLocality(state) ? state.locationContext ?? undefined : undefined, useLocality: includeLocality(state), messages: conversationForRequest(), ...activeTasteRequest() }), answerSchema);
+      const request = await begin(question); const { state } = request;
+      const dining = asksForDiningDiscovery(question);
+      const area = asksForAreaDiscovery(question);
+      const active = Boolean(state.scene?.event || state.scene?.dining || state.scene?.area);
+      const useLocality = !active && !dining && !area && includeLocality(state) && asksAboutArea(question);
+      const needDevicePosition = needsDevicePosition(question, active);
+      const position = needDevicePosition && state.locationEnabled ? await devicePosition(request.current) : undefined;
+      const result = await postApi('/api/scene/ask', askRequestSchema.parse({ question, scene: state.scene ?? undefined, locality: useLocality ? state.locality ?? undefined : undefined, locationContext: useLocality ? state.locationContext ?? undefined : undefined, useLocality,
+        locale: Intl.DateTimeFormat().resolvedOptions().locale, deviceTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locationEnabled: state.locationEnabled, position, messages: conversationForRequest(), ...activeTasteRequest() }), answerSchema);
       assertCurrentSession(state.generation);
       if (!request.current()) throw new Error('This exploration was cancelled. Ask again when you return.');
-      return { ...result, warnings: [...new Set([...(result.warnings ?? []), ...(request.warning ? [request.warning] : [])])] };
+      let answer = result.answer;
+      if (result.action?.kind === 'calendar') {
+        try { answer = await createCalendarAction(result.action); }
+        catch { answer = 'I could not add that event to Calendar. Please try again or check Calendar permission.'; }
+      }
+      return { ...result, answer, action: undefined, warnings: [...new Set([...(result.warnings ?? []), ...(request.warning ? [request.warning] : [])])] };
     },
     onSuccess: (result, question) => {
       const state = useContextStore.getState();

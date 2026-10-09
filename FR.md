@@ -1,5 +1,7 @@
 # Context — Functional Requirements
 
+> Historical requirements. [FR_v2.md](FR_v2.md) is the current product specification and supersedes conflicting decisions below.
+
 ## 1. Product Overview
 
 **Context** is an AI accessibility companion for blind and low-vision users.
@@ -114,9 +116,9 @@ Qloo resolves supported interests; user controls whether personalization is enab
         ↓
 User captures a scene or asks about the local area
         ↓
-App includes locality when device location is enabled and permitted
+App makes permitted locality available for place resolution and area questions
         ↓
-If permitted, derive locality context; if denied, continue without location
+Derive area evidence only when the scene or question needs it; if denied, continue without location
         ↓
 Vision system identifies objects and references when an image is available
         ↓
@@ -151,7 +153,11 @@ Show taste profile setup, an accessible personalization control, and an interest
 
 Show **Location context** as an optional evidence preference, not a separate exploration mode. Enabling device location explicitly requests foreground permission. When enabled and already permitted, derive available locality for scene analysis and conversational questions without repeatedly requesting permission.
 
-After recognition, show a concise answer, one contextual speech control that stops active playback or replays a completed answer, and a simple list of confirmed notable references only when any exist. Do not show a separate confidence label, an empty reference section, preset exploration buttons, or a mode menu. The orb is the Ask Context control: tap once to record, tap again to stop, transcribe with Whisper, submit the question automatically, and speak the answer. On the conversation screen, the orb also stops current speech and exposes an accessible Replay answer action without another visible button; the native header provides a back arrow to the prior screen. There must be no separate Start speaking, Stop recording, or Ask Context submit button. Questions about references, connections, guided exploration, and the surrounding area continue the same scene conversation. Keep a clear action to capture another scene. On native devices, move screen-reader focus to the new answer after analysis; announce listening, processing, speaking, loading, and errors accessibly.
+After recognition, show a concise answer, one contextual speech control that stops active playback or replays a completed answer, and a simple list of confirmed notable references only when any exist. Do not show a separate confidence label, an empty reference section, preset exploration buttons, or a mode menu. The orb is the Ask Context control: tap once to record, tap again to stop, transcribe with Whisper, submit the question automatically, and speak the answer. On the conversation screen, the orb also stops current speech and exposes an accessible Replay answer action without another visible button; the native header provides a back arrow to the prior screen. There must be no separate Start speaking, Stop recording, or Ask Context submit button. Questions about references, connections, guided exploration, and the surrounding area continue the same scene conversation. Keep a clearly labelled Home back control in the Scene header for another capture, but omit the Scene title and duplicate capture button. On native devices, coordinate result focus with the scene speech preference; announce listening, processing, speaking, loading, and errors accessibly.
+
+The **Speak scene results automatically** preference in Personalization controls only automatic app-generated speech for a newly analyzed scene. Scene analysis must always produce and render a concise accessible text result. When this preference is off, do not request automatic TTS; move native screen-reader focus to the result and have its accessible label begin “Scene analysis complete.” A screen reader remains free to read the interface. When the preference is on, speak the scene result through the existing TTS path, but do not also live-announce or automatically focus the full result while that speech starts. Replay remains an explicit action in either state. This preference does not change Ask Context recording, transcription, or answer playback.
+
+When a user returns to Home with a current photo scene, the continuation action must return to that Scene result and its Ask Context orb. It must not automatically read the same scene answer again. If there is conversation history but no photo scene, continuation opens the standalone Ask Context conversation.
 
 Personal Taste is a shared context layer across these capabilities. It must not introduce a separate experience or recommendation section. Every capability must remain usable without a taste profile or with personalization disabled.
 
@@ -346,6 +352,10 @@ The system must identify potentially meaningful visual entities such as:
 
 Each detection should include a confidence level where available.
 
+Vision must keep the **visual carrier** (such as a poster, shirt, logo, sign, cover, or product) separate from its candidate cultural subject. Its output should retain the visible or confidently recognized name, prominent readable text, approximate position when clear, a literal physical description, candidate entity type, and uncertainty. Vision establishes what appears in the image; it must not infer Qloo relationships, neighborhood significance, or the user's taste.
+
+A title and its visible author or artist on one cover are one physical reference with a related entity, not two objects. The app must preserve the visual title even when only the related artist, author, or brand can be grounded in Qloo.
+
 ---
 
 ## FR-03 — Cultural Relevance Filtering
@@ -379,7 +389,9 @@ The system may retain ordinary objects when they are relevant to the user's ques
 
 ## FR-04 — Qloo Entity Resolution
 
-The system must attempt to match detected cultural references with Qloo entities.
+The system must attempt to match detected cultural subjects with supported Qloo entities. Posters, clothing, logos, and covers are visual carriers; they do not each require a separate Qloo flow. The core grounding flows are movie/TV, music artist, book, brand, and place/venue, with other supported Qloo types used when appropriate.
+
+Artwork, albums, and generic products must remain identifiable visual references even when they are not supported as first-class Qloo Insights types. When vision reliably identifies a related artist, author, or manufacturer, the app may ground that related entity through Qloo while retaining the artwork title, album title, or product as the photographed subject. It must not claim that Qloo verified the unsupported item. If no supported Qloo subject can be identified, the app must skip Qloo resolution for that detection and still tell the user what was visually identified.
 
 For each entity, the system should retain:
 
@@ -387,8 +399,10 @@ For each entity, the system should retain:
 - Qloo entity ID
 - Qloo entity type/category
 - Match confidence where possible
+- Whether Qloo grounded the visible subject directly or a related entity
 
 Low-confidence matches must not be treated as confirmed.
+Nearby places or Qloo recommendations must never be described as visible in the image. Use locality to disambiguate duplicate place matches when available; do not fetch nearby-place context merely because location is enabled, and do not assume a chosen photo was taken at the device's current location.
 
 ---
 
@@ -698,7 +712,7 @@ Requirements:
 - All controls must have accessible labels.
 - Primary actions must be keyboard accessible.
 - The camera action must be easy to locate.
-- Responses must support automatic speech playback.
+- Scene responses must support optional automatic speech playback, controlled independently of screen-reader speech.
 - Voice interaction should be supported.
 - Important functionality must not depend on color.
 - Focus states must be clear.

@@ -1,0 +1,2075 @@
+{
+  "image": "image2.png",
+  "fixedProfileBeforeBothImages": {
+    "declared": [
+      {
+        "label": "Dune",
+        "category": "book",
+        "group": "books_podcasts"
+      },
+      {
+        "label": "The Hobbit",
+        "category": "book",
+        "group": "books_podcasts"
+      },
+      {
+        "label": "Hades",
+        "category": "game",
+        "group": "video_games"
+      },
+      {
+        "label": "Stardew Valley",
+        "category": "game",
+        "group": "video_games"
+      },
+      {
+        "label": "Radiohead",
+        "category": "artist",
+        "group": "music_artists"
+      },
+      {
+        "label": "Interstellar",
+        "category": "movie",
+        "group": "movies_tv"
+      }
+    ],
+    "resolved": [
+      {
+        "id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+        "name": "Dune (Dune, #1)",
+        "type": "urn:entity:book"
+      },
+      {
+        "id": "5AED339A-8815-402E-B524-C218D45E5BB9",
+        "name": "The Hobbit",
+        "type": "urn:entity:book"
+      },
+      {
+        "id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+        "name": "Hades",
+        "type": "urn:entity:videogame"
+      },
+      {
+        "id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+        "name": "Stardew Valley",
+        "type": "urn:entity:videogame"
+      },
+      {
+        "id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+        "name": "Radiohead",
+        "type": "urn:entity:artist"
+      },
+      {
+        "id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+        "name": "Interstellar",
+        "type": "urn:entity:movie"
+      }
+    ]
+  },
+  "rawStructuredVisionResult": {
+    "sceneType": "book_shelf",
+    "entities": [
+      {
+        "label": "Dune",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a red and black book spine with the title Dune",
+        "visibleText": "DUNE FRANK HERBERT",
+        "relatedName": "Frank Herbert",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Project Hail Mary",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book cover featuring an astronaut in space",
+        "visibleText": "PROJECT HAIL MARY ANDY WEIR",
+        "relatedName": "Andy Weir",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Martian",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "an orange book spine titled The Martian",
+        "visibleText": "THE MARTIAN ANDY WEIR",
+        "relatedName": "Andy Weir",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Artemis",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a dark grey book spine titled Artemis",
+        "visibleText": "ARTEMIS ANDY WEIR",
+        "relatedName": "Andy Weir",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Three-Body Problem",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a blue book spine titled The Three-Body Problem",
+        "visibleText": "THE THREE-BODY PROBLEM CIXIN LIU",
+        "relatedName": "Cixin Liu",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Dark Forest",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Dark Forest",
+        "visibleText": "THE DARK FOREST CIXIN LIU",
+        "relatedName": "Cixin Liu",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Death's End",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a dark blue book spine titled Death's End",
+        "visibleText": "DEATH'S END CIXIN LIU",
+        "relatedName": "Cixin Liu",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Leviathan Wakes",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a blue book spine titled Leviathan Wakes",
+        "visibleText": "LEVIATHAN WAKES JAMES S.A. COREY",
+        "relatedName": "James S.A. Corey",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Caliban's War",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a red book spine titled Caliban's War",
+        "visibleText": "CALIBAN'S WAR JAMES S.A. COREY",
+        "relatedName": "James S.A. Corey",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Abaddon's Gate",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a green book spine titled Abaddon's Gate",
+        "visibleText": "ABADDON'S GATE JAMES S.A. COREY",
+        "relatedName": "James S.A. Corey",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Hobbit",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Hobbit",
+        "visibleText": "THE HOBBIT J.R.R. TOLKIEN",
+        "relatedName": "J.R.R. Tolkien",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Lord of the Rings: The Fellowship of the Ring",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Lord of the Rings",
+        "visibleText": "LORD OF THE RINGS THE FELLOWSHIP OF THE RING J.R.R. TOLKIEN",
+        "relatedName": "J.R.R. Tolkien",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Lord of the Rings: The Two Towers",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Lord of the Rings",
+        "visibleText": "LORD OF THE RINGS THE TWO TOWERS J.R.R. TOLKIEN",
+        "relatedName": "J.R.R. Tolkien",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Lord of the Rings: The Return of the King",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Lord of the Rings",
+        "visibleText": "LORD OF THE RINGS THE RETURN OF THE KING J.R.R. TOLKIEN",
+        "relatedName": "J.R.R. Tolkien",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Game of Thrones",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a blue book cover featuring a throne made of swords",
+        "visibleText": "GEORGE R.R. MARTIN A GAME OF THRONES",
+        "relatedName": "George R.R. Martin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Clash of Kings",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled A Clash of Kings",
+        "visibleText": "GEORGE R.R. MARTIN A CLASH OF KINGS",
+        "relatedName": "George R.R. Martin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Storm of Swords",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a green book spine titled A Storm of Swords",
+        "visibleText": "GEORGE R.R. MARTIN A STORM OF SWORDS",
+        "relatedName": "George R.R. Martin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Feast for Crows",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a red book spine titled A Feast for Crows",
+        "visibleText": "GEORGE R.R. MARTIN A FEAST FOR CROWS",
+        "relatedName": "George R.R. Martin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Dance with Dragons",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a white book spine titled A Dance with Dragons",
+        "visibleText": "GEORGE R.R. MARTIN A DANCE WITH DRAGONS",
+        "relatedName": "George R.R. Martin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Mistborn",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a dark blue book spine titled Mistborn",
+        "visibleText": "BRANDON SANDERSON MISTBORN",
+        "relatedName": "Brandon Sanderson",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Way of Kings",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a purple book spine titled The Way of Kings",
+        "visibleText": "THE WAY OF KINGS BRANDON SANDERSON",
+        "relatedName": "Brandon Sanderson",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Words of Radiance",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a teal book spine titled Words of Radiance",
+        "visibleText": "BRANDON SANDERSON WORDS OF RADIANCE",
+        "relatedName": "Brandon Sanderson",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Oathbringer",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a brown book spine titled Oathbringer",
+        "visibleText": "BRANDON SANDERSON OATHBRINGER",
+        "relatedName": "Brandon Sanderson",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Name of the Wind",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Name of the Wind",
+        "visibleText": "THE NAME OF THE WIND PATRICK ROTHFUSS",
+        "relatedName": "Patrick Rothfuss",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Wise Man's Fear",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Wise Man's Fear",
+        "visibleText": "THE WISE MAN'S FEAR PATRICK ROTHFUSS",
+        "relatedName": "Patrick Rothfuss",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Nemesis Games",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled Nemesis Games",
+        "visibleText": "NEMESIS GAMES JAMES S.A. COREY",
+        "relatedName": "James S.A. Corey",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Babylon's Ashes",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled Babylon's Ashes",
+        "visibleText": "BABYLON'S ASHES JAMES S.A. COREY",
+        "relatedName": "James S.A. Corey",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Exhalation",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled Exhalation",
+        "visibleText": "EXHALATION TED CHIANG",
+        "relatedName": "Ted Chiang",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Ready Player One",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "an orange book spine titled Ready Player One",
+        "visibleText": "READY PLAYER ONE ERNEST CLINE",
+        "relatedName": "Ernest Cline",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Recursion",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a yellow book spine titled Recursion",
+        "visibleText": "RECURSION BLAKE CROUCH",
+        "relatedName": "Blake Crouch",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Dark Matter",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a red book spine titled Dark Matter",
+        "visibleText": "DARK MATTER BLAKE CROUCH",
+        "relatedName": "Blake Crouch",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Martian Chronicles",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Martian Chronicles",
+        "visibleText": "THE MARTIAN CHRONICLES RAY BRADBURY",
+        "relatedName": "Ray Bradbury",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Fahrenheit 451",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a red book spine titled Fahrenheit 451",
+        "visibleText": "RAY BRADBURY FAHRENHEIT 451",
+        "relatedName": "Ray Bradbury",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "A Wizard of Earthsea",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a dark blue book spine titled A Wizard of Earthsea",
+        "visibleText": "A WIZARD OF EARTHSEA URSULA K. LE GUIN",
+        "relatedName": "Ursula K. Le Guin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Tombs of Atuan",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Tombs of Atuan",
+        "visibleText": "THE TOMBS OF ATUAN URSULA K. LE GUIN",
+        "relatedName": "Ursula K. Le Guin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Farthest Shore",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a black book spine titled The Farthest Shore",
+        "visibleText": "THE FARTHEST SHORE URSULA K. LE GUIN",
+        "relatedName": "Ursula K. Le Guin",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Hyperion",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a purple book spine titled Hyperion",
+        "visibleText": "HYPERION DAN SIMMONS",
+        "relatedName": "Dan Simmons",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "Endymion",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a blue book spine titled Endymion",
+        "visibleText": "ENDYMION DAN SIMMONS",
+        "relatedName": "Dan Simmons",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      },
+      {
+        "label": "The Hitchhiker's Guide to the Galaxy",
+        "category": "book",
+        "carrier": "book_cover",
+        "visualDescription": "a blue book spine titled The Hitchhiker's Guide to the Galaxy",
+        "visibleText": "THE HITCHHIKER'S GUIDE TO THE GALAXY DOUGLAS ADAMS",
+        "relatedName": "Douglas Adams",
+        "relatedCategory": "author",
+        "confidence": 1,
+        "culturallyRelevant": true
+      }
+    ]
+  },
+  "production": {
+    "result": {
+      "status": 503,
+      "body": {
+        "error": {
+          "code": "AI_UNREACHABLE",
+          "message": "An analysis service is temporarily unreachable. Please try again."
+        }
+      }
+    },
+    "calls": [
+      {
+        "number": 1,
+        "provider": "Qwen",
+        "purpose": "vision",
+        "method": "POST",
+        "path": "/compatible-mode/v1/chat/completions",
+        "error": "TimeoutError"
+      }
+    ]
+  },
+  "pacedDiagnostic": {
+    "note": "Real Qwen Vision output from earlier production call; production shelf orchestration, real Qloo/Tavily/Qwen calls; Qloo HTTP calls paced 3 seconds apart solely for rate-limit diagnosis",
+    "qlooResolutionAndPhysicalInventory": [
+      {
+        "title": "Dune",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Frank Herbert",
+        "qlooId": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+        "qlooName": "Dune (Dune, #1)",
+        "qlooProvenance": "QLOO",
+        "exactInterest": true,
+        "interestProvenance": "USER",
+        "resolution": "matched",
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D"
+        ]
+      },
+      {
+        "title": "Project Hail Mary",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Andy Weir",
+        "qlooId": "7B75291D-103B-476A-91B5-81E7687D6A59",
+        "qlooName": "Project Hail Mary",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7661771171636544,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "The Martian",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Andy Weir",
+        "qlooId": "69AF3126-E4C2-47ED-8E6E-A5BD6DD073EB",
+        "qlooName": "The Martian",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.8230625290253542,
+        "contributingInterestIds": [
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Artemis",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Andy Weir",
+        "qlooId": "EB6DF54F-6855-4CF7-A448-B53F3724C388",
+        "qlooName": "Artemis",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7575022166673202,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "The Three-Body Problem",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Cixin Liu",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Dark Forest",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Cixin Liu",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Death's End",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Cixin Liu",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Leviathan Wakes",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "James S.A. Corey",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Caliban's War",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "James S.A. Corey",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Abaddon's Gate",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "James S.A. Corey",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Hobbit",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "J.R.R. Tolkien",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Lord of the Rings: The Fellowship of the Ring",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "J.R.R. Tolkien",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Lord of the Rings: The Two Towers",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "J.R.R. Tolkien",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Lord of the Rings: The Return of the King",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "J.R.R. Tolkien",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Game of Thrones",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "George R.R. Martin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Clash of Kings",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "George R.R. Martin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Storm of Swords",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "George R.R. Martin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Feast for Crows",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "George R.R. Martin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Dance with Dragons",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "George R.R. Martin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Mistborn",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Brandon Sanderson",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Way of Kings",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Brandon Sanderson",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Words of Radiance",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Brandon Sanderson",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Oathbringer",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Brandon Sanderson",
+        "qlooId": "8B6BC3AF-3F0B-4D9F-BD02-698DDB3F3676",
+        "qlooName": "Oathbringer (The Stormlight Archive, #3)",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7800613535867137,
+        "contributingInterestIds": [
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "The Name of the Wind",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Patrick Rothfuss",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Wise Man's Fear",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Patrick Rothfuss",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Nemesis Games",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "James S.A. Corey",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Babylon's Ashes",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "James S.A. Corey",
+        "qlooId": "84DBFFA4-0D63-412E-B42A-7693F296D03E",
+        "qlooName": "Babylon’s Ashes (The Expanse, #6)",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.660400534251711,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Exhalation",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ted Chiang",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Ready Player One",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ernest Cline",
+        "qlooId": "6521CE11-420E-4B17-AA74-261E3A71AE60",
+        "qlooName": "Ready Player One",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched"
+      },
+      {
+        "title": "Recursion",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Blake Crouch",
+        "qlooId": "6567D69A-B2B9-4A20-8BB1-60DFA3B9BE03",
+        "qlooName": "Recursion",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7431737198869183,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Dark Matter",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Blake Crouch",
+        "qlooId": "5FEED5A6-A03D-48FE-B880-A0C9A59E7D22",
+        "qlooName": "Dark Matter",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7347796207720949,
+        "contributingInterestIds": [
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "The Martian Chronicles",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ray Bradbury",
+        "qlooId": "CB4D34AD-C7D1-46F0-B2C9-D37C3C45F0B6",
+        "qlooName": "The Martian Chronicles",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7901331784969299,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Fahrenheit 451",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ray Bradbury",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "A Wizard of Earthsea",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ursula K. Le Guin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Tombs of Atuan",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ursula K. Le Guin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Farthest Shore",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Ursula K. Le Guin",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "Hyperion",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Dan Simmons",
+        "qlooId": "7965FDDA-B518-4E2B-AFB5-F9789F0E869F",
+        "qlooName": "Hyperion (Hyperion Cantos, #1)",
+        "qlooProvenance": "QLOO",
+        "exactInterest": false,
+        "resolution": "matched",
+        "affinity": 0.7741486205772429,
+        "contributingInterestIds": [
+          "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "057DA9D9-399B-437E-8BCA-A80E499125EF",
+          "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+          "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+          "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+        ]
+      },
+      {
+        "title": "Endymion",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Dan Simmons",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      },
+      {
+        "title": "The Hitchhiker's Guide to the Galaxy",
+        "confidence": 1,
+        "visualProvenance": "VISIBLE",
+        "visibleAuthor": "Douglas Adams",
+        "exactInterest": false,
+        "resolution": "ambiguous"
+      }
+    ],
+    "qlooRankingComplete": false,
+    "qlooInsightsRequest": {
+      "filter.type": "urn:entity:book",
+      "filter.results.entities": "9BA85467-2189-46DC-BB98-4B25EE182A9D,7B75291D-103B-476A-91B5-81E7687D6A59,69AF3126-E4C2-47ED-8E6E-A5BD6DD073EB,EB6DF54F-6855-4CF7-A448-B53F3724C388,8B6BC3AF-3F0B-4D9F-BD02-698DDB3F3676,84DBFFA4-0D63-412E-B42A-7693F296D03E,6521CE11-420E-4B17-AA74-261E3A71AE60,6567D69A-B2B9-4A20-8BB1-60DFA3B9BE03,5FEED5A6-A03D-48FE-B880-A0C9A59E7D22,CB4D34AD-C7D1-46F0-B2C9-D37C3C45F0B6,7965FDDA-B518-4E2B-AFB5-F9789F0E869F",
+      "signal.interests.entities": [
+        "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+        "5AED339A-8815-402E-B524-C218D45E5BB9",
+        "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+        "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+        "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+        "057DA9D9-399B-437E-8BCA-A80E499125EF"
+      ],
+      "feature.explainability": true,
+      "take": 11
+    },
+    "qlooInsightsResults": [
+      {
+        "entityId": "69AF3126-E4C2-47ED-8E6E-A5BD6DD073EB",
+        "name": "The Martian",
+        "affinity": 0.8230625290253542,
+        "contributingInterests": [
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.23239643130152557
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.21552748437296826
+          },
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.20983220452272638
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.19750298528319601
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1447408945195837
+          }
+        ]
+      },
+      {
+        "entityId": "CB4D34AD-C7D1-46F0-B2C9-D37C3C45F0B6",
+        "name": "The Martian Chronicles",
+        "affinity": 0.7901331784969299,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.24338683867988384
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.22581884118493162
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.18993031222075824
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.17659040236055953
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.16427360555386664
+          }
+        ]
+      },
+      {
+        "entityId": "8B6BC3AF-3F0B-4D9F-BD02-698DDB3F3676",
+        "name": "Oathbringer (The Stormlight Archive, #3)",
+        "affinity": 0.7800613535867137,
+        "contributingInterests": [
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.24421917052391348
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.22704820948340762
+          },
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.19883515444898203
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.1932567049572652
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1366407605864316
+          }
+        ]
+      },
+      {
+        "entityId": "7965FDDA-B518-4E2B-AFB5-F9789F0E869F",
+        "name": "Hyperion (Hyperion Cantos, #1)",
+        "affinity": 0.7741486205772429,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.24499505227415772
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.22173786581050908
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.19310751268991072
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.1853509077879543
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1548086614374682
+          }
+        ]
+      },
+      {
+        "entityId": "7B75291D-103B-476A-91B5-81E7687D6A59",
+        "name": "Project Hail Mary",
+        "affinity": 0.7661771171636544,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.22937154910511182
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.21575941900530812
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.21471998396383313
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.20528932927420757
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.13485971865153937
+          }
+        ]
+      },
+      {
+        "entityId": "EB6DF54F-6855-4CF7-A448-B53F3724C388",
+        "name": "Artemis",
+        "affinity": 0.7575022166673202,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.21891122897380635
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2172464411541152
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.2161267605628819
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.20886439639033832
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.13885117291885823
+          }
+        ]
+      },
+      {
+        "entityId": "6567D69A-B2B9-4A20-8BB1-60DFA3B9BE03",
+        "name": "Recursion",
+        "affinity": 0.7431737198869183,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.2166530114363704
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.21058907348755854
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.20951436041389482
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.2091780118626836
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.15406554279949253
+          }
+        ]
+      },
+      {
+        "entityId": "5FEED5A6-A03D-48FE-B880-A0C9A59E7D22",
+        "name": "Dark Matter",
+        "affinity": 0.7347796207720949,
+        "contributingInterests": [
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.21866913296630988
+          },
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.2125481136347842
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.211679341793158
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.20703415184902232
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.1500692597567257
+          }
+        ]
+      },
+      {
+        "entityId": "84DBFFA4-0D63-412E-B42A-7693F296D03E",
+        "name": "Babylon’s Ashes (The Expanse, #6)",
+        "affinity": 0.660400534251711,
+        "contributingInterests": [
+          {
+            "entity_id": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "score": 0.21629882733070258
+          },
+          {
+            "entity_id": "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "score": 0.21341147601407423
+          },
+          {
+            "entity_id": "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "score": 0.20765918922461896
+          },
+          {
+            "entity_id": "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "score": 0.19845499833773766
+          },
+          {
+            "entity_id": "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C",
+            "score": 0.16417550909286655
+          }
+        ]
+      }
+    ],
+    "shortlistIds": [],
+    "tavilyResearch": [],
+    "qwenFactExtraction": [],
+    "sceneBrief": {
+      "kind": "book",
+      "inventory": [
+        {
+          "title": "Dune",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Frank Herbert",
+          "qlooId": "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+          "qlooName": "Dune (Dune, #1)",
+          "qlooProvenance": "QLOO",
+          "exactInterest": true,
+          "interestProvenance": "USER",
+          "resolution": "matched",
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D"
+          ]
+        },
+        {
+          "title": "Project Hail Mary",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Andy Weir",
+          "qlooId": "7B75291D-103B-476A-91B5-81E7687D6A59",
+          "qlooName": "Project Hail Mary",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7661771171636544,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "The Martian",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Andy Weir",
+          "qlooId": "69AF3126-E4C2-47ED-8E6E-A5BD6DD073EB",
+          "qlooName": "The Martian",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.8230625290253542,
+          "contributingInterestIds": [
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Artemis",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Andy Weir",
+          "qlooId": "EB6DF54F-6855-4CF7-A448-B53F3724C388",
+          "qlooName": "Artemis",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7575022166673202,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "The Three-Body Problem",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Cixin Liu",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Dark Forest",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Cixin Liu",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Death's End",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Cixin Liu",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Leviathan Wakes",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "James S.A. Corey",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Caliban's War",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "James S.A. Corey",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Abaddon's Gate",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "James S.A. Corey",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Hobbit",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "J.R.R. Tolkien",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Lord of the Rings: The Fellowship of the Ring",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "J.R.R. Tolkien",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Lord of the Rings: The Two Towers",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "J.R.R. Tolkien",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Lord of the Rings: The Return of the King",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "J.R.R. Tolkien",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Game of Thrones",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "George R.R. Martin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Clash of Kings",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "George R.R. Martin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Storm of Swords",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "George R.R. Martin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Feast for Crows",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "George R.R. Martin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Dance with Dragons",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "George R.R. Martin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Mistborn",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Brandon Sanderson",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Way of Kings",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Brandon Sanderson",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Words of Radiance",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Brandon Sanderson",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Oathbringer",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Brandon Sanderson",
+          "qlooId": "8B6BC3AF-3F0B-4D9F-BD02-698DDB3F3676",
+          "qlooName": "Oathbringer (The Stormlight Archive, #3)",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7800613535867137,
+          "contributingInterestIds": [
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "The Name of the Wind",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Patrick Rothfuss",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Wise Man's Fear",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Patrick Rothfuss",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Nemesis Games",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "James S.A. Corey",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Babylon's Ashes",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "James S.A. Corey",
+          "qlooId": "84DBFFA4-0D63-412E-B42A-7693F296D03E",
+          "qlooName": "Babylon’s Ashes (The Expanse, #6)",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.660400534251711,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Exhalation",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ted Chiang",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Ready Player One",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ernest Cline",
+          "qlooId": "6521CE11-420E-4B17-AA74-261E3A71AE60",
+          "qlooName": "Ready Player One",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched"
+        },
+        {
+          "title": "Recursion",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Blake Crouch",
+          "qlooId": "6567D69A-B2B9-4A20-8BB1-60DFA3B9BE03",
+          "qlooName": "Recursion",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7431737198869183,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Dark Matter",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Blake Crouch",
+          "qlooId": "5FEED5A6-A03D-48FE-B880-A0C9A59E7D22",
+          "qlooName": "Dark Matter",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7347796207720949,
+          "contributingInterestIds": [
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "The Martian Chronicles",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ray Bradbury",
+          "qlooId": "CB4D34AD-C7D1-46F0-B2C9-D37C3C45F0B6",
+          "qlooName": "The Martian Chronicles",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7901331784969299,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Fahrenheit 451",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ray Bradbury",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "A Wizard of Earthsea",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ursula K. Le Guin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Tombs of Atuan",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ursula K. Le Guin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Farthest Shore",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Ursula K. Le Guin",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "Hyperion",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Dan Simmons",
+          "qlooId": "7965FDDA-B518-4E2B-AFB5-F9789F0E869F",
+          "qlooName": "Hyperion (Hyperion Cantos, #1)",
+          "qlooProvenance": "QLOO",
+          "exactInterest": false,
+          "resolution": "matched",
+          "affinity": 0.7741486205772429,
+          "contributingInterestIds": [
+            "9BA85467-2189-46DC-BB98-4B25EE182A9D",
+            "057DA9D9-399B-437E-8BCA-A80E499125EF",
+            "BA00D00A-E4CD-48C0-A22E-CFC52039D618",
+            "875DB771-9C4C-4DD0-9249-D2ABD95711F1",
+            "70CAE5BF-2F4C-445C-A3E5-4EDACFC3591C"
+          ]
+        },
+        {
+          "title": "Endymion",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Dan Simmons",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        },
+        {
+          "title": "The Hitchhiker's Guide to the Galaxy",
+          "confidence": 1,
+          "visualProvenance": "VISIBLE",
+          "visibleAuthor": "Douglas Adams",
+          "exactInterest": false,
+          "resolution": "ambiguous"
+        }
+      ],
+      "shortlistIds": [],
+      "rankingComplete": false,
+      "profileSignature": "b91cbca10225c9126db64997b55f9406bf86aa6ae01db6e02463ecb34038f5fc"
+    },
+    "exactInitialAnswer": "I can identify 39 books on this shelf. Dune is already in your interests. I cannot rank the full visible shelf reliably right now.",
+    "calls": [
+      {
+        "number": 1,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Dune",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 2,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Project Hail Mary",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 3,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Martian",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 4,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Artemis",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 5,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Three-Body Problem",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 6,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Dark Forest",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 7,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Death's End",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 8,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Leviathan Wakes",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 9,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Caliban's War",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 10,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Abaddon's Gate",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 11,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Hobbit",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 12,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Lord of the Rings: The Fellowship of the Ring",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 13,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Lord of the Rings: The Two Towers",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 14,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Lord of the Rings: The Return of the King",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 15,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Game of Thrones",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 16,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Clash of Kings",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 17,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Storm of Swords",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 18,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Feast for Crows",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 19,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Dance with Dragons",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 20,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Mistborn",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 21,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Way of Kings",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 22,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Words of Radiance",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 23,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Oathbringer",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 24,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Name of the Wind",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 25,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Wise Man's Fear",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 26,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Nemesis Games",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 27,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Babylon's Ashes",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 28,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Exhalation",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 29,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Ready Player One",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 30,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Recursion",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 31,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Dark Matter",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 32,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Martian Chronicles",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 33,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Fahrenheit 451",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 34,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "A Wizard of Earthsea",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 35,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Tombs of Atuan",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 36,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Farthest Shore",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 37,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Hyperion",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 38,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "Endymion",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 39,
+        "provider": "Qloo",
+        "method": "GET",
+        "path": "/search",
+        "query": "The Hitchhiker's Guide to the Galaxy",
+        "status": 200,
+        "retryAfter": null
+      },
+      {
+        "number": 40,
+        "provider": "Qloo",
+        "method": "POST",
+        "path": "/v2/insights",
+        "status": 200,
+        "retryAfter": null
+      }
+    ]
+  },
+  "askContext": [
+    {
+      "questions": [
+        {
+          "question": "Is Dune one of my interests?",
+          "status": 200,
+          "answer": "I could not tell which shelf question you meant. Please name a title and ask again.",
+          "calls": [
+            {
+              "number": 1,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "question": "Is The Hobbit one of my interests?",
+          "status": 200,
+          "answer": "I could not tell which shelf question you meant. Please name a title and ask again.",
+          "calls": [
+            {
+              "number": 2,
+              "provider": "Qwen",
+              "purpose": "question_planning",
+              "path": "/compatible-mode/v1/chat/completions",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "number": 1,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "fact",
+            "itemIndices": [
+              0
+            ],
+            "fields": [
+              "interests"
+            ]
+          }
+        },
+        {
+          "number": 2,
+          "provider": "Qwen",
+          "purpose": "question_planning",
+          "method": "POST",
+          "path": "/compatible-mode/v1/chat/completions",
+          "status": 200,
+          "qwenPlan": {
+            "intent": "fact",
+            "itemIndices": [
+              10
+            ],
+            "fields": [
+              "interest"
+            ],
+            "criterion": ""
+          }
+        }
+      ]
+    }
+  ]
+}

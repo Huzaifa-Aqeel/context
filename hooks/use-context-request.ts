@@ -1,12 +1,16 @@
 import { deviceLocality } from '@/lib/location/device';
 import { refreshLocationForRequest } from '@/lib/location/session';
 import { assertCurrentSession, useContextStore } from '@/stores/context';
+import { asksAboutArea, asksForAreaDiscovery, asksForDiningDiscovery, asksForPracticalLookup } from '@/lib/orchestration/intent';
 import { useForegroundTask } from './use-foreground-task';
 export function useContextRequest() {
   const task = useForegroundTask();
-  return async () => {
+  return async (question?: string) => {
     let ticket = task.begin();
-    const location = await refreshLocationForRequest(deviceLocality, ticket.current);
+    const active = useContextStore.getState().scene;
+    const location = question && !active?.event && !active?.dining && !active?.area && asksAboutArea(question)
+      && !asksForDiningDiscovery(question) && !asksForAreaDiscovery(question) && !asksForPracticalLookup(question)
+      ? await refreshLocationForRequest(deviceLocality, ticket.current) : { generation: useContextStore.getState().generation, warning: undefined };
     assertCurrentSession(location.generation);
     // A successful area refresh advances generation; start a ticket for the new snapshot.
     ticket = task.begin();

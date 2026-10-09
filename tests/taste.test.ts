@@ -15,14 +15,14 @@ import { tasteProfileSchema } from '../schemas/taste';
 import type { TasteContext, TasteDraft, TasteProfile } from '../types/taste';
 import type { Scene } from '../types/context';
 const profile: TasteProfile = { entities: [{ id: 'interest', name: 'Radiohead', type: 'urn:entity:artist' }], signature: 'a'.repeat(64) };
-const context: TasteContext = { profileSignature: profile.signature!, referenceIds: ['film', 'brand'], connections: [{ referenceId: 'brand', interestId: 'interest', kind: 'affinity', strength: 0.8, evidenceSource: 'qloo', description: 'Measured Qloo affinity.' }], warnings: [] };
+const context: TasteContext = { profileSignature: profile.signature!, referenceIds: ['film', 'brand'], connections: [{ referenceId: 'brand', interestId: 'interest', kind: 'affinity', strength: 0.8, sharedTags: ['Culture'], evidenceSource: 'qloo', description: 'Measured Qloo affinity.' }], warnings: [] };
 const scene: Scene = { id: 'scene', createdAt: '2026-10-08T00:00:00.000Z', summary: 'Generic scene context.', confidence: 'medium', culturalEvidence: { entities: [
   { detectedName: 'Interstellar', detectedCategory: 'film', qlooId: 'film', qlooName: 'Interstellar', qlooType: 'urn:entity:movie', visionConfidence: 0.98, matchConfidence: 0.95, source: 'vision' },
   { detectedName: 'Nike', detectedCategory: 'brand', qlooId: 'brand', qlooName: 'Nike', qlooType: 'urn:entity:brand', visionConfidence: 0.99, matchConfidence: 0.95, source: 'vision' },
 ], facts: [], relationships: [], themes: [], confidence: 0.5 } };
 const unexpected = async (): Promise<never> => { throw new Error('Unexpected investigation'); };
 function providers(): Providers {
-  return { vision: { inspectScene: unexpected }, qloo: { resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected, analyzeTaste: unexpected }, llm: { nextTurn: async () => ({ kind: 'answer', result: { answer: 'Available environmental context.', confidence: 'low' } }) } };
+  return { vision: { inspectScene: unexpected }, qloo: { resolveEntities: unexpected, analyzeConnections: unexpected, exploreReference: unexpected, getLocationContext: unexpected, analyzeTaste: unexpected, getEntityFact: unexpected }, llm: { nextTurn: async () => ({ kind: 'answer', result: { answer: 'Available environmental context.', confidence: 'low' } }) } };
 }
 const draft: TasteDraft = { candidates: [
   { label: 'Radiohead', category: 'artist', status: 'matched', entity: profile.entities[0] },
@@ -57,9 +57,9 @@ test('clarification confirms only a user-selected candidate from the signed Qloo
 
 test('personalized opening is a derived spoken view and disabling it restores the unchanged summary', () => {
   const original = JSON.stringify(scene);
-  assert.match(scenePresentation(scene, profile, context, true, 'balanced', ''), /affinity between Nike and your interest in Radiohead/);
+  assert.match(scenePresentation(scene, profile, context, true, 'balanced', ''), /Nike and your interest in Radiohead share Culture/);
   assert.equal(scenePresentation(scene, profile, context, false, 'balanced', ''), scene.summary);
-  assert.match(scenePresentation(scene, profile, { ...context, connections: [] }, true, 'balanced', ''), /does not mean.*unfamiliar/);
+  assert.equal(scenePresentation(scene, profile, { ...context, connections: [] }, true, 'balanced', ''), scene.summary);
   assert.equal(JSON.stringify(scene), original);
 });
 
@@ -91,19 +91,18 @@ test('weak taste evidence never highlights a reference or promotes an uncertain 
   assert.equal(orderedReferences(uncertain, context, 'familiar')[0].qlooId, 'film');
 });
 
-test('toggle preserves scene and visible history while excluding old taste from future requests', () => {
+test('deleting the profile preserves scene and generic history while excluding old taste', () => {
   const state = useContextStore.getState(); state.clearSession(); state.setScene(scene);
   useContextStore.getState().addMessage({ role: 'assistant', content: 'Generic context.' });
   useContextStore.getState().setProfile(profile);
   useContextStore.getState().addMessage({ role: 'assistant', content: 'Personalized context.' });
   useContextStore.getState().setTasteContext(context);
   const generation = useContextStore.getState().generation;
-  useContextStore.getState().setPersonalization(false);
-  assert.strictEqual(useContextStore.getState().scene, scene); assert.equal(useContextStore.getState().messages.length, 2);
+  useContextStore.getState().clearTaste();
+  assert.strictEqual(useContextStore.getState().scene, scene); assert.equal(useContextStore.getState().messages.length, 1);
   assert.deepEqual(activeTasteRequest(), {}); assert.equal(useContextStore.getState().tasteContext, null);
   assert.deepEqual(conversationForRequest().map((message) => message.content), ['Generic context.']);
   assert.throws(() => assertCurrentSession(generation), /changed/);
-  useContextStore.getState().clearTaste(); assert.strictEqual(useContextStore.getState().scene, scene);
   useContextStore.getState().clearSession();
 });
 
@@ -122,12 +121,14 @@ test('taste evidence binds to the current profile and rejects substitution', asy
 test('Qloo taste checks use individual confirmed interests and only returned shortlist affinities', async () => {
   let requests = 0;
   const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (input) => {
-    requests++; const url = new URL(String(input)); assert.equal(url.searchParams.get('signal.interests.entities'), 'interest');
+    requests++; const url = new URL(String(input));
+    if (url.pathname === '/entities') return Response.json({ results: url.searchParams.get('entity_ids')!.split(',').map((id) => ({ entity_id: id, name: id, types: [id === 'interest' ? 'urn:entity:artist' : id === 'film' ? 'urn:entity:movie' : 'urn:entity:brand'], tags: [{ tag_id: 'urn:tag:genre:test:shared', name: 'Culture' }] })) });
+    assert.equal(url.searchParams.get('signal.interests.entities'), 'interest');
     const id = url.searchParams.get('filter.results.entities')!;
     return Response.json({ results: { entities: [{ entity_id: id, name: id, subtype: url.searchParams.get('filter.type'), query: { affinity: 0.8 } }, { entity_id: 'unrequested', name: 'Unrequested', query: { affinity: 0.99 } }] } });
   });
   const result = await client.analyzeTaste(profile.entities, tasteReferences(scene));
-  assert.equal(requests, 2); assert.equal(result.connections.length, 2);
+  assert.equal(requests, 3); assert.equal(result.connections.length, 2);
   assert.ok(result.connections.every((connection) => ['film', 'brand'].includes(connection.referenceId) && connection.interestId === 'interest' && connection.evidenceSource === 'qloo'));
 });
 
@@ -135,8 +136,8 @@ test('taste query budget is bounded and exact profile references need no affinit
   let requests = 0;
   const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async () => { requests++; return Response.json({ results: { entities: [] } }); });
   const many = Array.from({ length: 10 }, (_, index) => ({ id: `interest-${index}`, name: `Interest ${index}`, type: 'urn:entity:artist' }));
-  const result = await client.analyzeTaste(many, tasteReferences(scene)); assert.equal(requests, 6); assert.ok(result.warnings.length);
-  const exact = await client.analyzeTaste(profile.entities, profile.entities); assert.equal(exact.connections[0].kind, 'exact'); assert.equal(requests, 6);
+  const result = await client.analyzeTaste(many, tasteReferences(scene)); assert.equal(requests, 1); assert.ok(result.warnings.length);
+  const exact = await client.analyzeTaste(profile.entities, profile.entities); assert.equal(exact.connections[0].kind, 'exact'); assert.equal(requests, 1);
 });
 
 test('Qloo taste outage degrades to environmental context without inventing a bridge', async () => {
@@ -171,7 +172,7 @@ test('changing area excludes previous locality taste targets while retaining sce
 
 test('a familiar explanation must cite a real Qloo pair; invented or disabled-profile pairs are rejected', async () => {
   const services = providers();
-  const request = { scene, profile, tasteContext: { ...context, referenceIds: ['brand', 'film'] }, mode: 'reference' as const, question: 'Explain this through something I know.', messages: [] };
+  const request = { scene, profile, tasteContext: { ...context, referenceIds: ['brand', 'film'] }, mode: 'reference' as const, question: 'Explain Nike through something I know.', messages: [] };
   services.llm.nextTurn = async () => ({ kind: 'answer', result: { answer: 'Qloo links this reference to a stated interest.', confidence: 'medium', usedTasteConnections: [{ referenceId: 'brand', interestId: 'interest' }] } });
   assert.equal((await explore(request, services)).usedTasteConnections?.length, 1);
   services.llm.nextTurn = async () => ({ kind: 'answer', result: { answer: 'Invented comparison.', confidence: 'high', usedTasteConnections: [{ referenceId: 'film', interestId: 'invented' }] } });
