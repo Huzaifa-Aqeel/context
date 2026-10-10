@@ -49,11 +49,17 @@ export function mergeEvidence(previous: CulturalEvidence, incoming: CulturalEvid
 }
 
 export async function explore(request: AskRequest, providers: Providers): Promise<Answer> {
+  if (request.locationEnabled === false && (!request.scene || request.scene.origin === 'conversation'))
+    return { answer: 'Turn on Location in Personalization to use Ask Context without a photo.', confidence: 'low' };
   // A profile edit ends the active capture. Reject an in-flight or replayed signed scene as well.
   if (request.scene && [request.scene.shelf?.profileSignature, request.scene.event?.profileSignature,
     request.scene.dining?.profileSignature, request.scene.area?.profileSignature]
     .some((signature) => signature && signature !== request.profile?.signature))
     return { answer: 'Your interests changed. Capture a new scene to explore it with your current profile.', confidence: 'low' };
+  if (asksForAreaDiscovery(request.question) && !asksForDiningDiscovery(request.question)
+    && !asksForPracticalLookup(request.question))
+    return { answer: 'Please name a place category: restaurant or bar, bookstore, record store, game shop, pharmacy, ATM, or restroom.',
+      confidence: 'low', ...(request.scene ? { scene: request.scene } : {}) };
   if (request.useLocality === false) request = { ...request, locality: undefined, locationContext: undefined, scene: request.scene ? { ...request.scene, locationContext: undefined } : undefined };
   if (request.scene?.shelf) return exploreShelf(request, providers.displayLlm ?? providers.shelfLlm ?? providers.llm, providers.research);
   if ((request.scene?.event || request.scene?.dining || request.scene?.area

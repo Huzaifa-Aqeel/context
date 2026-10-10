@@ -5,12 +5,12 @@ import type { QlooService } from '@/lib/qloo/service';
 import { researchEvent } from '@/lib/research/event';
 import type { ResearchService } from '@/lib/research/tavily';
 import type { Answer, AskRequest, Scene } from '@/types/context';
-import { discoverDining, fetchDiningDetails } from './dining';
-import { continueArea, discoverArea, discoverMall } from './area';
+import { diningKind, discoverDining, fetchDiningDetails, qlooDetailAnswer } from './dining';
 import { eventPrintedAnswer, exploreEvent } from './event-ask';
-import { asksForAreaDiscovery, asksForDiningDiscovery, explicitlyNearDevice, implicitlyNearDevice, visibleReferences } from './intent';
+import { asksForAreaDiscovery, isDiningComparisonRequest, asksForDiningDiscovery, asksForDiningPlaceDetails, asksForPracticalLookup, explicitlyNamedPlace, explicitlyNearDevice, practicalCategoryFromQuestion, visibleReferences } from './intent';
 import { metersBetween, spokenDistance, straightLineKilometers } from '@/lib/location/distance';
 import { withinGeojson } from '@/lib/location/geometry';
+import { openingStatusAt } from '@/lib/places/opening-hours';
 
 type Services = { qloo: QlooService; reasoner: SceneReasoningService; research?: ResearchService; places?: PlacesService };
 const reply = (answer: string, scene: Scene, confidence: Answer['confidence'] = 'medium'): Answer => ({ answer, scene, confidence });
@@ -33,8 +33,10 @@ function reasoningInput(request: AskRequest, services: Services): SceneReasoning
     interests: request.profile?.entities.map((item) => ({ id: item.id, name: item.name })) ?? [],
     available: { research: Boolean(services.research)
       && !asksForDiningDiscovery(request.question) && !asksForAreaDiscovery(request.question)
+      && !asksForPracticalLookup(request.question)
       && !(request.scene?.area && !request.scene.event), places: Boolean(services.places),
-      qloo: true, calendar: Boolean(request.scene?.event), devicePosition: Boolean(request.position) } };
+      qloo: true, calendar: Boolean(request.scene?.event), devicePosition: Boolean(request.position),
+      locationEnabled: Boolean(request.locationEnabled) } };
 }
 function grounded(answer: string | undefined, ids: string[], input: SceneReasoningInput, scene: Scene): Answer {
   const known = sceneEvidence({ ...input, scene });
@@ -60,49 +62,30 @@ async function answerAfterTool(request: AskRequest, services: Services, scene: S
   } catch { return reply('I checked the available information, but could not form a reliable answer. Please ask a narrower question.', scene, 'low'); }
 }
 
-async function placeAnchor(plan: SceneDecision, request: AskRequest, scene: Scene, places?: PlacesService): Promise<PlaceAnchor | undefined> {
-  if (plan.anchor === 'device') {
-    if (!explicitlyNearDevice(request.question)) {
-      const active = scene.area?.anchor ?? scene.dining?.resolvedAnchor;
-      if (active && active.kind !== 'device') return active;
-      if (scene.event?.visual.venueName) return placeAnchor({ ...plan, anchor: 'event_venue' }, request, scene, places);
-    }
-    const saved = scene.area?.anchor.kind === 'device' ? scene.area.anchor :
-      scene.dining?.resolvedAnchor?.kind === 'device' ? scene.dining.resolvedAnchor : undefined;
-    if (!request.position && saved && !explicitlyNearDevice(request.question)) return saved;
-    if (!request.locationEnabled || !request.position || (!explicitlyNearDevice(request.question) && !implicitlyNearDevice(request.question))) return undefined;
-    return { ...request.position, kind: 'device', name: null, timezone: request.deviceTimeZone ?? null,
-      source: 'foreground_location', confidence: null };
-  }
-  if (plan.anchor === 'event_venue') {
-    if (scene.dining?.resolvedAnchor?.kind === 'venue') return scene.dining.resolvedAnchor;
-    if (scene.area?.anchor.kind === 'venue') return scene.area.anchor;
-    if (!scene.event?.visual.venueName || !places) return undefined;
-    const name = scene.event.visual.venueName;
-    if (scene.event.place?.latitude !== undefined && scene.event.place.longitude !== undefined)
-      return { kind: 'venue', name: scene.event.place.name, placeId: scene.event.place.placeId,
-        latitude: scene.event.place.latitude, longitude: scene.event.place.longitude,
-        timezone: scene.event.place.timezone ?? null, source: 'event_scene', confidence: null };
-    const located = places.resolveAnchor ? await places.resolveAnchor(name, scene.event.visual.locationText, 'venue') : undefined;
-    if (located) return { ...located, source: 'event_scene' };
-    const legacy = await places.findExact(name, { locality: scene.event.visual.locationText });
-    return legacy?.latitude !== undefined && legacy.longitude !== undefined
-      ? { kind: 'venue', name: legacy.name, placeId: legacy.placeId, latitude: legacy.latitude,
-        longitude: legacy.longitude, timezone: legacy.timezone ?? null, source: 'event_scene', confidence: null } : undefined;
-  }
-  if (plan.anchor === 'named') {
-    const current = scene.area?.anchor ?? scene.dining?.resolvedAnchor;
-    if (!plan.anchorName && current?.kind === 'named') return current;
-    if (!plan.anchorName || !places?.resolveAnchor) return undefined;
-    if (current?.kind === 'named' && current.name?.toLowerCase() === plan.anchorName.toLowerCase()) return current;
-    return places.resolveAnchor(plan.anchorName, plan.anchorLocality, 'named');
-  }
-  return scene.area?.anchor ?? scene.dining?.resolvedAnchor;
+function placeAnchor(request: AskRequest): PlaceAnchor | undefined {
+  // Deictic searches use foreground location; named searches resolve separately.
+  if (!request.locationEnabled || !request.position) return undefined;
+  return { ...request.position, kind: 'device', name: null, timezone: request.deviceTimeZone ?? null,
+    source: 'foreground_location', confidence: null };
+}
+async function discoveryAnchor(request: AskRequest, plan: SceneDecision, services: Services): Promise<PlaceAnchor | undefined> {
+  const namedInQuestion = plan.anchorName && request.question.toLocaleLowerCase().includes(plan.anchorName.toLocaleLowerCase());
+  if (plan.anchor === 'named' && namedInQuestion)
+    return services.places?.resolveAnchor?.(plan.anchorName!, plan.anchorLocality, 'named').catch(() => undefined);
+  if (plan.anchor === 'named') return undefined;
+  return placeAnchor(request);
+}
+function namedAnchorFromQuestion(question: string): string | undefined {
+  if (!explicitlyNamedPlace(question) || explicitlyNearDevice(question)) return undefined;
+  return question.replace(/[.!?]+$/, '').match(/\b(?:near|around|in)\s+(?:the\s+)?(.+)$/i)?.[1]?.trim();
 }
 
 /** Scene-first Event and place orchestration. Qwen selects evidence needs; code owns provider calls and actions. */
 export async function exploreActiveScene(request: AskRequest, services: Services): Promise<Answer> {
   let scene = request.scene!;
+  if (!request.locationEnabled && (asksForDiningDiscovery(request.question)
+    || asksForAreaDiscovery(request.question) || asksForPracticalLookup(request.question)))
+    return reply('Turn on Location in Personalization to search for places near you.', scene, 'low');
   if (scene.event && !scene.event.pendingCalendar && !scene.event.pendingCalendarDetails) {
     const printed = eventPrintedAnswer(scene, request.question);
     if (printed) return printed;
@@ -113,14 +96,31 @@ export async function exploreActiveScene(request: AskRequest, services: Services
   // An in-progress Calendar confirmation has a deterministic safety path. It must not be reinterpreted as dining.
   if (event?.pendingCalendar || event?.pendingCalendarDetails)
     return exploreEvent({ ...request, scene }, services.qloo, services.research, services.places);
-
+  if (scene.dining && isDiningComparisonRequest(request.question))
+    return reply('I do not compare dining recommendations. Ask about one recommended place’s cuisine, address, distance, business rating, phone number, or opening hours instead.', scene, 'low');
+  if (asksForAreaDiscovery(request.question) && !asksForDiningDiscovery(request.question) && !asksForPracticalLookup(request.question))
+    return reply('Please name a place category: restaurant or bar, bookstore, record store, game shop, pharmacy, ATM, or restroom.', scene, 'low');
   let plan: SceneDecision;
   try { plan = await services.reasoner.plan(reasoningInput({ ...request, scene }, services)); }
   catch { return reply('I could not interpret that question reliably. Please ask it again more specifically.', scene, 'low'); }
+  const namedAnchor = namedAnchorFromQuestion(request.question);
+  if (asksForDiningDiscovery(request.question)) plan = { scope: 'dining', next: 'dining_discovery', evidenceIds: [],
+    anchor: namedAnchor ? 'named' : 'device', anchorName: namedAnchor };
+  const practicalCategory = asksForPracticalLookup(request.question) ? practicalCategoryFromQuestion(request.question) : undefined;
+  if (practicalCategory) plan = { scope: 'area', next: 'practical_lookup', practicalCategory, evidenceIds: [],
+    anchor: namedAnchor ? 'named' : 'device', anchorName: namedAnchor };
+  // Explicit user scope wins over the planner's anchor suggestion.
+  if (['dining_discovery', 'area_discovery', 'practical_lookup'].includes(plan.next)) {
+    if (explicitlyNearDevice(request.question)) plan = { ...plan, anchor: 'device', anchorName: undefined };
+    else if (explicitlyNamedPlace(request.question)) plan = { ...plan, anchor: 'named' };
+  }
   const input = reasoningInput({ ...request, scene }, services);
+  if (plan.scope === 'dining' && !asksForDiningDiscovery(request.question)
+    && !asksForDiningPlaceDetails(request.question))
+    return reply('For dining, ask for restaurants or bars near you or a named place, or ask for one recommended place’s details.', scene, 'low');
   if (plan.scope === 'general') return reply('Please ask about this scene, or capture a new one to change context.', scene, 'low');
   if (plan.scope === 'event' && !scene.event || plan.scope === 'dining' && !scene.dining && plan.next !== 'dining_discovery'
-    || plan.scope === 'area' && !scene.area && !['area_discovery', 'mall_discovery', 'practical_lookup'].includes(plan.next))
+    || plan.scope === 'area' && !scene.area && !['area_discovery', 'practical_lookup'].includes(plan.next))
     return reply('I do not have that part of the scene to answer from.', scene, 'low');
   if (plan.next === 'clarify') return reply(plan.answer ?? 'Which part of this scene do you mean?', scene, 'low');
   if (plan.next === 'answer') return grounded(plan.answer, plan.evidenceIds, input, scene);
@@ -131,6 +131,7 @@ export async function exploreActiveScene(request: AskRequest, services: Services
   }
   if (plan.next === 'event_research') {
     if (plan.scope !== 'event' || asksForDiningDiscovery(request.question) || asksForAreaDiscovery(request.question)
+      || asksForPracticalLookup(request.question)
       || !scene.event || !plan.researchKind || !services.research)
       return reply('I cannot check current event information right now.', scene, 'low');
     const eventState = scene.event;
@@ -170,49 +171,45 @@ export async function exploreActiveScene(request: AskRequest, services: Services
     } catch { return reply('I could not verify that venue right now.', scene, 'low'); }
   }
   if (plan.next === 'dining_discovery') {
-    if (plan.anchor === 'device' && explicitlyNearDevice(request.question) && !request.locationEnabled)
-      return reply('Turn on Location in Personalization to find restaurants near you.', scene, 'low');
-    let anchor: PlaceAnchor | undefined;
-    try { anchor = await placeAnchor(plan, request, scene, services.places); }
-    catch { return reply('I could not locate that place reliably right now.', scene, 'low'); }
-    if (!anchor) return reply(plan.anchor === 'device' ? 'I need foreground location permission to find restaurants near you.'
-      : !services.places && plan.anchor === 'event_venue' ? 'I cannot verify the event venue location, and I will not substitute your current location.'
-        : 'Which city or neighborhood is that place in? I could not locate it uniquely.', scene, 'low');
-    const source = anchor.kind === 'device' ? { kind: 'device' as const } : anchor.kind === 'venue'
-      ? { kind: 'event_venue' as const, name: anchor.name ?? 'the venue', placeId: anchor.placeId ?? '' }
-      : { kind: 'named' as const, name: anchor.name ?? 'the area', placeId: anchor.placeId ?? '' };
+    if (!asksForDiningDiscovery(request.question)) return reply(
+      'Ask for restaurants or bars near you or near a named place.', scene, 'low');
+    const anchor = await discoveryAnchor(request, plan, services);
+    if (!anchor) return reply(plan.anchor === 'named' ? 'Which named place and city should I search near? I could not locate it uniquely.'
+      : request.locationEnabled ? 'I need foreground location permission to find restaurants near you.'
+      : 'Turn on Location in Personalization to find restaurants near you.',
+    scene, 'low');
     return discoverDining(request, services.qloo, { position: { latitude: anchor.latitude, longitude: anchor.longitude },
-      source, resolved: anchor }, scene, services.places);
+      source: anchor.kind === 'named' ? { kind: 'named', name: anchor.name ?? plan.anchorName ?? 'that place', placeId: anchor.placeId ?? '' }
+        : { kind: 'device' }, resolved: anchor }, scene);
   }
   if (plan.next === 'area_discovery') {
-    if (plan.anchor === 'device' && explicitlyNearDevice(request.question) && !request.locationEnabled)
-      return reply('Turn on Location in Personalization to explore places around you.', scene, 'low');
-    let anchor: PlaceAnchor | undefined;
-    try { anchor = await placeAnchor(plan, request, scene, services.places); }
-    catch { return reply('I could not locate that area reliably right now.', scene, 'low'); }
-    if (!anchor) return reply(plan.anchor === 'device' ? 'I need foreground location permission to explore places around you.'
-      : 'Which neighborhood or part of the city do you want to explore?', scene, 'low');
-    return discoverArea(request, services.qloo, anchor, services.places, scene,
-      scene.area?.anchor.latitude === anchor.latitude && scene.area.anchor.longitude === anchor.longitude ? scene.area : undefined);
+    return reply('Please name a place category, such as bookstore, record store, game shop, pharmacy, ATM, restroom, restaurant, or bar.', scene, 'low');
   }
-  if (plan.next === 'mall_discovery') {
-    if (!plan.anchorName) return reply('Which mall do you mean?', scene, 'low');
-    return discoverMall(request, services.qloo, services.places, plan.anchorName, plan.anchorLocality, scene);
-  }
-  if (plan.next === 'area_more') return continueArea(request, services.qloo, services.places, scene);
+  if (plan.next === 'area_more') return reply('Please name the category you want to find next.', scene, 'low');
   if (plan.next === 'practical_lookup') {
-    const category = { restroom: 'amenity.toilet', atm: 'service.financial.atm',
-      pharmacy: 'healthcare.pharmacy' }[plan.practicalCategory ?? 'restroom'];
+    if (!practicalCategory) return reply('Please name a practical place category to search for.', scene, 'low');
+    const category = { bookstore: 'commercial.books', record_store: 'commercial.video_and_music',
+      game_shop: 'commercial.hobby.games,commercial.toy_and_game', restroom: 'amenity.toilet',
+      atm: 'service.financial.atm', pharmacy: 'healthcare.pharmacy' }[practicalCategory];
     if (!services.places?.practicalLookup) return reply('Practical place lookup is unavailable right now.', scene, 'low');
-    const scopedPlan = scene.event && !explicitlyNearDevice(request.question) && !plan.anchor
-      ? { ...plan, anchor: 'event_venue' as const } : plan;
-    const anchor = await placeAnchor(scopedPlan, request, scene, services.places);
-    if (!anchor) return reply('I need a location before I can look for that practical place.', scene, 'low');
+    const anchor = await discoveryAnchor(request, plan, services);
+    if (!anchor) return reply(plan.anchor === 'named' ? 'Which named place and city should I search near? I could not locate it uniquely.'
+      : request.locationEnabled ? 'I need foreground location permission to look for that practical place.'
+      : 'Turn on Location in Personalization to find practical places near you.', scene, 'low');
     try {
       const found = await services.places.practicalLookup(anchor, category);
       const first = found[0];
-      if (!first) return reply('I could not find a mapped practical place of that kind nearby.', scene, 'low');
-      return reply(`${first.name}${first.address ? ` is at ${first.address}` : ' is mapped nearby'}. This is a practical place lookup, not a personalized recommendation.`, scene);
+      if (!first) return reply(`I could not find a mapped ${practicalCategory.replace('_', ' ')} nearby.`, scene, 'low');
+      const checked = await services.places.details?.(first.placeId).catch(() => undefined);
+      const place = checked ? { ...first, ...checked, latitude: checked.latitude ?? first.latitude,
+        longitude: checked.longitude ?? first.longitude, timezone: checked.timezone ?? first.timezone } : first;
+      const distance = place.latitude !== undefined && place.longitude !== undefined
+        ? `${spokenDistance(metersBetween(anchor, { latitude: place.latitude, longitude: place.longitude }), request.locale)} in a straight line from ${anchor.name ?? 'you'}` : undefined;
+      const timezone = place.timezone ?? anchor.timezone ?? (anchor.kind === 'device' ? request.deviceTimeZone : undefined);
+      const open = place.openNow ?? (place.openingHours && timezone ? openingStatusAt(place.openingHours, new Date(), timezone) : undefined);
+      const status = open === undefined ? 'I could not verify whether it is open now.'
+        : `It is listed as ${open ? 'open' : 'closed'} right now.`;
+      return reply(`The closest mapped ${practicalCategory.replace('_', ' ')} I found is ${place.name}${distance ? `, ${distance}` : ''}${place.address ? `, at ${place.address}` : ''}. ${status} This is a practical lookup, not a personalized recommendation.`, scene);
     } catch { return reply('I could not check practical places right now.', scene, 'low'); }
   }
   if (plan.next === 'area_details') {
@@ -257,6 +254,9 @@ export async function exploreActiveScene(request: AskRequest, services: Services
     const target = scene.dining.candidates.find((item) => item.qlooId === plan.targetId);
     if (!target) return reply('Which recommended dining place do you mean?', scene, 'low');
     if (plan.detail === 'accessibility') return reply(`I do not have verified accessibility details for ${target.name}.`, scene, 'low');
+    const fromQloo = qlooDetailAnswer(target, plan.detail, scene.dining.resolvedAnchor, request.locale);
+    if (fromQloo && plan.detail !== 'opening' && plan.detail !== 'walking') return reply(fromQloo, scene);
+    if (plan.detail === 'rating') return reply(`I could not verify a business rating for ${target.name}.`, scene, 'low');
     if (plan.detail === 'walking') {
       if (!services.places?.walk10 || !scene.dining.resolvedAnchor) return reply('I cannot check the walking area right now.', scene, 'low');
       let geometry = scene.dining.walk10Geometry;
@@ -275,15 +275,37 @@ export async function exploreActiveScene(request: AskRequest, services: Services
         : contained === false ? `${target.name} is outside the estimated ten-minute walking area. I cannot give an exact walking time.`
           : `I could not verify walking reachability for ${target.name}.`, scene, contained === undefined ? 'low' : 'medium');
     }
-    if (!services.places) return reply(`I found ${target.name} through Qloo, but I cannot verify its address or current details yet.`, scene, 'low');
+    if (!services.places && !scene.dining.places?.some((item) => item.qlooId === target.qlooId))
+      return reply(`I found ${target.name} through Qloo, but I cannot verify its practical details yet.`, scene, 'low');
     try {
       const updated = await fetchDiningDetails(scene, target.qlooId, services.places, plan.detail === 'opening');
       if (!updated) return reply(`I could not uniquely verify practical details for ${target.name}.`, scene, 'low');
+      const place = updated.dining?.places?.find((item) => item.qlooId === target.qlooId)?.details;
+      if (plan.detail === 'cuisine') {
+        const kind = diningKind(place);
+        return reply(kind ? `${target.name} is listed as ${/^[aeiou]/i.test(kind) ? 'an' : 'a'} ${kind}.`
+          : `I could not verify the cuisine or restaurant category for ${target.name}.`, updated, kind ? 'medium' : 'low');
+      }
+      if (plan.detail === 'phone') return reply(place?.phone ? `${target.name}'s listed phone number is ${place.phone}.`
+        : `I could not verify a phone number for ${target.name}.`, updated, place?.phone ? 'medium' : 'low');
+      if (plan.detail === 'address') return reply(place?.address ? `${target.name} is at ${place.address}.`
+        : `I could not verify an address for ${target.name}.`, updated, place?.address ? 'medium' : 'low');
+      if (plan.detail === 'opening') {
+        if (!place?.openingHours) return reply(`I could not confirm ${target.name}'s opening hours.`, updated, 'low');
+        if (/\b(hours|opening hours|schedule)\b/i.test(request.question))
+          return reply(`${target.name} lists these opening hours: ${place.openingHours}.`, updated);
+        const timezone = place.timezone ?? updated.dining?.resolvedAnchor?.timezone;
+        const status = timezone ? openingStatusAt(place.openingHours, new Date(), timezone) : undefined;
+        return reply(status === undefined ? `I found listed hours for ${target.name}, but I could not confirm whether it is open now.`
+          : `${target.name} is listed as ${status ? 'open' : 'closed'} right now.`, updated,
+        status === undefined ? 'low' : 'medium');
+      }
       if (plan.detail === 'distance') {
-        const place = updated.dining?.places?.find((item) => item.qlooId === target.qlooId)?.details;
         if (place?.latitude !== undefined && place.longitude !== undefined && updated.dining?.position) {
           const km = straightLineKilometers(updated.dining.position, { latitude: place.latitude, longitude: place.longitude });
-          return reply(`${place.name} is about ${km} kilometers from ${updated.dining.anchor?.kind === 'event_venue' ? updated.dining.anchor.name : 'you'} in a straight line.${place.address ? ` Its address is ${place.address}.` : ''} This is not a walking route.`, updated);
+          const origin = updated.dining.resolvedAnchor?.kind === 'named'
+            ? updated.dining.resolvedAnchor.name ?? 'the named place' : 'you';
+          return reply(`${place.name} is about ${km} kilometers from ${origin} in a straight line.${place.address ? ` Its address is ${place.address}.` : ''} This is not a walking route.`, updated);
         }
       }
       return answerAfterTool(request, services, updated, plan);

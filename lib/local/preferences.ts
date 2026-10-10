@@ -10,6 +10,7 @@ const savedPreferencesSchema = z.object({
   profile: tasteProfileSchema.nullable(),
   interests: structuredInterestsSchema.nullable(),
   locationEnabled: z.boolean(),
+  homeAskTipSeen: z.boolean().default(false),
   speechPreferences: z.object({ voice: z.enum(speechVoices), style: z.enum(speechStyles) }),
   resolutionCache: shelfResolutionCacheSchema.optional(),
 });
@@ -19,6 +20,7 @@ export type SavedPreferences = {
   profile: TasteProfile | null;
   interests: StructuredInterests | null;
   locationEnabled: boolean;
+  homeAskTipSeen: boolean;
   speechPreferences: SpeechPreferences;
   resolutionCache?: z.infer<typeof shelfResolutionCacheSchema>;
 };
@@ -37,6 +39,7 @@ export function decodePreferences(raw: string | null): SavedPreferences | null {
 export function preferencesFromState(state: {
   profile: TasteProfile | null; interests: StructuredInterests | null;
   locationEnabled: boolean; speechPreferences: SpeechPreferences;
+  homeAskTipSeen?: boolean;
   resolutionCache?: SavedPreferences['resolutionCache'];
 }): SavedPreferences {
   return {
@@ -44,6 +47,7 @@ export function preferencesFromState(state: {
     profile: state.profile?.signature && state.profile.entities.length ? state.profile : null,
     interests: state.interests,
     locationEnabled: state.locationEnabled,
+    homeAskTipSeen: state.homeAskTipSeen ?? false,
     speechPreferences: state.speechPreferences ?? defaultSpeechPreferences,
     ...(state.resolutionCache ? { resolutionCache: state.resolutionCache } : {}),
   };

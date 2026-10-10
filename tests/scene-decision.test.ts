@@ -47,6 +47,12 @@ test('a printed start-time follow-up skips Qwen and Qloo', async () => {
   assert.equal(result.scene?.event?.profileSignature, profile.signature);
 });
 
+test('a captured flyer remains explorable when Location is off', async () => {
+  const result = await explore({ ...request('What time does it start?', eventScene()),
+    locationEnabled: false, position: undefined }, providers(noCall, noCall));
+  assert.match(result.answer, /October 10, 2026 at 8 PM ET/);
+});
+
 test('a performer decision stays in structured reasoning rather than the printed-list fast path', async () => {
   let plans = 0;
   const result = await explore(request('Which performer should I see?', eventScene()), providers(async () => {
@@ -74,22 +80,22 @@ test('event Capture states the printed performer even when Qloo ranking is unava
   assert.match(result.summary, /Radiohead/);
 });
 
-test('event-anchored dining uses the verified venue position and never substitutes device location', async () => {
+test('dining during an event uses the current device position, not the printed venue', async () => {
   const device = { latitude: 34, longitude: -118 };
   const venue = { latitude: 40.7, longitude: -73.9 };
   let qlooPosition: typeof venue | undefined;
   let placesOptions: unknown;
-  const result = await explore(request('Find dinner around the event', eventScene(), device), providers(
-    async () => ({ scope: 'dining', next: 'dining_discovery', anchor: 'event_venue', evidenceIds: [] }), noCall,
+  const result = await explore(request('Find somewhere nearby I’d enjoy eating', eventScene(), device), providers(
+    async () => ({ scope: 'dining', next: 'dining_discovery', anchor: 'device', evidenceIds: [] }), noCall,
     { qloo: { ...qloo, recommendDining: async (position) => { qlooPosition = position; return [{ qlooId: 'cafe', name: 'Cafe Roma', radiusMeters: 2000,
       affinity: 0.7, contributingInterestIds: ['radiohead'], cuisineTags: ['Italian'] }]; } },
       places: { findExact: async (_name, options) => { placesOptions = options; return { name: 'Blue Note', placeId: 'venue',
         address: '131 West 3rd Street, New York', checkedAt: new Date().toISOString(), ...venue }; } } }));
-  assert.deepEqual(qlooPosition, venue);
-  assert.deepEqual(placesOptions, { locality: 'New York' });
+  assert.deepEqual(qlooPosition, device);
+  assert.equal(placesOptions, undefined);
   assert.equal(result.scene?.event?.visual.title, 'Summer Sound');
-  assert.equal(result.scene?.dining?.anchor?.kind, 'event_venue');
-  assert.match(result.answer, /Near Blue Note/);
+  assert.equal(result.scene?.dining?.anchor?.kind, 'device');
+  assert.doesNotMatch(result.answer, /Near Blue Note/);
 });
 
 test('event venue lookup never uses device position to choose a same-named venue', async () => {
@@ -104,17 +110,19 @@ test('event venue lookup never uses device position to choose a same-named venue
   assert.match(result.answer, /straight line/);
 });
 
-test('event dining cannot fall back to device coordinates when Places is unavailable', async () => {
-  const result = await explore(request('Find dinner near the event', eventScene(), { latitude: 34, longitude: -118 }), providers(
-    async () => ({ scope: 'dining', next: 'dining_discovery', anchor: 'event_venue', evidenceIds: [] }), noCall));
-  assert.match(result.answer, /will not substitute your current location/);
+test('event-relative dining phrasing cannot start a recommendation', async () => {
+  const device = { latitude: 34, longitude: -118 };
+  const result = await explore(request('Find dinner near the event', eventScene(), device), providers(
+    async () => ({ scope: 'dining', next: 'dining_discovery', anchor: 'device', evidenceIds: [] }), noCall,
+    { qloo: { ...qloo, recommendDining: async () => { throw Error('Qloo must not run'); } } }));
+  assert.match(result.answer, /restaurants or bars near you/);
   assert.equal(result.scene?.dining, undefined);
 });
 
-test('explicit near-me dining changes anchor instead of silently reusing event venue', async () => {
+test('explicit nearby dining changes anchor instead of silently reusing event venue', async () => {
   const position = { latitude: 34, longitude: -118 };
   let seen: typeof position | undefined;
-  const result = await explore(request('Find dinner near me', eventScene(), position), providers(
+  const result = await explore(request('Find somewhere nearby I’d enjoy eating', eventScene(), position), providers(
     async () => ({ scope: 'dining', next: 'dining_discovery', anchor: 'device', evidenceIds: [] }), noCall,
     { qloo: { ...qloo, recommendDining: async (point) => { seen = point; return [{ qlooId: 'diner', name: 'Diner',
       radiusMeters: 2000, affinity: 0.7, contributingInterestIds: [], cuisineTags: [] }]; } } }));
@@ -123,16 +131,31 @@ test('explicit near-me dining changes anchor instead of silently reusing event v
   assert.equal(result.scene?.dining?.anchor?.kind, 'device');
 });
 
-test('dining comparison uses retained Qloo candidates without another Qloo or Places request', async () => {
+test('dining comparison requests are declined without provider calls', async () => {
   const scene: Scene = { id: 'dining', origin: 'conversation', createdAt: new Date().toISOString(), summary: 'Two places.', confidence: 'medium',
     culturalEvidence: { entities: [], relationships: [], themes: [], confidence: 0 },
     dining: { profileSignature: profile.signature, discoveredAt: new Date().toISOString(), anchor: { kind: 'device' },
+      resolvedAnchor: { kind: 'device', name: null, latitude: 40.7, longitude: -73.9,
+        source: 'foreground_location', confidence: null, timezone: 'America/New_York' },
+      selectedIds: ['a', 'b'], places: [
+        { qlooId: 'a', details: { name: 'Cafe A', placeId: 'ga', checkedAt: new Date().toISOString(),
+          cuisine: 'Italian', categories: ['catering.restaurant'], openingHours: 'Mo-Fr 09:00-18:00',
+          latitude: 40.701, longitude: -73.9 } },
+        { qlooId: 'b', details: { name: 'Cafe B', placeId: 'gb', checkedAt: new Date().toISOString(),
+          cuisine: 'Japanese', categories: ['catering.cafe'], openingHours: 'Mo-Fr 10:00-20:00',
+          latitude: 40.703, longitude: -73.9 } }],
       candidates: [{ qlooId: 'a', name: 'Cafe A', radiusMeters: 2000, contributingInterestIds: ['radiohead'], cuisineTags: ['Italian'] },
         { qlooId: 'b', name: 'Cafe B', radiusMeters: 2000, contributingInterestIds: [], cuisineTags: ['Japanese'] }] } };
-  const result = await explore(request('How do these two differ for me?', scene), providers(async () => ({ scope: 'dining', next: 'answer',
-    answer: 'Cafe A has an Italian dining tag and Radiohead contributed to its Qloo ranking; Cafe B has a Japanese dining tag.',
-    evidenceIds: ['dining:a', 'dining:b'] }), noCall));
-  assert.match(result.answer, /Cafe A/);
+  const result = await explore(request('How do these two differ for me?', scene), providers(noCall, noCall));
+  assert.match(result.answer, /do not compare dining recommendations/);
+  const closer = await explore(request('Which is closer?', scene), providers(noCall, noCall));
+  assert.match(closer.answer, /do not compare dining recommendations/);
+  const hours = await explore(request('Compare their opening hours', scene), providers(noCall, noCall));
+  assert.match(hours.answer, /do not compare dining recommendations/);
+  for (const question of ['Which of these has the better rating?', 'Is Cafe A closer than Cafe B?', 'Which one would you pick?']) {
+    const comparison = await explore(request(question, scene), providers(noCall, noCall));
+    assert.match(comparison.answer, /do not compare dining recommendations/);
+  }
 });
 
 test('a repeated researched event question reuses its grounded answer while evidence is fresh', async () => {
@@ -193,17 +216,17 @@ test('scene reasoning sends evidence without precise device coordinates and retu
     return { message: { content: JSON.stringify({ scope: 'event', next: 'answer', answer: 'Summer Sound starts at 8 PM.', evidenceIds: ['event:start'] }) }, finish_reason: 'stop' };
   } };
   const result = await new ChatSceneReasoning(client).plan({ question: 'When does it start?', messages: [], scene,
-    interests: [{ id: 'radiohead', name: 'Radiohead' }], available: { research: false, places: false, qloo: true, calendar: true, devicePosition: false } });
+    interests: [{ id: 'radiohead', name: 'Radiohead' }], available: { research: false, places: false, qloo: true, calendar: true, devicePosition: false, locationEnabled: false } });
   assert.equal(result.next, 'answer');
   assert.equal(sceneEvidence({ question: '', messages: [], scene, interests: [],
-    available: { research: false, places: false, qloo: true, calendar: false, devicePosition: false } })['event:start'], '8 PM ET');
+    available: { research: false, places: false, qloo: true, calendar: false, devicePosition: false, locationEnabled: false } })['event:start'], '8 PM ET');
 });
 
 test('a bounded Qwen research-kind synonym is normalized before deterministic provider routing', async () => {
   const client = { model: 'qwen3.8-max', completion: async () => ({ message: {
     content: JSON.stringify({ scope: 'event', next: 'event_research', researchKind: 'ticket_availability' }) }, finish_reason: 'stop' }) };
   const plan = await new ChatSceneReasoning(client).plan({ question: 'Are tickets available?', messages: [], scene: eventScene(),
-    interests: [], available: { research: true, places: false, qloo: true, calendar: true, devicePosition: false } });
+    interests: [], available: { research: true, places: false, qloo: true, calendar: true, devicePosition: false, locationEnabled: false } });
   assert.equal(plan.researchKind, 'tickets');
 });
 
@@ -212,17 +235,19 @@ test('stale event-status evidence is unavailable to Qwen until refreshed', () =>
   scene.event!.researchedFacts = [{ kind: 'status', value: 'scheduled', sourceUrl: 'https://summersound.example',
     retrievedAt: new Date(Date.now() - 60 * 60_000).toISOString(), supportingQuote: 'Summer Sound is scheduled.' }];
   const evidence = sceneEvidence({ question: 'Is it still happening?', messages: [], scene, interests: [],
-    available: { research: true, places: false, qloo: true, calendar: false, devicePosition: false } });
+    available: { research: true, places: false, qloo: true, calendar: false, devicePosition: false, locationEnabled: false } });
   assert.equal(evidence['research:0'], undefined);
 });
 
-test('turning Location off retains event-venue dining but clears device-anchored dining', () => {
-  const venue = eventScene(); venue.dining = { discoveredAt: new Date().toISOString(), anchor: { kind: 'event_venue', name: 'Blue Note', placeId: 'v' }, candidates: [] };
-  useContextStore.setState({ scene: venue, locationEnabled: true });
+test('turning Location off clears device-anchored dining but retains a named result', () => {
+  const named = eventScene(); named.dining = { discoveredAt: new Date().toISOString(),
+    resolvedAnchor: { latitude: 40.7, longitude: -73.9, kind: 'named', name: 'Union Square',
+      timezone: 'America/New_York', source: 'geoapify_geocode', confidence: 1 }, candidates: [] };
+  useContextStore.setState({ scene: named, locationEnabled: true });
   useContextStore.getState().setLocationEnabled(false);
   assert.equal(useContextStore.getState().scene?.event?.visual.title, 'Summer Sound');
-  assert.equal(useContextStore.getState().scene?.dining?.anchor?.kind, 'event_venue');
-  const device = { ...venue, dining: { ...venue.dining, anchor: { kind: 'device' as const } } };
+  assert.equal(useContextStore.getState().scene?.dining?.resolvedAnchor?.kind, 'named');
+  const device = { ...named, dining: { ...named.dining, resolvedAnchor: undefined, anchor: { kind: 'device' as const } } };
   useContextStore.setState({ scene: device, locationEnabled: true });
   useContextStore.getState().setLocationEnabled(false);
   assert.equal(useContextStore.getState().scene?.event?.visual.title, 'Summer Sound');

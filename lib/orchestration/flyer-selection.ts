@@ -7,7 +7,7 @@ type FlyerVisual = z.infer<typeof eventVisualSchema>;
 type Ranked = EventRanking['ranked'][number];
 export const flyerName = (value: string) => value.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 const key = (name: string, type: string) => `${flyerName(name)}:${flyerName(type)}`;
-const flyerQlooTypes = new Set(['movie', 'place', 'person', 'artist']);
+const flyerQlooTypes = new Set(['movie', 'place', 'person', 'artist', 'brand', 'game', 'videogame']);
 
 export function flyerRole(event: FlyerVisual, item: VisionEntity, index: number): NonNullable<VisionEntity['role']> {
   const primary = event.primarySubject;

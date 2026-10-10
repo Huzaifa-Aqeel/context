@@ -9,7 +9,7 @@ import { useContextStore } from '@/stores/context';
 import { hasRequiredTasteProfile } from '@/lib/taste/required';
 
 export default function HomeScreen() {
-  const { setImage, scene, messages, profile } = useContextStore();
+  const { setImage, scene, messages, profile, locationEnabled } = useContextStore();
   const profileReady = hasRequiredTasteProfile(profile);
   const [pending, setPending] = useState(false);
   const task = useForegroundTask(useCallback(() => setPending(false), []), true);
@@ -38,10 +38,14 @@ export default function HomeScreen() {
     <Button title="Capture a scene" onPress={() => router.push(profileReady ? '/camera' : '/personalization/taste')} hint={profileReady ? 'Opens the camera. Capturing a photo starts analysis.' : 'Opens My Interests voice setup first.'} />
     <Button title={pending ? 'Preparing image…' : 'Choose a photo'} onPress={() => { void chooseImage(); }} disabled={pending} secondary />
     {(scene || messages.length > 0) && <Button title={scene ? 'Continue exploring this scene' : 'Continue the conversation'}
-      onPress={() => router.push(profileReady ? scene ? '/scene' : '/conversation' : '/personalization/taste')} secondary />}
+      onPress={() => router.push(profileReady ? scene ? '/scene' : '/conversation' : '/personalization/taste')}
+      disabled={!locationEnabled && (!scene || scene.origin === 'conversation')} secondary />}
     <Notice text={error} />
     <Text style={styles.small}>Captured or chosen photos are sent for analysis. Your microphone starts only when you tap the voice orb.</Text>
     <Text style={[styles.small, { textAlign: 'center' }]}>or</Text>
-    <Button title="Ask Context" onPress={() => router.push(profileReady ? '/conversation' : '/personalization/taste')} hint={profileReady ? 'Opens the voice conversation. Tap its orb to speak.' : 'Opens My Interests voice setup first.'} secondary />
+    {!locationEnabled && <Body>Turn on Location in Personalization to use Ask Context without a photo. You can still capture a scene and ask about it.</Body>}
+    <Button title="Ask Context" onPress={() => router.push(profileReady ? '/conversation' : '/personalization/taste')}
+      disabled={!locationEnabled}
+      hint={profileReady ? 'Opens the voice conversation without a photo using your current foreground location.' : 'Opens My Interests voice setup first.'} secondary />
   </Screen>;
 }

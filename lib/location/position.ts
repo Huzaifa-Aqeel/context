@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 
-/** User-initiated foreground position. Dining may retain it in active, non-persisted scene memory only. */
+/** User-initiated foreground position; only active scene memory may retain it. */
 export async function devicePosition(current: () => boolean) {
   let permission = await Location.getForegroundPermissionsAsync();
   if (!current()) throw new Error('This location request was cancelled.');

@@ -1,7 +1,7 @@
 import type { Answer, AskRequest, Scene } from '@/types/context';
 import type { PlaceRecommendation, QlooService } from '@/lib/qloo/service';
 import type { MatchOutcome, PlaceAnchor, PlacesService } from '@/lib/places/geoapify';
-import { culturalBuckets, geoapifyCategories, classifyGeoapifyPlace } from '@/lib/places/qloo-tags';
+import { culturalBuckets, geoapifyCategories } from '@/lib/places/qloo-tags';
 import { metersBetween, spokenDistance } from '@/lib/location/distance';
 
 const answer = (message: string, scene?: Scene, confidence: Answer['confidence'] = 'medium'): Answer =>
@@ -101,12 +101,12 @@ export async function discoverArea(request: AskRequest, qloo: QlooService, ancho
   }
   if (!selected.length) return answer('I found personalized places in this area, but could not verify their identities confidently enough to recommend one.', baseScene, 'low');
   let orientation = prior?.orientation ?? null;
-  if (!orientation && anchor.kind === 'device' && places?.reverse) {
+  if (!orientation && anchor.kind === 'device' && !anchor.name && places?.reverse) {
     try { const result = await places.reverse(anchor); orientation = { street: result.street, neighborhood: result.neighborhood, city: result.city }; }
     catch { /* Orientation is optional; Qloo recommendations survive. */ }
   }
   const location = orientation ? [orientation.street, orientation.neighborhood ?? orientation.city].filter(Boolean).join(' in ') : '';
-  const intro = location && anchor.kind === 'device' ? `You're near ${location}. ` : '';
+  const intro = anchor.name ? `Near ${anchor.name}, ` : location && anchor.kind === 'device' ? `You're near ${location}. ` : '';
   const names = selected.map(({ item, match }, index) => placeSentence(item, match, anchor, request, index));
   const practicalCaveat = selected.every(({ match }) => match.status === 'unverified')
     ? ' I could not verify practical place details right now.' : '';
@@ -162,51 +162,4 @@ export async function continueArea(request: AskRequest, qloo: QlooService, place
   }
   return answer('I do not have another Qloo-ranked place from this area yet.',
     { ...scene, area: { ...state, qlooTopUpResults: extras, matches } }, 'low');
-}
-
-/** A bounded mapped-building inventory, then one Qloo ranking over successfully resolved IDs. */
-export async function discoverMall(request: AskRequest, qloo: QlooService, places: PlacesService | undefined,
-  mallName: string, locality?: string, baseScene?: Scene): Promise<Answer> {
-  if (!request.profile?.entities.length) return answer('Set up at least one matched interest to personalize places inside the mall.', baseScene, 'low');
-  if (!places?.resolveAnchor || !places.buildingPlaces || !qloo.resolvePlaceCandidates || !qloo.rankBoundedPlaces)
-    return answer('I cannot check mapped places inside that mall right now.', baseScene, 'low');
-  let anchor: PlaceAnchor | undefined;
-  let mapped: Awaited<ReturnType<NonNullable<PlacesService['buildingPlaces']>>>;
-  try {
-    anchor = await places.resolveAnchor(mallName, locality, 'named');
-    if (!anchor?.placeId) return answer('Which mall and city do you mean? I could not locate it uniquely.', baseScene, 'low');
-    mapped = await places.buildingPlaces(anchor.placeId);
-  } catch { return answer('I could not check places mapped inside that mall right now.', baseScene, 'low'); }
-  const cultural = mapped.filter((item) => classifyGeoapifyPlace(item.categories) !== 'other').slice(0, 12);
-  if (!cultural.length) return answer('I could not identify culturally relevant businesses mapped inside this mall.', baseScene, 'low');
-  const resolved = await qloo.resolvePlaceCandidates(cultural.map((item) => ({ name: item.name,
-    latitude: item.position.latitude, longitude: item.position.longitude, city: locality })));
-  if (resolved.length < 2) return answer('I can identify places mapped inside this mall, but I do not have enough Qloo matches to personalize them reliably.', baseScene, 'low');
-  let ranked: PlaceRecommendation[];
-  try { ranked = await qloo.rankBoundedPlaces(resolved.map((item) => item.qlooId), request.profile.entities); }
-  catch { return answer('I found places mapped inside this mall, but Qloo could not rank them for your interests right now.', baseScene, 'low'); }
-  const byQloo = new Map(resolved.map((item) => [item.qlooId, item]));
-  const candidates = ranked.filter((item) => byQloo.has(item.qlooId)).map((item) => {
-    const matched = cultural.find((place) => place.name === byQloo.get(item.qlooId)!.name)!;
-    return { ...item, bucket: classifyGeoapifyPlace(matched.categories),
-      latitude: matched.position.latitude, longitude: matched.position.longitude };
-  });
-  if (!candidates.length) return answer('Qloo did not return a reliable personalized ranking for the mapped mall places.', baseScene, 'low');
-  const chosen = candidates.slice(0, 3);
-  const matches = chosen.map((item) => {
-    const mappedPlace = cultural.find((place) => place.name === byQloo.get(item.qlooId)?.name);
-    return { qlooId: item.qlooId, status: 'confirmed' as const, checkedAt: new Date().toISOString(),
-      details: { name: item.name, placeId: mappedPlace?.placeId ?? anchor!.placeId!, checkedAt: new Date().toISOString(),
-        latitude: item.latitude, longitude: item.longitude, categories: mappedPlace?.categories } };
-  });
-  const spoken = `Among places mapped inside ${anchor.name ?? mallName}, ${chosen.map((item, index) =>
-    index === 0 ? `${item.name} ranks highest for your interests` : item.name).join(', ')} stand out. This may not include every business in the mall.`;
-  const scene: Scene = { ...(baseScene ?? { origin: 'conversation', id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(), confidence: 'medium' as const,
-    culturalEvidence: { entities: [], relationships: [], themes: [], confidence: 0 } }),
-    summary: baseScene?.summary ?? spoken,
-    area: { anchor, profileSignature: request.profile.signature, qlooUnionResults: candidates,
-      qlooTopUpResults: {}, presentedIds: chosen.map((item) => item.qlooId),
-      matches, orientation: null, createdAt: new Date().toISOString() } };
-  return answer(spoken, scene);
 }

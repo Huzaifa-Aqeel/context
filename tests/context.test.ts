@@ -61,7 +61,7 @@ test('malformed API requests fail before reaching providers and never become cac
 test('Capture and Ask Context reject requests without a matched, signed profile', async () => {
   const image = 'data:image/jpeg;base64,YQ==';
   const capture = await analyzeRoute(jsonRequest('/api/scene/analyze', { image }));
-  const ask = await askRoute(jsonRequest('/api/scene/ask', { question: 'Find dinner nearby.' }));
+  const ask = await askRoute(jsonRequest('/api/scene/ask', { question: 'Find somewhere nearby I’d enjoy eating.' }));
   assert.equal(capture.status, 403);
   assert.equal(ask.status, 403);
   assert.equal((await capture.json()).error.code, 'PROFILE_REQUIRED');

@@ -24,7 +24,7 @@ export function SceneGuidanceDisclosure({ text, expanded, onToggle }: {
   }, [expanded]);
   return <View style={{ gap: 4 }}>
     <Pressable accessibilityRole="button" accessibilityLabel="What can I ask Context?"
-      accessibilityHint={expanded ? 'Hides suggestions for exploring this scene.' : 'Shows suggestions for exploring this scene.'}
+      accessibilityHint={expanded ? 'Hides Ask Context suggestions.' : 'Shows Ask Context suggestions.'}
       accessibilityState={{ expanded }}
       onPress={() => { focusRequested.current = !expanded; onToggle(); }}
       style={{ minHeight: 56, justifyContent: 'center', alignSelf: 'flex-start' }}>

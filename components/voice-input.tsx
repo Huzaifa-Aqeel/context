@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useIsFocused } from 'expo-router';
-import { AppState, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { getSpeechState, speakResponse, stopSpokenOutput, subscribeSpeech } from '@/lib/audio/playback';
+import { waitForAppActive } from '@/lib/audio/foreground';
+import { recordingFormData } from '@/lib/audio/upload';
 import { colors, Notice } from '@/components/ui';
 import { postApi } from '@/lib/api/client';
 import { discardTemporaryFile } from '@/lib/images';
@@ -47,7 +49,7 @@ export function VoiceInput({ onText, disabled = false, replayText }: { onText: (
       }
     };
     const subscription = AppState.addEventListener('change', (status) => {
-      if (status !== 'active' && !(status === 'inactive' && permissionRequest.current)) void discard().catch(() => {});
+      if (status !== 'active' && !permissionRequest.current) void discard().catch(() => {});
     });
     const session = useContextStore.subscribe((context, previous) => { if (context.generation !== previous.generation) void discard().catch(() => {}); });
     if (!focused) void discard().catch(() => {});
@@ -65,12 +67,7 @@ export function VoiceInput({ onText, disabled = false, replayText }: { onText: (
       await release();
       const uri = recorder.uri;
       if (!uri) throw new Error('No recording was captured. Please try again.');
-      const form = new FormData();
-      if (Platform.OS === 'web') {
-        form.append('audio', await (await fetch(uri)).blob(), 'question.webm');
-      } else {
-        form.append('audio', { uri, name: 'question.m4a', type: 'audio/mp4' } as unknown as Blob);
-      }
+      const form = await recordingFormData(uri, 'question');
       const transcript = await postApi('/api/audio/transcribe', form, transcriptionSchema);
       if (mounted.current && focused && currentOperation === operation.current && AppState.currentState === 'active' && generation === useContextStore.getState().generation) onText(transcript.text);
     } catch (cause) { if (mounted.current && currentOperation === operation.current) setError(cause instanceof Error ? cause.message : 'Voice input failed. Please try again.'); }
@@ -89,7 +86,11 @@ export function VoiceInput({ onText, disabled = false, replayText }: { onText: (
     try {
       stopSpokenOutput();
       permissionRequest.current = true;
-      const permission = await requestRecordingPermissionsAsync().finally(() => { permissionRequest.current = false; });
+      let permission;
+      try {
+        permission = await requestRecordingPermissionsAsync();
+        await waitForAppActive();
+      } finally { permissionRequest.current = false; }
       if (!mounted.current || currentOperation !== operation.current || AppState.currentState !== 'active') return;
       if (!permission.granted) throw new Error('Microphone access is off. You can enable it in your device settings and try again.');
       if (!useContextStore.getState().beginRecording(owner)) throw new Error('Another microphone interaction is active. Stop it before starting this one.');

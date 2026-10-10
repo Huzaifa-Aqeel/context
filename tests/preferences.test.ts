@@ -30,6 +30,18 @@ test('local preferences round-trip without scene, messages, images, or precise l
   assert.equal(decodePreferences(JSON.stringify({ ...saved, profile: { entities: profile.entities } })), null);
   assert.deepEqual(decodePreferences(JSON.stringify({ ...saved, autoSpeakScene: true,
     seenSceneTips: { book_shelf: true }, sceneTipOfferCounts: { book_shelf: 3 } })), saved);
+  assert.equal(decodePreferences(JSON.stringify({ ...saved, homeAskTipSeen: undefined }))?.homeAskTipSeen, false);
+});
+
+test('the Home Ask Context first-open tip is remembered without scene data', () => {
+  useContextStore.getState().clearSession();
+  try {
+    useContextStore.getState().markHomeAskTipSeen();
+    useContextStore.getState().setImage('data:image/jpeg;base64,YQ==');
+    assert.equal(useContextStore.getState().homeAskTipSeen, true);
+    const saved = preferencesFromState(useContextStore.getState());
+    assert.equal(decodePreferences(JSON.stringify(saved))?.homeAskTipSeen, true);
+  } finally { useContextStore.getState().clearSession(); }
 });
 
 test('scene result focus and on-demand guidance persist during the same scene and reset on a new capture', () => {

@@ -12,6 +12,9 @@ export function useExploration() {
   const begin = useContextRequest();
   return useMutation({
     mutationFn: async (question: string) => {
+      const currentState = useContextStore.getState();
+      if (!currentState.locationEnabled && (!currentState.scene || currentState.scene.origin === 'conversation'))
+        throw new Error('Turn on Location in Personalization to use Ask Context without a photo.');
       if (isCapabilityQuestion(question)) return { ...answerSchema.parse({ answer: capabilityAnswer(useContextStore.getState().scene) }),
         requestGeneration: useContextStore.getState().generation };
       const request = await begin(question); const { state } = request;

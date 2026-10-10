@@ -175,7 +175,7 @@ test('a conference flyer evaluates named speakers but leaves its venue and spons
   assert.equal(scene.culturalEvidence.entities.length, 4);
 });
 
-test('a brand promotion stays readable while only a printed speaker enters flyer Qloo evaluation', async () => {
+test('a brand promotion evaluates its brand and printed speaker, but not its venue', async () => {
   const visual = { materialType: 'flyer' as const, kind: 'mixed' as const, title: 'Nike running weekend',
     primarySubject: { name: 'Nike', entityIndex: 0 }, venueName: 'Westfield', performers: ['Guest Speaker'], schedule: [],
     printedDetails: ['20% off running shoes through Sunday'] };
@@ -185,10 +185,10 @@ test('a brand promotion stays readable while only a printed speaker enters flyer
     { label: 'Westfield', category: 'place', role: 'venue' as const, confidence: 0.95, culturallyRelevant: true },
   ];
   const result = await analyzeEvent(visual, detected, profile, { ...qloo, rankEvent: async (visible) => {
-    assert.deepEqual(visible.map((item) => item.label), ['Guest Speaker']);
+    assert.deepEqual(visible.map((item) => item.label), ['Nike', 'Guest Speaker']);
     return { resolved: visible.map((item) => ({ detectedName: item.label, detectedCategory: item.category,
       role: item.role, visionConfidence: item.confidence, qlooId: item.label, qlooName: item.label,
-      qlooType: 'urn:entity:person', matchConfidence: 0.95, source: 'vision' as const })),
+      qlooType: item.category === 'brand' ? 'urn:entity:brand' : 'urn:entity:person', matchConfidence: 0.95, source: 'vision' as const })),
     ranked: [{ entityId: 'Guest Speaker', name: 'Guest Speaker', affinity: 0.99, exactInterest: false, contributingInterestIds: ['radiohead'] }] };
   } });
   assert.match(result.summary, /20% off running shoes through Sunday/);
@@ -197,8 +197,8 @@ test('a brand promotion stays readable while only a printed speaker enters flyer
   assert.match(result.summary, /Guest Speaker has a taste match/);
 });
 
-test('brand and book flyer subjects remain printed facts without Capture Qloo requests', async () => {
-  for (const [category, title] of [['brand', 'Nike weekend sale'], ['book', 'The Hobbit launch']] as const) {
+test('book flyer subjects remain printed facts without Capture Qloo requests', async () => {
+  for (const [category, title] of [['book', 'The Hobbit launch']] as const) {
     const result = await analyzeEvent({ materialType: 'flyer', title, performers: [], schedule: [],
       primarySubject: { name: title, entityIndex: 0 }, printedDetails: ['Saturday at the library'] },
     [{ label: title, category, role: 'primary_subject', confidence: 0.95, culturallyRelevant: true }],
@@ -207,6 +207,40 @@ test('brand and book flyer subjects remain printed facts without Capture Qloo re
     assert.match(result.summary, /Saturday at the library/);
     assert.deepEqual(result.event?.ranking, []);
   }
+});
+
+test('brand and game flyer subjects use typed Qloo Search and Insights', async () => {
+  for (const [category, name, type] of [
+    ['brand', 'Nike', 'urn:entity:brand'], ['videogame', 'Minecraft', 'urn:entity:videogame'],
+  ] as const) {
+    const searches: string[] = []; const insights: string[] = [];
+    const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (url, init) => {
+      const parsed = new URL(String(url));
+      if (parsed.pathname === '/search') {
+        searches.push(parsed.searchParams.get('types')!);
+        return Response.json({ results: [{ entity_id: name, name, types: [type] }] });
+      }
+      insights.push((JSON.parse(String(init?.body)) as { 'filter.type': string })['filter.type']);
+      return Response.json({ success: true, results: { entities: [{ entity_id: name, name, types: [type],
+        query: { affinity: 0.7, explainability: { 'signal.interests.entities': [{ entity_id: 'radiohead', score: 0.3 }] } } }] } });
+    });
+    const result = await analyzeEvent({ materialType: 'flyer', kind: category === 'brand' ? 'brand_promotion' : 'game',
+      title: `${name} weekend`, primarySubject: { name, entityIndex: 0 }, performers: [], schedule: [] },
+    [{ label: name, category, role: 'primary_subject', confidence: 0.95, culturallyRelevant: true }], profile, client);
+    assert.deepEqual(searches, [type]);
+    assert.deepEqual(insights, [type]);
+    assert.equal(result.culturalEvidence.entities[0].qlooId, name);
+    assert.match(result.summary, new RegExp(`${name} has a taste match`));
+  }
+});
+
+test('a background sponsor does not enter flyer Qloo evaluation', async () => {
+  const result = await analyzeEvent({ materialType: 'flyer', kind: 'concert', title: 'Jazz Night',
+    performers: [], schedule: [], printedDetails: ['Sponsored by Nike'] },
+  [{ label: 'Nike', category: 'brand', role: 'organizer', confidence: 0.95, culturallyRelevant: true }],
+  profile, { ...qloo, rankEvent: noCall });
+  assert.match(result.summary, /Sponsored by Nike/);
+  assert.deepEqual(result.event?.ranking, []);
 });
 
 test('a venue promotion evaluates its place subject while a speaker flyer venue stays context only', async () => {
@@ -395,9 +429,9 @@ test('dining needs explicit location and Qloo interest ranking; Places is only c
   const ranking = { ...qloo, recommendDining: async () => { qlooCalls++; return [{ qlooId: 'cafe', name: 'Cafe Roma', radiusMeters: 2000 as const,
     affinity: 0.6, contributingInterestIds: ['radiohead'], cuisineTags: ['Italian'] }]; } };
   const places = { findExact: async () => { placesCalls++; return { name: 'Cafe Roma', placeId: 'g1', address: '10 Main Street, New York', checkedAt: new Date().toISOString() }; } };
-  const noLocation = await exploreDining({ question: 'Find a restaurant near me', profile, messages: [], mode: 'scene', locationEnabled: false }, ranking, places);
+  const noLocation = await exploreDining({ question: "Find somewhere nearby I'd enjoy eating", profile, messages: [], mode: 'scene', locationEnabled: false }, ranking, places);
   assert.match(noLocation.answer, /Turn on Location/); assert.equal(qlooCalls, 0);
-  const discovered = await exploreDining({ question: 'Find a restaurant near me', profile, messages: [], mode: 'scene', locationEnabled: true,
+  const discovered = await exploreDining({ question: "Find somewhere nearby I'd enjoy eating", profile, messages: [], mode: 'scene', locationEnabled: true,
     position: { latitude: 40.7, longitude: -73.9 } }, ranking, places);
   assert.equal(qlooCalls, 1); assert.equal(placesCalls, 0);
   assert.equal(discovered.scene?.dining?.candidates.length, 1);

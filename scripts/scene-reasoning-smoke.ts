@@ -17,7 +17,7 @@ const scene: Scene = { id: 'synthetic-event', origin: 'image', createdAt: new Da
     venueName: 'Blue Note', locationText: 'New York', performers: ['Radiohead'], schedule: [] },
     ranking: [{ entityId: 'radiohead', name: 'Radiohead', exactInterest: true, contributingInterestIds: ['radiohead'] }],
     researchedFacts: [] } };
-const available = { research: true, places: true, qloo: true, calendar: true, devicePosition: false };
+const available = { research: true, places: true, qloo: true, calendar: true, devicePosition: false, locationEnabled: false };
 async function main() {
   if (process.argv.includes('--dining')) {
     scene.event = undefined;

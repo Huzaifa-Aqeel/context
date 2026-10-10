@@ -21,6 +21,9 @@ const properties = z.object({
     confidence_building_level: z.number().optional() }).optional(),
   timezone: z.object({ name: z.string().optional() }).optional(),
   phone: z.string().optional(), website: z.string().optional(), opening_hours: z.string().optional(),
+  contact: z.object({ phone: z.string().optional() }).optional(),
+  catering: z.object({ cuisine: z.string().optional(), diet: z.string().optional(),
+    reservation: z.string().optional() }).optional(),
   payment: z.unknown().optional(), payment_options: z.unknown().optional(),
   reservation: z.string().optional(), feature_type: z.string().optional(),
 }).passthrough();
@@ -46,22 +49,23 @@ const detailsOf = (item: z.infer<typeof feature>): PlaceDetails | undefined => {
   const point = pointOf(item);
   const website = p.website && /^https?:\/\//i.test(p.website) ? p.website : undefined;
   return { name: p.name, placeId: p.place_id, checkedAt: new Date().toISOString(),
-    address: p.formatted, phone: p.phone, website, openingHours: p.opening_hours,
+    address: p.formatted, phone: p.contact?.phone ?? p.phone, website, openingHours: p.opening_hours,
     timezone: p.timezone?.name, categories: p.categories,
+    cuisine: p.catering?.cuisine, diet: p.catering?.diet,
     paymentOptions: p.payment_options ?? p.payment,
-    reservation: p.reservation === 'required' || p.reservation === 'recommended' ? p.reservation : 'unknown',
+    reservation: p.catering?.reservation === 'required' || p.catering?.reservation === 'recommended'
+      ? p.catering.reservation : p.reservation === 'required' || p.reservation === 'recommended' ? p.reservation : 'unknown',
     ...(point ?? {}) };
 };
 
 export interface PlacesService {
   findExact(name: string, options?: { locality?: string; position?: Coordinates; requireDining?: boolean;
     maxDistanceMeters?: number }): Promise<PlaceDetails | undefined>;
-  resolveAnchor?(name: string, locality?: string, kind?: 'venue' | 'named'): Promise<PlaceAnchor | undefined>;
+  resolveAnchor?(name: string, locality?: string, kind?: 'venue' | 'named', nearPosition?: Coordinates): Promise<PlaceAnchor | undefined>;
   matchCandidate?(candidate: { name: string; position?: Coordinates; city?: string }, categories: string[]): Promise<MatchOutcome>;
   reverse?(position: Coordinates): Promise<{ street: string | null; neighborhood: string | null; city: string | null; timezone: string | null }>;
   details?(placeId: string): Promise<PlaceDetails | undefined>;
   walk10?(position: Coordinates): Promise<unknown | null>;
-  buildingPlaces?(placeId: string): Promise<{ name: string; placeId: string; position: Coordinates; categories: string[] }[]>;
   practicalLookup?(position: Coordinates, category: string): Promise<PlaceDetails[]>;
 }
 
@@ -82,17 +86,19 @@ export class GeoapifyClient implements PlacesService {
     if (!query || query.length > 300) return [];
     return providerData(geocoding, await this.get('/v1/geocode/search', { text: query, format: 'json', limit: 5 })).results;
   }
-  async resolveAnchor(name: string, locality?: string, kind: 'venue' | 'named' = 'named'): Promise<PlaceAnchor | undefined> {
+  async resolveAnchor(name: string, locality?: string, kind: 'venue' | 'named' = 'named', nearPosition?: Coordinates): Promise<PlaceAnchor | undefined> {
     const candidates = await this.geocode(name, locality);
     const plausible = candidates.filter((item) => {
       const match = nameMatches(item.name ?? '', name) || normalize(item.formatted ?? '').includes(normalize(name));
       const correctCity = !locality || normalize(item.formatted ?? '').includes(normalize(locality));
-      return match && correctCity && Boolean(coordinates(item)) && Boolean(item.place_id);
+      const point = coordinates(item);
+      return match && correctCity && Boolean(point) && Boolean(item.place_id)
+        && (!nearPosition || metersBetween(point!, nearPosition) <= 800);
     });
     // Confidence thresholds for venue names need calibration. A unique exact name with a matching
     // locality is safer than accepting a geocoder's top hit by score alone.
     let item = plausible.length === 1 ? plausible[0] : undefined;
-    if (!item && locality) {
+    if (!item && locality && !nearPosition) {
       const area = (await this.geocode(locality)).find((result) => result.place_id
         && ['city', 'district', 'suburb', 'county'].includes(result.result_type ?? ''));
       if (area?.place_id) {
@@ -145,7 +151,15 @@ export class GeoapifyClient implements PlacesService {
     const summary = detailsOf(acceptable[0]);
     if (!summary) return { status: 'unverified' };
     const details = await this.details(summary.placeId).catch(() => undefined);
-    return { status: 'confirmed', details: details ?? summary };
+    return { status: 'confirmed', details: details ? {
+      ...summary, ...details,
+      categories: details.categories ?? summary.categories,
+      cuisine: details.cuisine ?? summary.cuisine,
+      diet: details.diet ?? summary.diet,
+      address: details.address ?? summary.address,
+      latitude: details.latitude ?? summary.latitude,
+      longitude: details.longitude ?? summary.longitude,
+    } : summary };
   }
   async details(placeId: string): Promise<PlaceDetails | undefined> {
     const data = providerData(collection, await this.get('/v2/place-details', { id: placeId, features: 'details' }));
@@ -164,21 +178,23 @@ export class GeoapifyClient implements PlacesService {
       lat: position.latitude, lon: position.longitude, features: 'walk_10' }));
     return data.features.find((item) => item.properties.feature_type === 'walk_10')?.geometry ?? null;
   }
-  async buildingPlaces(placeId: string) {
-    const data = providerData(collection, await this.get('/v2/place-details', { id: placeId, features: 'building.places' }));
-    return data.features.filter((item) => item.properties.feature_type === 'building.places').flatMap((item) => {
-      const p = item.properties; const position = pointOf(item);
-      return p.name && p.place_id && position ? [{ name: p.name, placeId: p.place_id, position, categories: p.categories ?? [] }] : [];
-    });
-  }
   async practicalLookup(position: Coordinates, category: string): Promise<PlaceDetails[]> {
-    const data = providerData(collection, await this.get('/v2/places', { categories: category,
-      filter: `circle:${position.longitude},${position.latitude},1000`,
-      bias: `proximity:${position.longitude},${position.latitude}`, limit: 5 }));
     const categoryName: Record<string, string> = {
       'amenity.toilet': 'Restroom', 'service.financial.atm': 'ATM', 'healthcare.pharmacy': 'Pharmacy',
+      'commercial.books': 'Bookstore',
+      'commercial.video_and_music': 'Record store',
+      'commercial.hobby.games,commercial.toy_and_game': 'Game shop',
     };
-    return data.features.flatMap((item) => detailsOf({ ...item,
-      properties: { ...item.properties, name: item.properties.name ?? categoryName[category] } }) ?? []);
+    for (const radius of [1000, 5000]) {
+      const data = providerData(collection, await this.get('/v2/places', { categories: category,
+        filter: `circle:${position.longitude},${position.latitude},${radius}`,
+        bias: `proximity:${position.longitude},${position.latitude}`, limit: 20 }));
+      const found = data.features.flatMap((item) => detailsOf({ ...item,
+        properties: { ...item.properties, name: item.properties.name ?? categoryName[category] } }) ?? [])
+        .filter((item) => item.latitude !== undefined && item.longitude !== undefined)
+        .sort((left, right) => metersBetween(position, left as Coordinates) - metersBetween(position, right as Coordinates));
+      if (found.length) return found.slice(0, 5);
+    }
+    return [];
   }
 }

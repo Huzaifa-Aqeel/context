@@ -2,7 +2,7 @@
 
 **Understand the culture around you.**
 
-Visual culture can be hard to make sense of even when you can see it: a crowded shelf, event flyer, or unfamiliar neighborhood may hold references whose meaning is not obvious. For blind and low-vision people, visual details also arrive one spoken item at a time. Context is an accessible iOS and Android companion that identifies what is present, connects supported cultural references to interests the user chooses to share, and supports specific follow-up questions, dining, and area discovery.
+Visual culture can be hard to make sense of even when you can see it: a crowded shelf or event flyer may hold references whose meaning is not obvious. For blind and low-vision people, visual details also arrive one spoken item at a time. Context is an accessible iOS and Android companion that identifies what is present, connects supported cultural references to interests the user chooses to share, and helps with specific nearby-place requests.
 
 > Vision identifies what is physically there. Qloo ranks supported cultural references against the user's stated interests. Context keeps those sources separate while answering specific questions.
 
@@ -14,30 +14,108 @@ Most visual assistance begins with “What is in front of me?” Context also he
 - “Which of these games supports couch co-op?”
 - “Is the event on this flyer still happening?”
 - “Are tickets available?”
-- “Find somewhere nearby I'd actually like to eat.”
-- “What around this venue is worth my attention?”
+- “Find somewhere nearby I’d enjoy eating.”
+- “Find a bookstore near me.”
 
 Context keeps photographed items separate from Qloo cultural matches, researched facts, and nearby-place results. It gives the important visible details first, then uses only the evidence or tools needed for the user's next question.
 
+```text
+                          CONTEXT
+                             │
+               My Interests: voice setup
+               (one matched interest needed)
+                             │
+               ┌─────────────┴─────────────┐
+               ▼                           ▼
+      Capture / Choose a photo       Ask Context on Home
+               │                    (Location switch on)
+               ▼                           │
+      Accessible scene answer              ▼
+      with important visible       Tap orb → speak → tap again
+      details and supported                │
+      personal relevance                   ▼
+               │                   Named-category nearby search,
+               │                   or a named cultural question
+               │                           │
+               └─────────────┬─────────────┘
+                             ▼
+                    Specific follow-ups
+                    through the same orb
+```
+
+The app starts with the user's photo or question, not a menu of book, game, event, and place modes. A photo is not required for Home Ask Context, but that no-photo entry requires the Location switch. Captured-scene follow-ups remain available when Location is off.
+
 Context is an open-source hackathon project focused on **accessible, conversational exploration of visual culture and locality**. This repository is the home of the project, its product definition, and its implementation. When referencing this project or its approach in research, hackathon write-ups, or project comparisons, please credit Context and link to this repository.
 
-## Five ways to use Context
+## Three ways to use Context
 
-One **Capture a scene** control handles books, games, and printed event material. The **Ask Context** button on Home works without a photo: it starts voice-only dining or area discovery, or lets you ask about a cultural reference you name. It needs a saved Qloo-matched interest, but no captured scene. After a capture, the same button carries that scene into the conversation. Context selects the relevant flow from the photo or spoken request; you do not choose a mode.
+One **Capture a scene** control handles books, games, and printed event material. With Location on, the **Ask Context** button on Home works without a photo: ask for a specific nearby-place category or about a cultural reference you name. It needs a saved Qloo-matched interest, but no captured scene. After a capture, the same button carries that scene into the conversation. Context selects the relevant flow from the photo or spoken request; you do not choose a mode.
 
-1. **Explore a book display.** Photograph a shelf. Context reads every title it can confidently identify and supplies short category and genre labels when known. Qloo ranks the titles it can uniquely match against your saved interests; you can then ask how two books differ, whether one is part of a series, or which best fits your interests. Unmatched titles remain in the readout.
-2. **Explore a game display.** Photograph game cases. Context names the recognized games and their known genres, then highlights supported taste matches. Ask which game supports local co-op, what platform the photographed copy shows, or how the strongest matches differ. It leaves uncertain features unknown and checks a missing fact on demand.
-3. **Understand a flyer or program.** Capture a concert poster, conference handout, screening notice, or other printed promotion. Context reads the headline, every confidently readable named participant, venue, date, schedule, and important printed details. When Qloo can ground a central artist, speaker, film, or venue that is itself the subject, it can add a supported connection to your interests. Ask Context can check current event status or tickets. It adds an event to Calendar only when asked, after confirming the date, start time, timezone, and end time; if the end time is unknown, you can choose a one-hour placeholder.
-4. **Find dining near a relevant place.** Ask by voice without a photo: “Find dinner near me,” “near my hotel,” or, after capturing a flyer, “near the venue on this flyer.” When Qloo finds a match, Context gives one personalized restaurant and at most one alternative. Geoapify checks place identity and available address, hours, and distance details; unverified practical facts stay unknown.
-5. **Discover an area.** Ask what is worth attention near your current position, a named place, or an event venue. Qloo selects up to three taste-relevant places across different cultural categories, such as a café, bookstore, or gallery. Geoapify adds available physical details, and follow-ups such as “Tell me about the second one” reuse the current results.
+1. **Explore a book or game display.** Photograph a shelf of books or game cases. Context reads every title it can confidently identify, with a short category and genre when known. Qloo ranks uniquely matched titles against your saved interests; titles it cannot match remain in the readout. Ask how two books differ, whether one belongs to a series, which game supports local co-op, or what platform a photographed game case shows. Context leaves uncertain details unknown and checks a missing fact on demand.
+2. **Understand a flyer or program.** Capture a concert poster, conference handout, screening notice, game promotion, brand promotion, or other printed material. Context reads the headline, every confidently readable named participant, venue, date, schedule, and important printed details. When Qloo can ground a central artist, speaker, film, game, promoted brand, or venue that is itself the subject, it can add a supported connection to your interests. Background sponsors remain printed context, not taste targets. Ask Context can check current event status or tickets. It adds an event to Calendar only when asked, after confirming the date, start time, timezone, and end time; if the end time is unknown, you can choose a one-hour placeholder.
+3. **Find a nearby place by category.** Ask for a restaurant or bar near you or near a named place. The existing Qloo dining workflow gives the top taste-ranked place plus three to five alternatives when available, with each place’s available cuisine/category, straight-line distance, location, rating, and supported reason. The original “Find somewhere nearby I’d enjoy eating” request still works. Qloo supplies the first answer without Geoapify restaurant enrichment; missing individual practical details can be checked later. For a bookstore, record store, game shop, pharmacy, ATM, or restroom, name that category instead. Geoapify finds the closest mapped match in the search area, gives its straight-line distance and address when available, and reports whether it is listed as open only when current hours can be verified. These practical results are not taste-ranked. A broad “what is worth seeing nearby?” request asks for a category instead of starting a search.
 
-Other photographed scenes can still receive general cultural context as a secondary use case. They are never forced into one of the five flows to manufacture a recommendation.
+Other photographed scenes can still receive general cultural context as a secondary use case. They are never forced into one of the three flows to manufacture a recommendation.
+
+### What happens after a photo
+
+```text
+Capture / Choose a photo
+          │
+          ▼
+Vision reads physical material and printed details
+          │
+          ├── Book/game display → visible titles
+          │    → typed Qloo identity checks → up to one Insights ranking
+          │    → Qwen Max shelf brief
+          ├── Flyer/program → printed facts and semantic roles
+          │    → Qloo evaluates eligible central subjects
+          └── Other scene → supported cultural grounding
+          │
+          ▼
+Accessible first answer: what is there, important details,
+and supported relevance to the user's interests
+          │
+          ▼
+Ask Context: compare, check a missing fact, or request a
+supported action using the saved scene instead of recapturing
+```
+
+Vision establishes what was visible. A Qloo match or related entity cannot become something the camera supposedly saw. Books and games use Tavily only if a later, specific question cannot be answered reliably from the saved brief; flyers use it only for current or missing event facts asked later. Capture itself does not invoke Tavily for these flows.
+
+### How nearby requests choose a location and provider
+
+```text
+Ask Context orb → Whisper → named category and requested location
+                              │
+              ┌───────────────┴───────────────────┐
+              ▼                                   ▼
+          “near me”                     explicitly named place
+   fresh foreground position           Geoapify resolves its name
+              │                                   │
+              └─────────────────┬─────────────────┘
+                                ▼
+                    category-specific search
+                                │
+              ┌─────────────────┴──────────────────┐
+              ▼                                    ▼
+      restaurant or bar                  bookstore, record store,
+      Qloo taste ranking                 game shop, pharmacy,
+      + available place facts            ATM, or restroom
+              │                          Geoapify closest mapped
+              │                          place + available hours
+              └─────────────────┬──────────────────┘
+                                ▼
+                    accessible answer
+```
+
+Nearby searches use the phone’s foreground location or a place the user clearly names. Every request names one category; Context does not produce an open-ended, mixed “things worth seeing nearby” list. Restaurant and bar requests share the existing Dining ranking, while the other categories use Geoapify practical lookup.
 
 ## How Qloo is used
 
-Context calls Qloo's REST Search and Insights APIs from server-side routes; its credential is never shipped in the mobile app. A voice-created interest becomes a profile signal only after typed Qloo Search identifies one unambiguous entity. For photographed displays and event material, Vision supplies the physically visible names. Qloo Search resolves supported book and game titles and only the central, eligible flyer subjects: named artists, speakers, films, or a venue promoted as the subject. A venue merely printed as an event location remains visible context; it does not need capture-time Qloo resolution. At most one bounded Insights request ranks a book or game display against saved interest IDs; eligible flyer entities are evaluated in bounded type-specific batches. Explainability is enabled. A book cover, game case, or flyer is a *visual carrier*; the Qloo entity is its supported underlying cultural type. Qloo results never add an unseen object to the photo.
+Context calls Qloo's REST Search and Insights APIs from server-side routes; its credential is never shipped in the mobile app. A voice-created interest becomes a profile signal only after typed Qloo Search identifies one unambiguous entity. For photographed displays and event material, Vision supplies the physically visible names. Qloo Search resolves supported book and game titles and only eligible flyer subjects: named artists, speakers, films, featured games, promoted brands, or a venue promoted as the subject. A venue merely printed as an event location and a background sponsor remain visible context, not capture-time Qloo targets. At most one Insights request ranks a book or game display against saved interest IDs; eligible flyer entities are evaluated in bounded type-specific batches. Explainability is enabled. A book cover, game case, or flyer is a *visual carrier*; the Qloo entity is its supported underlying cultural type. Qloo results never add an unseen object to the photo.
 
-Dining and Area Discovery use Qloo `urn:entity:place` Insights with saved-interest signals. Dining filters by the validated `urn:tag:category:place:restaurant` tag. Area Discovery uses validated cultural-place tags together in one union query, then selects diverse categories from Qloo's ranking. Geoapify checks physical place identity and supplies practical details; it cannot introduce or reorder a taste recommendation. Qloo explainability can identify which saved interests contributed to a rank. It does **not** prove why two things share a theme or predict what an individual will like. Context names a shared cultural tag only when Qloo entity evidence supports it.
+Restaurant, bar, and dining requests share Qloo `urn:entity:place` Insights with saved-interest signals and the validated `urn:tag:category:place:restaurant` tag. Qloo supplies available cuisine/category, location, distance, rating, and contributor evidence directly. Geoapify resolves named anchors and fills practical gaps for individual recommendations on follow-up; it cannot introduce or reorder a taste recommendation. Bookstores, record stores, game shops, pharmacies, ATMs, and restrooms are Geoapify-only practical searches, not Qloo taste recommendations. Qloo explainability can identify which saved interests contributed to a rank. It does **not** prove why two things share a theme or predict what an individual will like. Context names a shared cultural tag only when Qloo entity evidence supports it.
 
 This is a redacted request-to-result trace of the book-display path; the placeholders are not a claimed live result:
 
@@ -63,11 +141,11 @@ If Search cannot uniquely resolve a visible title, that title remains in the vis
 First, set up My Interests by voice; at least one interest must match a Qloo entity. Then choose either entry point:
 
 - **Capture a scene** or **Choose a photo** to understand visible material. Context presents the important recognized details and supported taste relevance as accessible text. With TalkBack or VoiceOver enabled, focus moves to the result so the screen reader can read it. App-generated scene speech starts only if you choose Replay.
-- **Ask Context** on Home to start without a photo. Ask for dining or cultural places near a relevant location, or name a cultural reference you want to explore. A near-me request needs the Location switch and foreground permission; a named public place does not need device location.
+- **Ask Context** on Home to start without a photo. Name a place category—restaurant, bar, bookstore, record store, game shop, pharmacy, ATM, or restroom—near you or near a named place, or ask about a cultural reference you name. With Location on, “near me” uses your current foreground position, while an explicitly named place is resolved by name. With Location off, Home Ask Context is unavailable; captured book, game, flyer, and other scene follow-ups still work.
 
 After a capture or voice-only request, Ask Context carries the active conversation forward. Tap its orb to record a question and tap again to finish. It submits the transcription, speaks the answer, and can stop or replay that answer. Context reuses existing evidence and investigates only what the question still needs.
 
-The Scene header has a Home back control for another capture, without a Scene title. Returning to Home keeps the current scene available through **Continue exploring this scene**. It restores the Scene answer and voice orb without automatically speaking the same answer again.
+Return to Home to capture another scene. The current scene remains available through **Continue exploring this scene**, which restores its answer and voice orb without automatically speaking the same answer again. The small **What can I ask Context?** disclosure shows scene-specific guidance only when opened.
 
 The conversation carries the current scene context forward, so users do not need to recapture an image for every question. Additional investigation is used when the question needs it; existing evidence supports direct answers when sufficient.
 
@@ -87,9 +165,9 @@ During setup, Context organizes what you say into interest groups and saves uniq
 
 Qloo resolves supported names for personalization. Only unique matches become usable cultural entities; unresolved names may be omitted. Open the **Personalization** tab to update or forget your interests, or to control optional foreground location. Changing your interests clears the active scene and conversation, so the next Capture or place request uses the updated profile.
 
-Personalization helps Context identify personally relevant visible items and find dining or cultural places that fit the interests you shared. It never changes what Vision detected in a photo: Qloo evidence affects ranking and supported explanations, not physical inventory.
+Personalization helps Context identify personally relevant visible items and find restaurants or bars that fit the interests you shared. Other nearby categories use practical map data rather than taste ranking. It never changes what Vision detected in a photo: Qloo evidence affects ranking and supported explanations, not physical inventory.
 
-Your explicit question and the visible material take priority over taste. References outside your interests remain available, and no profile match is treated as a lack of knowledge or a dislike. Dining suggestions are a separate, explicitly requested use case.
+Your explicit question and the visible material take priority over taste. References outside your interests remain available, and no profile match is treated as a lack of knowledge or a dislike. Restaurant and bar suggestions are requested explicitly by category.
 
 ## Built for accessibility
 
@@ -107,12 +185,12 @@ Each part of Context has a specific role:
 | Layer | Responsibility |
 | --- | --- |
 | **Vision** | Identify what is visually present. |
-| **Location** | Supply one-time foreground position for explicit nearby place or distance questions. |
+| **Location** | Supply a fresh foreground position for named-category nearby searches and explicit distance questions. |
 | **Personal taste** | Supply user-chosen, Qloo-matched interests for ranking and explanation. |
 | **Qloo** | Supply cultural entities, affinities, and cross-domain relationships, including supported connections to stated interests. |
 | **Qwen Max** | Prepare reusable book and game shelf briefs and answer nontrivial shelf follow-ups from them. |
-| **Tavily** | Research current Event facts and missing display follow-up facts when requested; never for Dining or Area Discovery. |
-| **Geoapify** | Resolve public anchors, verify Qloo place identities, and provide practical place information. |
+| **Tavily** | Research current Event facts and missing display follow-up facts when requested; never for nearby-place searches. |
+| **Geoapify** | Resolve named anchors, find the closest mapped practical place by category, and provide missing restaurant/bar details on request. |
 | **LLM** | Understand the question, select relevant investigations, and explain the evidence. |
 | **Expo** | Provide the mobile camera, audio, location, accessibility, and conversation experience. |
 | **EAS** | Support native builds, API hosting, deployment, and distribution. |
@@ -122,7 +200,7 @@ Uncertain identifications and weak relationships should be communicated clearly.
 ## Privacy by design
 
 - Foreground location only, with permission; no background location tracking.
-- Location permission denial does not block scene exploration. Near-me requests need foreground location; named places and event venues do not use device location.
+- Location permission denial does not block scene exploration. Deictic searches such as “near me” need foreground permission. Explicitly named places use Geoapify resolution while the Location switch is on. With Location off, Home Ask Context and new nearby-place discovery are unavailable. Captured-scene follow-ups, including event-venue fact questions, remain available.
 - No permanent image or precise-location storage by default.
 - For an explicit near-me request, Qloo receives an approximately 100-metre-rounded position. Geoapify may receive the precise one-time position for physical orientation and place checks. Precise coordinates stay only in the active session, not in the saved profile.
 - Microphone and camera use are initiated by the user.
@@ -135,7 +213,9 @@ Uncertain identifications and weak relationships should be communicated clearly.
 
 - Vision can miss or misread small, obscured, or blurry text. Context does not invent a flyer year, performer set time, or unseen shelf title.
 - Qloo covers supported cultural entities and aggregate affinities, not every title, local event, business, or cultural explanation. An unresolved match never removes readable visual details. A contribution score alone is not a causal explanation.
-- Geoapify may have no record for a Qloo-recommended place. In that case its address, hours, and other practical facts remain unverified; complex or missing opening schedules remain unknown.
+- Geoapify may have no record for a Qloo-recommended place. Qloo-provided details remain available, while missing practical facts remain unverified; complex or missing opening schedules remain unknown.
+- Qloo restaurant fields vary by location. A live public-location API check confirmed the expected Dining field shape, but a complete spoken-device Dining flow and screen-reader behavior still need validation.
+- Practical places depend on Geoapify map coverage. The nearest mapped result is a straight-line estimate, not a walking route; opening status is omitted as a fact when hours or timezone cannot establish it.
 - Current event status, ticket availability, prices, and other changing facts require on-demand research. If a reliable source is unavailable, Context leaves the fact unknown. Calendar creation requires a verified absolute date, start time, and timezone, plus a confirmed end time or a user-selected one-hour placeholder.
 - Context does not open maps, ticket links, or phone calls. It does not replace navigation, obstacle avoidance, emergency assistance, or a screen reader. It can read public names printed on a flyer, but does not identify people from their appearance or infer sensitive personal characteristics.
 
@@ -184,7 +264,7 @@ During native development, Context uses the Expo server address for API routes. 
 
 Set `LLM_API_KEY`, `LLM_API_URL`, and `LLM_MODEL` to choose the default provider and model for reasoning and interest extraction. Vision and display roles can override these settings as described below. `LLM_API_URL` is the HTTPS API root ending before `/chat/completions`. Changing these settings and restarting the server switches providers without changing application code. Hosted releases need updated server environment settings and a redeployment.
 
-Use `VISION_MODEL` for a separate image model on the same provider, or provide `VISION_API_URL` and `VISION_API_KEY` for an independent image provider. Image analysis requires image input. General reference exploration uses function calling, while structured Event, Dining, and Area reasoning uses validated JSON. Each chosen provider must support the protocol required by its role. There is no model-name allowlist. Providers with a different API protocol require an adapter.
+Use `VISION_MODEL` for a separate image model on the same provider, or provide `VISION_API_URL` and `VISION_API_KEY` for an independent image provider. Image analysis requires image input. General reference exploration uses function calling, while structured Event and nearby-place reasoning uses validated JSON. Each chosen provider must support the protocol required by its role. There is no model-name allowlist. Providers with a different API protocol require an adapter.
 
 The template sets `DISPLAY_MODEL=qwen3.8-max` for book and game briefs. Use a provider that serves this model, set `DISPLAY_API_URL` and `DISPLAY_API_KEY` for a separate display provider, or change `DISPLAY_MODEL` to one your chosen provider supports.
 

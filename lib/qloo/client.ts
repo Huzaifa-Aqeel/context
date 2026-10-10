@@ -8,7 +8,6 @@ import { QLOO_PLACE_TAGS, classifyQlooPlace, type CulturalPlaceBucket } from '@/
 import { cachedShelfMatch, flyerResolutionKey, type ResolutionEntry } from './display-resolution-cache';
 import { displayCategories, type DisplayKind } from '@/lib/display/categories';
 import type { CulturalEvidence, Locality, LocationContext, ResolvedEntity, VisionEntity } from '@/types/context';
-import { metersBetween } from '@/lib/location/distance';
 
 const tagSchema = z.object({ id: z.string().optional(), tag_id: z.string().optional(), name: z.string(), type: z.string().optional() });
 const entitySchema = z.object({
@@ -20,9 +19,12 @@ const entitySchema = z.object({
     akas: z.array(z.object({ value: z.string() })).optional(),
     geocode: z.object({ name: z.string().optional(), city: z.string().optional(), admin1_region: z.string().optional(), country: z.string().optional() }).optional(),
     neighborhood: z.string().optional(),
+    address: z.string().nullable().optional(), phone: z.string().nullable().optional(),
+    business_rating: z.number().nullable().optional(),
+    primary_genre: z.object({ name: z.string() }).nullable().optional(),
   }).optional(),
   disambiguation: z.string().optional(),
-  query: z.object({ affinity: z.number().optional(), explainability: z.object({
+  query: z.object({ affinity: z.number().optional(), distance: z.number().optional(), explainability: z.object({
     'signal.interests.entities': z.array(z.object({ entity_id: z.string(), score: z.number() })).optional(),
   }).optional() }).optional(),
 });
@@ -291,16 +293,19 @@ export class QlooClient implements QlooService {
       if (typeOf(entity) !== 'urn:entity:place' || affinity === undefined || affinity < 0 || affinity > 1) return [];
       const tagIds = (entity.tags ?? []).flatMap((tag) => tag.tag_id ?? tag.id ?? []);
       return [{ qlooId: entity.entity_id, name: entity.name, radiusMeters, affinity, tagIds,
+        distanceMeters: entity.query?.distance, address: entity.properties?.address ?? undefined,
+        businessRating: entity.properties?.business_rating ?? undefined,
+        restaurantCategory: entity.properties?.primary_genre?.name, phone: entity.properties?.phone ?? undefined,
         latitude: entity.location?.lat, longitude: entity.location?.lon,
         city: entity.properties?.geocode?.city,
         bucket: classifyQlooPlace(tagIds),
-        cuisineTags: (entity.tags ?? []).filter((tag) => /^urn:tag:genre:restaurant:/i.test(tag.tag_id ?? tag.id ?? '')).map((tag) => tag.name).slice(0, 5),
+        cuisineTags: (entity.tags ?? []).filter((tag) => /^urn:tag:cuisine:|^urn:tag:genre:place:restaurant:/i.test(tag.tag_id ?? tag.id ?? '') && !/restaurant$/i.test(tag.tag_id ?? tag.id ?? '')).map((tag) => tag.name).slice(0, 5),
         contributingInterestIds: [...new Set(entity.query?.explainability?.['signal.interests.entities']?.filter((entry) =>
           interestIds.includes(entry.entity_id) && entry.score >= 0.1).sort((a, b) => b.score - a.score).map((entry) => entry.entity_id) ?? [])] }];
     }).map((item) => [item.qlooId, item])).values()];
   }
   async recommendDining(position: { latitude: number; longitude: number }, interests: TasteEntity[],
-    options: { device?: boolean; extraSignalId?: string; weekday?: string } = {}): Promise<DiningRecommendation[]> {
+    options: { device?: boolean } = {}): Promise<DiningRecommendation[]> {
     const interestIds = [...new Set(interests.map((item) => item.id))];
     if (!interestIds.length || !Number.isFinite(position.latitude) || !Number.isFinite(position.longitude)
       || Math.abs(position.latitude) > 90 || Math.abs(position.longitude) > 180) return [];
@@ -309,9 +314,8 @@ export class QlooClient implements QlooService {
       const response = providerData(insightsSchema, await this.http.json('/v2/insights', {
         'filter.type': 'urn:entity:place', 'filter.tags': QLOO_PLACE_TAGS.restaurant,
         'filter.location': point, 'filter.location.radius': radiusMeters,
-        'signal.interests.entities': [...interestIds, ...(options.extraSignalId ? [options.extraSignalId] : [])],
+        'signal.interests.entities': interestIds,
         'feature.explainability': true, sort_by: 'affinity', take: 8,
-        ...(options.weekday ? { 'filter.hours': options.weekday } : {}),
       }));
       if (response.success === false) continue;
       const candidates = this.placeCandidates(response.results.entities ?? [], interestIds, radiusMeters)
@@ -336,35 +340,6 @@ export class QlooClient implements QlooService {
       sort_by: 'affinity', take: options.take ?? (options.bucket ? 5 : 30),
     }));
     return response.success === false ? [] : this.placeCandidates(response.results.entities ?? [], interestIds, radiusMeters);
-  }
-  async rankBoundedPlaces(ids: string[], interests: TasteEntity[]): Promise<PlaceRecommendation[]> {
-    const unique = [...new Set(ids)].slice(0, 12);
-    const interestIds = [...new Set(interests.map((item) => item.id))];
-    if (!unique.length || !interestIds.length) return [];
-    const response = providerData(insightsSchema, await this.http.json('/v2/insights', {
-      'filter.type': 'urn:entity:place', 'filter.results.entities': unique.join(','),
-      'signal.interests.entities': interestIds, 'feature.explainability': true,
-      sort_by: 'affinity', take: unique.length,
-    }));
-    return response.success === false ? [] : this.placeCandidates((response.results.entities ?? []).filter((item) => unique.includes(item.entity_id)), interestIds, 0);
-  }
-  async resolvePlaceCandidates(items: { name: string; latitude: number; longitude: number; city?: string }[]) {
-    const resolved: { name: string; qlooId: string; latitude: number; longitude: number }[] = [];
-    for (const item of items.slice(0, 12)) {
-      try {
-        const result = providerData(lookupSchema, await this.search({ query: item.name, types: 'urn:entity:place', take: '8' }));
-        const candidates = Array.isArray(result.results) ? result.results : result.results.entities;
-        const matching = candidates.filter((candidate) => typeOf(candidate) === 'urn:entity:place'
-          && normalized(candidate.name) === normalized(item.name)
-          && candidate.location?.lat !== undefined && candidate.location.lon !== undefined
-          && metersBetween(item, { latitude: candidate.location.lat, longitude: candidate.location.lon }) <= 300
-          && (!item.city || !candidate.properties?.geocode?.city
-            || normalized(candidate.properties.geocode.city) === normalized(item.city)));
-        if (matching.length === 1) resolved.push({ name: item.name, qlooId: matching[0].entity_id,
-          latitude: item.latitude, longitude: item.longitude });
-      } catch { /* A failed lookup does not invalidate other mapped businesses. */ }
-    }
-    return resolved;
   }
   async getEntityFact(entityId: string): Promise<Fact | undefined> {
     if (!this.facts.has(entityId)) await this.lookup([entityId]);

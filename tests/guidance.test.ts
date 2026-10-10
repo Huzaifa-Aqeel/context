@@ -16,6 +16,13 @@ test('each prioritized capture flow has one distinct Ask Context capability answ
   assert.equal(new Set(Object.values(sceneGuidance)).size, 3);
   assert.equal(isGuidanceText(capabilityAnswer(book)), true);
   assert.equal(isGuidanceText(capabilityAnswer({} as Scene)), true);
+  assert.equal(capabilityAnswer({ origin: 'conversation' } as Scene), capabilityAnswer(null));
+  assert.match(capabilityAnswer(null), /near me/);
+  assert.match(capabilityAnswer(null), /restroom/);
+  assert.match(capabilityAnswer(null), /bookstore/);
+  assert.match(capabilityAnswer(null), /bar near Union Square/);
+  assert.doesNotMatch(capabilityAnswer(null), /what is worth seeing near you/i);
+  assert.match(capabilityAnswer(null), /near me/);
   assert.equal(isCapabilityQuestion('What can I ask?'), true);
   assert.equal(isCapabilityQuestion('What can you do with this?'), true);
   assert.equal(isCapabilityQuestion('What is this book about?'), false);

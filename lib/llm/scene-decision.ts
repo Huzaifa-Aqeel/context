@@ -4,15 +4,15 @@ import type { AskRequest, Scene } from '@/types/context';
 export const sceneDecisionSchema = z.object({
   scope: z.enum(['event', 'dining', 'area', 'general']),
   next: z.enum(['answer', 'clarify', 'event_research', 'venue_details', 'dining_discovery', 'dining_details',
-    'area_discovery', 'area_more', 'area_details', 'mall_discovery', 'practical_lookup', 'qloo_connection', 'calendar']),
+    'area_discovery', 'area_more', 'area_details', 'practical_lookup', 'qloo_connection', 'calendar']),
   answer: z.string().trim().min(1).max(800).optional(),
   evidenceIds: z.array(z.string().trim().min(1).max(100)).max(8).default([]),
   researchKind: z.enum(['status', 'schedule', 'tickets', 'official_page', 'calendar', 'reviews']).optional(),
-  detail: z.enum(['address', 'phone', 'opening', 'distance', 'walking', 'accessibility']).optional(),
-  anchor: z.enum(['event_venue', 'device', 'named']).optional(),
+  detail: z.enum(['address', 'phone', 'opening', 'distance', 'walking', 'accessibility', 'cuisine', 'rating']).optional(),
+  anchor: z.enum(['device', 'named']).optional(),
   anchorName: z.string().trim().min(1).max(300).optional(),
   anchorLocality: z.string().trim().min(1).max(300).optional(),
-  practicalCategory: z.enum(['restroom', 'atm', 'pharmacy']).optional(),
+  practicalCategory: z.enum(['bookstore', 'record_store', 'game_shop', 'restroom', 'atm', 'pharmacy']).optional(),
   targetId: z.string().trim().min(1).max(500).optional(),
   pairIds: z.tuple([z.string().trim().min(1).max(500), z.string().trim().min(1).max(500)]).optional(),
 });
@@ -29,7 +29,7 @@ export type SceneReasoningInput = {
   messages: AskRequest['messages'];
   scene?: Scene;
   interests: { id: string; name: string }[];
-  available: { research: boolean; places: boolean; qloo: boolean; calendar: boolean; devicePosition: boolean };
+  available: { research: boolean; places: boolean; qloo: boolean; calendar: boolean; devicePosition: boolean; locationEnabled: boolean };
   completed?: Pick<SceneDecision, 'scope' | 'next' | 'targetId' | 'researchKind' | 'detail'>;
 };
 

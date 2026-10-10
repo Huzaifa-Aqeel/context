@@ -13,6 +13,8 @@ export type EventRanking = { resolved: ResolvedEntity[]; ranked: { entityId: str
   exactInterest: boolean; contributingInterestIds: string[]; sharedTag?: string }[] };
 export type PlaceRecommendation = { qlooId: string; name: string; radiusMeters: number;
   affinity?: number; contributingInterestIds: string[]; cuisineTags: string[];
+  distanceMeters?: number; address?: string; businessRating?: number;
+  restaurantCategory?: string; phone?: string;
   latitude?: number; longitude?: number; city?: string; tagIds?: string[];
   bucket?: CulturalPlaceBucket };
 export type DiningRecommendation = PlaceRecommendation;
@@ -24,12 +26,9 @@ export interface QlooService {
   rankEvent?(visible: VisionEntity[], interests: TasteEntity[], cache?: ResolutionEntry[], printedLocality?: Locality): Promise<EventRanking>;
   rerankEvent?(resolved: ResolvedEntity[], interests: TasteEntity[]): Promise<EventRanking>;
   recommendDining?(position: { latitude: number; longitude: number }, interests: TasteEntity[],
-    options?: { device?: boolean; extraSignalId?: string; weekday?: string }): Promise<DiningRecommendation[]>;
+    options?: { device?: boolean }): Promise<DiningRecommendation[]>;
   discoverArea?(position: { latitude: number; longitude: number }, interests: TasteEntity[],
     options?: { device?: boolean; radiusMeters?: 800 | 2000; bucket?: CulturalPlaceBucket; take?: number }): Promise<PlaceRecommendation[]>;
-  rankBoundedPlaces?(ids: string[], interests: TasteEntity[]): Promise<PlaceRecommendation[]>;
-  resolvePlaceCandidates?(items: { name: string; latitude: number; longitude: number; city?: string }[]): Promise<
-    { name: string; qlooId: string; latitude: number; longitude: number }[]>;
   analyzeTaste(interests: TasteEntity[], references: TasteEntity[]): Promise<Pick<TasteContext, 'connections' | 'warnings'>>;
   getEntityFact(entityId: string): Promise<NonNullable<CulturalEvidence['facts']>[number] | undefined>;
   resolveEntities(entities: VisionEntity[], locality?: Locality): Promise<ResolvedEntity[]>;

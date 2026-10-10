@@ -130,7 +130,7 @@ export const placeDetailsSchema = z.object({
   latitude: z.number().min(-90).max(90).optional(), longitude: z.number().min(-180).max(180).optional(),
   timezone: shortText.optional(), website: z.url().max(1000).optional(), openingHours: z.string().max(1000).optional(),
   paymentOptions: z.unknown().optional(), reservation: z.enum(['required', 'recommended', 'unknown']).optional(),
-  categories: z.array(shortText).max(30).optional(),
+  categories: z.array(shortText).max(30).optional(), cuisine: shortText.optional(), diet: shortText.optional(),
 });
 export const placeAnchorSchema = z.object({
   kind: z.enum(['device', 'venue', 'named']), name: shortText.nullable(),
@@ -138,18 +138,12 @@ export const placeAnchorSchema = z.object({
   timezone: shortText.nullable(), source: z.enum(['foreground_location', 'event_scene', 'geoapify_geocode']),
   confidence: scoreSchema.nullable(), placeId: shortText.optional(),
 });
-export const placeTimeContextSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('now'), timezone: shortText }),
-  z.object({ kind: z.literal('requested'), timestamp: z.iso.datetime({ offset: true }), timezone: shortText }),
-  z.object({ kind: z.literal('before_event'), eventStart: z.iso.datetime({ offset: true }).nullable(),
-    requestedDiningTime: z.iso.datetime({ offset: true }).nullable(), timezone: shortText }),
-  z.object({ kind: z.literal('after_event'), eventEnd: z.iso.datetime({ offset: true }).nullable(),
-    requestedDiningTime: z.iso.datetime({ offset: true }).nullable(), timezone: shortText }),
-]);
 export const placeCandidateSchema = z.object({
   qlooId: shortText, name: shortText, radiusMeters: z.number().int().min(0).max(5000),
   affinity: scoreSchema.optional(), contributingInterestIds: z.array(shortText).max(100),
   cuisineTags: z.array(shortText).max(5), tagIds: z.array(shortText).max(50).optional(),
+  distanceMeters: z.number().min(0).optional(), address: shortText.optional(),
+  businessRating: z.number().min(0).max(5).optional(), restaurantCategory: shortText.optional(), phone: shortText.optional(),
   latitude: z.number().min(-90).max(90).optional(), longitude: z.number().min(-180).max(180).optional(),
   city: shortText.optional(), bucket: z.enum(['cafe', 'bookstore', 'record_store', 'museum_gallery', 'live_music', 'park', 'other']).optional(),
 });
@@ -177,10 +171,9 @@ export const diningContextSchema = z.object({
   profileSignature: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   anchor: z.discriminatedUnion('kind', [
     z.object({ kind: z.literal('device') }),
-    z.object({ kind: z.literal('event_venue'), name: shortText, placeId: shortText }),
   ]).optional(),
-  resolvedAnchor: placeAnchorSchema.optional(), timeContext: placeTimeContextSchema.optional(),
-  candidates: z.array(placeCandidateSchema).max(8), selectedIds: z.array(shortText).max(2).optional(),
+  resolvedAnchor: placeAnchorSchema.optional(),
+  candidates: z.array(placeCandidateSchema).max(8), selectedIds: z.array(shortText).max(6).optional(),
   matches: z.array(placeMatchSchema).max(8).optional(),
   walk10Geometry: z.unknown().optional(),
   discoveredAt: z.iso.datetime(),

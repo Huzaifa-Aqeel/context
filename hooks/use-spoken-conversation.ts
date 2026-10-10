@@ -1,8 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import { useIsFocused } from 'expo-router';
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder, useAudioRecorderState } from 'expo-audio';
 import { clearSpokenOutput, getSpeechState, speakResponse } from '@/lib/audio/playback';
+import { waitForAppActive } from '@/lib/audio/foreground';
+import { recordingFormData } from '@/lib/audio/upload';
 import { postApi } from '@/lib/api/client';
 import { discardTemporaryFile } from '@/lib/images';
 import { ResponseSilence, VoiceConversation, type ConversationState } from '@/lib/taste/conversation';
@@ -66,7 +68,7 @@ export function useSpokenConversation(options: SpokenConversationOptions) {
         permissionUI.current = true;
         const work = requestRecordingPermissionsAsync(); pendingPermission.current = work;
         let permission;
-        try { permission = await work; }
+        try { permission = await work; await waitForAppActive(signal); }
         finally { if (pendingPermission.current === work) pendingPermission.current = null; permissionUI.current = false; }
         check(signal);
         if (!permission.granted) throw new Error('Microphone access is off. You can enable it in your device settings and start again.');
@@ -108,9 +110,7 @@ export function useSpokenConversation(options: SpokenConversationOptions) {
       },
       save: async (uri, signal) => {
         check(signal);
-        const form = new FormData();
-        if (Platform.OS === 'web') form.append('audio', await (await fetch(uri, { signal })).blob(), `${options.filename}.webm`);
-        else form.append('audio', { uri, name: `${options.filename}.m4a`, type: 'audio/mp4' } as unknown as Blob);
+        const form = await recordingFormData(uri, options.filename, signal);
         check(signal);
         const transcript = await postApi('/api/audio/transcribe', form, transcriptionSchema, signal); check(signal);
         return options.saveTranscript(transcript.text, signal, (save) => {
@@ -125,11 +125,11 @@ export function useSpokenConversation(options: SpokenConversationOptions) {
   });
   useEffect(() => {
     mounted.current = true;
-    const app = AppState.addEventListener('change', (status) => { if (status !== 'active' && !(status === 'inactive' && permissionUI.current)) void conversation.cancel(); });
+    const app = AppState.addEventListener('change', (status) => { if (status !== 'active' && !permissionUI.current) void conversation.cancel(); });
     const session = useContextStore.subscribe((context, previous) => { if (context.generation !== previous.generation && !ownSave.current) void conversation.cancel(); });
     return () => { mounted.current = false; app.remove(); session(); void conversation.cancel(); };
   }, [conversation]);
-  useEffect(() => { if (!focused) void conversation.cancel(); }, [conversation, focused]);
+  useEffect(() => { if (!focused && !permissionUI.current) void conversation.cancel(); }, [conversation, focused]);
   useEffect(() => {
     if (state.phase !== 'listening') return;
     const timer = setInterval(() => {

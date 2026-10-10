@@ -8,6 +8,7 @@ type ContextState = {
   recordingOwner: string | null; beginRecording: (owner: string) => boolean; endRecording: (owner: string) => void;
   image: string | null; scene: Scene | null; locality: Locality | null; localityEligible: boolean;
   locationEnabled: boolean; setLocationEnabled: (enabled: boolean) => void;
+  homeAskTipSeen: boolean; markHomeAskTipSeen: () => void;
   question: string; lastQuestion: string; setQuestion: (question: string) => void;
   profile: TasteProfile | null; tasteContext: TasteContext | null; strategy: 'balanced' | 'familiar' | 'discover';
   interests: StructuredInterests | null; saveInterests: (interests: StructuredInterests, profile: TasteProfile | null) => void;
@@ -46,6 +47,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
   markSceneAnnounced: (sceneId) => set((state) => state.scene?.id === sceneId ? { announcedSceneId: sceneId } : {}),
   toggleSceneGuidance: (sceneId) => set((state) => state.scene?.id === sceneId
     ? { guidanceOpenSceneId: state.guidanceOpenSceneId === sceneId ? null : sceneId } : {}),
+  markHomeAskTipSeen: () => set({ homeAskTipSeen: true }),
   saveInterests: (interests, profile) => set((state) => ({ ...emptyExploration(),
     interests, profile, tasteContext: null, tasteError: null, generation: state.generation + 1 })),
   updateInterests: (interests, profile) => set((state) => ({ ...emptyExploration(),
@@ -57,7 +59,7 @@ export const useContextStore = create<ContextState>((set, get) => ({
     tasteContext: null, tasteError: null, strategy: 'balanced', generation: state.generation + 1 })),
   setTasteContext: (tasteContext) => set((state) => state.profile?.signature === tasteContext.profileSignature ? { tasteContext, tasteError: null } : {}),
   setStrategy: (strategy) => set((state) => ({ strategy, generation: state.generation + 1 })),
-  image: null, scene: null, announcedSceneId: null, guidanceOpenSceneId: null, locality: null, localityEligible: true, locationEnabled: false, messages: [], autoSpeak: true, locationContext: null, generation: 0, speechPreferences: defaultSpeechPreferences,
+  image: null, scene: null, announcedSceneId: null, guidanceOpenSceneId: null, locality: null, localityEligible: true, locationEnabled: false, homeAskTipSeen: false, messages: [], autoSpeak: true, locationContext: null, generation: 0, speechPreferences: defaultSpeechPreferences,
   setLocationEnabled: (locationEnabled) => set((state) => ({ locationEnabled,
     ...(locationEnabled ? {} : { locality: null, locationContext: null,
       ...(state.scene?.dining?.resolvedAnchor?.kind === 'device' || state.scene?.dining?.anchor?.kind === 'device'
@@ -85,10 +87,11 @@ export const useContextStore = create<ContextState>((set, get) => ({
     profile: preferences.profile, interests: preferences.interests,
     resolutionCache: preferences.resolutionCache,
     locationEnabled: preferences.locationEnabled,
+    homeAskTipSeen: preferences.homeAskTipSeen,
     speechPreferences: preferences.speechPreferences, tasteContext: null, tasteError: null,
     generation: state.generation + 1,
   })),
-  clearSession: () => set((state) => ({ question: '', lastQuestion: '', image: null, scene: null, announcedSceneId: null, guidanceOpenSceneId: null, locality: null, localityEligible: true, locationEnabled: false, locationContext: null, profile: null, interests: null, resolutionCache: undefined, tasteContext: null, tasteError: null, strategy: 'balanced', messages: [], generation: state.generation + 1 })),
+  clearSession: () => set((state) => ({ question: '', lastQuestion: '', image: null, scene: null, announcedSceneId: null, guidanceOpenSceneId: null, locality: null, localityEligible: true, locationEnabled: false, homeAskTipSeen: false, locationContext: null, profile: null, interests: null, resolutionCache: undefined, tasteContext: null, tasteError: null, strategy: 'balanced', messages: [], generation: state.generation + 1 })),
 }));
 
 export function assertCurrentSession(generation: number) {
