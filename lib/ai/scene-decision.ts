@@ -13,6 +13,8 @@ export function sceneEvidence(input: SceneReasoningInput): Record<string, string
   const event = scene.event;
   if (event) {
     const visual = event.visual;
+    add('flyer:kind', visual.kind);
+    add('flyer:primary_subject', visual.primarySubject?.name);
     add('event:title', visual.title);
     add('event:date', visual.dateText);
     add('event:start', [visual.timeText, visual.timezoneText].filter(Boolean).join(' '));
@@ -25,8 +27,11 @@ export function sceneEvidence(input: SceneReasoningInput): Record<string, string
     visual.printedDetails?.forEach((detail, index) => add(`event:printed:${index}`, detail));
     for (const item of event.ranking.slice(0, 12)) {
       const interests = item.contributingInterestIds.flatMap((id) => input.interests.find((interest) => interest.id === id)?.name ?? []);
+      const visible = scene.culturalEvidence.entities.find((entity) => entity.qlooId === item.entityId);
+      const sameTypeRank = event.ranking.filter((candidate) => scene.culturalEvidence.entities.some((entity) =>
+        entity.qlooId === candidate.entityId && entity.qlooType === visible?.qlooType)).findIndex((candidate) => candidate.entityId === item.entityId) + 1;
       add(`qloo:${item.entityId}`, item.exactInterest ? `${item.name} is already an exact saved interest.`
-        : `${item.name}; rank ${event.ranking.indexOf(item) + 1} among the named visible references; contributing interests: ${interests.join(', ') || 'unknown'}. Ranking is aggregate affinity, not a proven shared theme.${item.sharedTag ? ` Qloo assigns ${item.sharedTag} to this reference and each listed contributing interest.` : ''}`);
+        : `${item.name}; printed role: ${visible?.role ?? 'unknown'}; Qloo type: ${visible?.qlooType ?? 'unknown'}; within-type rank: ${sameTypeRank || 'unknown'}; contributing interests: ${interests.join(', ') || 'unknown'}. Independent Qloo types do not share a comparable ranking. Contributors do not prove a shared theme.`);
     }
     event.researchedFacts.slice(-12).forEach((fact, index) => {
       if (['status', 'tickets', 'schedule'].includes(fact.kind) && !fresh(fact.retrievedAt)) return;
@@ -39,7 +44,6 @@ export function sceneEvidence(input: SceneReasoningInput): Record<string, string
     const anchorName = dining.resolvedAnchor?.name ?? (dining.anchor?.kind === 'event_venue' ? dining.anchor.name : undefined);
     add('dining:anchor', anchorName ? `${dining.resolvedAnchor?.kind ?? 'venue'}: ${anchorName}` : 'The user explicitly requested dining near their current position.');
     for (const [index, item] of dining.candidates.filter((candidate) => !dining.selectedIds || dining.selectedIds.includes(candidate.qlooId)).entries()) {
-      if (dining.profileSignature && input.profileSignature && dining.profileSignature !== input.profileSignature) continue;
       const interests = item.contributingInterestIds.flatMap((id) => input.interests.find((interest) => interest.id === id)?.name ?? []);
       add(`dining:${item.qlooId}`, `${index === 0 ? 'Primary' : 'Alternative'}: ${item.name}; Qloo-ranked for saved interests; contributing interests: ${interests.join(', ') || 'unknown'}; cuisine tags: ${item.cuisineTags.join(', ') || 'unknown'}; radius: ${item.radiusMeters / 1000} km straight-line. Qloo affinity is not proof of a specific cuisine preference.`);
     }
@@ -52,7 +56,6 @@ export function sceneEvidence(input: SceneReasoningInput): Record<string, string
     add('area:presented', area.presentedIds.map((id, index) =>
       `${index + 1}: ${areaCandidates.find((item) => item.qlooId === id)?.name ?? id} (${id})`).join('; '));
     areaCandidates.slice(0, 18).forEach((item, index) => {
-      if (area.profileSignature && input.profileSignature && area.profileSignature !== input.profileSignature) return;
       const interests = item.contributingInterestIds.flatMap((id) => input.interests.find((interest) => interest.id === id)?.name ?? []);
       add(`area:${item.qlooId}`, `${index + 1} in Qloo ranking: ${item.name}; category: ${item.bucket ?? 'unknown'}; contributing interests: ${interests.join(', ') || 'unknown'}; already presented: ${area.presentedIds.includes(item.qlooId)}`);
     });

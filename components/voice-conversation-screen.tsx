@@ -7,6 +7,7 @@ import { VoiceOrb } from './voice-orb';
 
 type VoiceSession = {
   phase: VoicePhase;
+  silentSpeech?: boolean;
   orbVisible: boolean;
   busy: boolean;
   otherRecording: boolean;
@@ -16,15 +17,19 @@ type VoiceSession = {
   end: () => void;
 };
 
-export function VoiceConversationScreen({ orbLabel, modeControl, voice }: {
+export function VoiceConversationScreen({ orbLabel, modeControl, voice, directRecording = false, idleHint, listeningHint }: {
   orbLabel: string;
   modeControl: ReactNode;
   voice: VoiceSession;
+  directRecording?: boolean;
+  idleHint?: string;
+  listeningHint?: string;
 }) {
   const focused = useIsFocused();
   useEffect(() => {
-    if (focused && voice.message && Platform.OS === 'ios' && voice.phase !== 'speaking') AccessibilityInfo.announceForAccessibility(voice.message);
-  }, [focused, voice.message, voice.phase]);
+    if (focused && voice.message && voice.phase !== 'speaking' && voice.message !== 'Getting ready…'
+      && (voice.silentSpeech || directRecording || Platform.OS === 'ios')) AccessibilityInfo.announceForAccessibility(voice.message);
+  }, [directRecording, focused, voice.message, voice.phase, voice.silentSpeech]);
   const speaking = voice.phase === 'speaking';
   const listening = voice.phase === 'listening';
   const canStop = speaking || listening;
@@ -35,14 +40,16 @@ export function VoiceConversationScreen({ orbLabel, modeControl, voice }: {
     <View style={{ alignItems: 'center', justifyContent: 'center', gap: 16 }}>
       <Text accessibilityElementsHidden importantForAccessibility="no" style={[styles.body, { fontWeight: '700', alignSelf: 'stretch' }]}>{label}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={label}
-        accessibilityHint={listening ? 'Stops recording and saves your response.' : speaking ? 'Stops this conversation.' : 'Hear a prompt, then speak one response. Tap again to finish.'}
+        accessibilityHint={directRecording
+          ? listening ? listeningHint ?? 'Double tap to finish and submit.' : idleHint ?? 'Double tap to start recording.'
+          : listening ? 'Stops recording and saves your response.' : speaking ? 'Stops this conversation.' : 'Hear a prompt, then speak one response. Tap again to finish.'}
         accessibilityState={{ disabled: unavailable, busy: voice.phase === 'processing' }}
         disabled={unavailable}
         onPress={canStop ? voice.end : voice.start}
         style={({ pressed }) => ({ alignItems: 'center', opacity: pressed ? 0.75 : 1, borderRadius: 20, borderWidth: 2, borderColor: pressed ? colors.accent : 'transparent' })}>
         <VoiceOrb phase={voice.phase} level={voice.level} />
       </Pressable>
-      {voice.message ? <Text accessibilityLiveRegion={focused && voice.phase !== 'speaking' ? 'polite' : 'none'} style={[styles.body, { textAlign: 'center' }]}>{voice.message}</Text> : null}
+      {voice.message ? <Text accessibilityLiveRegion={focused && voice.phase !== 'speaking' && !voice.silentSpeech && !directRecording ? 'polite' : 'none'} style={[styles.body, { textAlign: 'center' }]}>{voice.message}</Text> : null}
     </View>
   </Screen>;
 }

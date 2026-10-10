@@ -119,17 +119,12 @@ test('nontrivial shelf follow-up takes exactly one model call with retained brie
   assert.equal(result.scene?.summary, bookScene.summary);
 });
 
-test('profile change reranks saved IDs and rebuilds brief without Search or Vision', async () => {
+test('an old shelf cannot be reused after a profile change', async () => {
   const changed = { signature: 'b'.repeat(64), entities: [{ id: 'foundation', name: 'Foundation', type: 'urn:entity:book' }] };
-  let reranks = 0, briefs = 0;
   const services = providers();
-  services.qloo.rerankShelf = async (_kind, resolved) => { reranks++; return { resolved, ranked: [
-    { entityId: 'foundation', contributingInterestIds: ['foundation'] }, { entityId: 'dune', affinity: 0.4, contributingInterestIds: ['foundation'] },
-  ], complete: false }; };
-  services.llm.createShelfBrief = async () => { briefs++; return { labels: [], items: [] }; };
-  const first = await explore({ scene: bookScene, profile: changed, question: 'Which book ranked first for my interests?', mode: 'scene', messages: [] }, services);
-  assert.match(first.answer, /^Foundation ranks highest/);
-  assert.equal(reranks, 1); assert.equal(briefs, 1);
-  const second = await explore({ scene: first.scene, profile: changed, question: 'Which book ranked first for my interests?', mode: 'scene', messages: [] }, services);
-  assert.equal(second.answer, first.answer); assert.equal(reranks, 1); assert.equal(briefs, 1);
+  services.qloo.rerankShelf = noCall;
+  services.llm.createShelfBrief = noCall;
+  const result = await explore({ scene: bookScene, profile: changed, question: 'Which book ranked first for my interests?', mode: 'scene', messages: [] }, services);
+  assert.match(result.answer, /Capture a new scene/);
+  assert.equal(result.scene, undefined);
 });

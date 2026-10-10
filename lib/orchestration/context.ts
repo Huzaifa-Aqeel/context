@@ -13,7 +13,7 @@ import { contextInstructions } from '@/prompts/context';
 import { evidenceSchema, locationContextSchema, resolvedEntitySchema, visionEntitySchema } from '@/schemas/context';
 import type { Answer, AskRequest, CulturalEvidence, Locality, Scene } from '@/types/context';
 import type { TasteProfile } from '@/types/taste';
-import type { ShelfResolutionEntry } from '@/lib/qloo/display-resolution-cache';
+import type { ResolutionEntry } from '@/lib/qloo/display-resolution-cache';
 import { modes, type UserMode } from '@/lib/modes';
 import { asksAboutArea, asksAboutTaste, asksForConnections, asksForDiningDiscovery, asksForAreaDiscovery, asksForPracticalLookup, asksForRecommendations, namedInQuestion, visibleReferences } from './intent';
 import { questionNamesEntity, visualLead, visualName } from './visual';
@@ -49,8 +49,13 @@ export function mergeEvidence(previous: CulturalEvidence, incoming: CulturalEvid
 }
 
 export async function explore(request: AskRequest, providers: Providers): Promise<Answer> {
+  // A profile edit ends the active capture. Reject an in-flight or replayed signed scene as well.
+  if (request.scene && [request.scene.shelf?.profileSignature, request.scene.event?.profileSignature,
+    request.scene.dining?.profileSignature, request.scene.area?.profileSignature]
+    .some((signature) => signature && signature !== request.profile?.signature))
+    return { answer: 'Your interests changed. Capture a new scene to explore it with your current profile.', confidence: 'low' };
   if (request.useLocality === false) request = { ...request, locality: undefined, locationContext: undefined, scene: request.scene ? { ...request.scene, locationContext: undefined } : undefined };
-  if (request.scene?.shelf) return exploreShelf(request, providers.displayLlm ?? providers.shelfLlm ?? providers.llm, providers.qloo, providers.research);
+  if (request.scene?.shelf) return exploreShelf(request, providers.displayLlm ?? providers.shelfLlm ?? providers.llm, providers.research);
   if ((request.scene?.event || request.scene?.dining || request.scene?.area
     || asksForDiningDiscovery(request.question) || asksForAreaDiscovery(request.question)
     || asksForPracticalLookup(request.question)) && providers.sceneReasoner)
@@ -200,14 +205,14 @@ export async function explore(request: AskRequest, providers: Providers): Promis
   throw new ApiError(422, 'INVESTIGATION_LIMIT', 'Try a more specific question.');
 }
 
-export async function analyzeScene(input: { image: string; locality?: Locality; mode: UserMode; question?: string; profile?: TasteProfile; resolutionCache?: { entries: ShelfResolutionEntry[] } }, providers: Providers): Promise<Scene> {
+export async function analyzeScene(input: { image: string; locality?: Locality; mode: UserMode; question?: string; profile?: TasteProfile; resolutionCache?: { entries: ResolutionEntry[] } }, providers: Providers): Promise<Scene> {
   const frame = await providers.vision.inspectScene(input.image);
   const sceneType = Array.isArray(frame) ? 'general' : (frame as VisionFrame).sceneType;
   const displayKind = displayKindForScene(sceneType);
   const detected = (displayKind ? visionEntitySchema.array() : visionEntitySchema.array().max(120))
     .parse(Array.isArray(frame) ? frame : (frame as VisionFrame).entities);
   if (displayKind) return analyzeShelf(displayKind, detected, input.profile, providers.qloo, providers.displayLlm ?? providers.shelfLlm ?? providers.llm, input.resolutionCache?.entries);
-  if (sceneType === 'event_material') return analyzeEvent(Array.isArray(frame) ? undefined : (frame as VisionFrame).event, detected, input.profile, providers.qloo);
+  if (sceneType === 'event_material') return analyzeEvent(Array.isArray(frame) ? undefined : (frame as VisionFrame).event, detected, input.profile, providers.qloo, input.resolutionCache?.entries);
   const meaningful = detected.filter((entity) => entity.culturallyRelevant).slice(0, 30);
   const environmentalObservations = detected.filter((entity) => !entity.culturallyRelevant).sort((a, b) => Number(Boolean(b.necessaryInformation)) - Number(Boolean(a.necessaryInformation))).slice(0, 5).map(({ label, confidence, position, necessaryInformation }) => ({ label, confidence, position, necessaryInformation }));
   const shortlist = meaningful.filter((entity) => entity.confidence >= 0.5).sort((a, b) => Number((input.question ?? '').toLowerCase().includes(b.label.toLowerCase())) - Number((input.question ?? '').toLowerCase().includes(a.label.toLowerCase())) || b.confidence - a.confidence).slice(0, 8);

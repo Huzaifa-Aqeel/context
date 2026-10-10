@@ -33,28 +33,41 @@ export class SpeechSequence {
   private controller?: AbortController;
   private text = '';
   private assets = new Map<string, SpeechAsset>();
+  private retained = new Map<string, Map<string, SpeechAsset>>();
   constructor(private dependencies: Dependencies) {}
   stop() { this.controller?.abort(); this.controller = undefined; this.dependencies.onState({ status: 'idle' }); }
   clear() {
     this.stop(); this.assets.forEach((asset) => asset.dispose()); this.assets.clear(); this.text = '';
   }
-  async speak(text: string, preferences: SpeechPreferences = defaultSpeechPreferences) {
+  async speak(text: string, preferences: SpeechPreferences = defaultSpeechPreferences, retain = false) {
     this.stop();
     if (!this.dependencies.isActive() || !text.trim()) return false;
     const cacheKey = JSON.stringify({ text, preferences });
     if (this.text !== cacheKey) { this.clear(); this.text = cacheKey; }
+    let assets = this.assets;
+    if (retain) {
+      assets = this.retained.get(cacheKey) ?? new Map<string, SpeechAsset>();
+      this.retained.delete(cacheKey);
+      this.retained.set(cacheKey, assets);
+      while (this.retained.size > 6) {
+        const oldestKey = this.retained.keys().next().value!;
+        const oldest = this.retained.get(oldestKey)!;
+        oldest.forEach((asset) => asset.dispose());
+        this.retained.delete(oldestKey);
+      }
+    }
     const controller = new AbortController();
     this.controller = controller;
     const { signal } = controller;
     try {
       for (const chunk of splitSpeech(text, 200 - directionPrefix(preferences.style).length)) {
         if (signal.aborted || !this.dependencies.isActive()) break;
-        let asset = this.assets.get(chunk);
+        let asset = assets.get(chunk);
         if (!asset) {
           this.dependencies.onState({ status: 'loading' });
           asset = await this.dependencies.generate(chunk, signal, preferences);
           if (signal.aborted) { asset.dispose(); break; }
-          this.assets.set(chunk, asset);
+          assets.set(chunk, asset);
         }
         if (!this.dependencies.isActive()) break;
         this.dependencies.onState({ status: 'playing' });

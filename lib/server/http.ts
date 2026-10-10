@@ -14,7 +14,9 @@ export class ProviderHttp {
   async response(path: string, init: RequestInit = {}): Promise<Response> {
     let response: Response;
     try {
-      response = await this.fetcher(`${this.baseUrl}${path}`, {
+      // Worker runtimes can require the global receiver for fetch. Calling a
+      // stored function as this.fetcher gives it this ProviderHttp instance.
+      response = await this.fetcher.call(globalThis, `${this.baseUrl}${path}`, {
         ...init, headers: { Accept: 'application/json', ...this.headers, ...init.headers },
         signal: init.signal ?? AbortSignal.timeout(30_000),
       });

@@ -3,25 +3,35 @@ import type { QlooService } from '@/lib/qloo/service';
 import type { ResearchService } from '@/lib/research/tavily';
 import { researchEvent, type EventResearchKind } from '@/lib/research/event';
 import type { Answer, AskRequest, Scene } from '@/types/context';
-import type { TasteProfile } from '@/types/taste';
 import { explicitEventZone, parseEventStart } from './event-time';
 import { asksForConnections, visibleReferences } from './intent';
 import { questionNamesEntity } from './visual';
 import { straightLineKilometers } from '@/lib/location/distance';
+import { flyerTasteFocus } from './flyer-selection';
 
 const reply = (answer: string, scene: Scene, confidence: Answer['confidence'] = 'medium', action?: Answer['action']): Answer =>
   ({ answer, scene, confidence, ...(action ? { action } : {}) });
 const recent = (date: string, minutes = 15) => Date.now() - new Date(date).getTime() < minutes * 60_000;
-export async function refreshEventRanking(scene: Scene, profile: TasteProfile | undefined, qloo: QlooService): Promise<Scene> {
-  const event = scene.event;
-  if (!event || !event.profileSignature || event.profileSignature === profile?.signature) return scene;
-  let ranking: typeof event.ranking = [];
-  try { ranking = (await qloo.rerankEvent?.(scene.culturalEvidence.entities, profile?.entities ?? []))?.ranked ?? []; }
-  catch { /* Keep visible event details but discard stale taste claims. */ }
-  return { ...scene, event: { ...event, profileSignature: profile?.signature, ranking } };
-}
 const calendarRequest = (question: string) => /\b(add|save|create|put)\b.*\bcalendar\b|\bremind me\b/i.test(question);
 const currentScheduleQuestion = (question: string) => /\b(latest|updated|changed|change|current)\b.*\b(schedule|lineup|program|start time)\b|\b(schedule|lineup|program|start time)\b.*\b(latest|updated|changed|change|current)\b/i.test(question);
+/** Printed-fact questions need neither the Qwen planner nor a taste rerank. */
+export function eventPrintedAnswer(scene: Scene, question: string): Answer | undefined {
+  const visual = scene.event?.visual;
+  if (!visual) return undefined;
+  const plain = question.trim().replace(/[?.!]+$/, '').toLowerCase();
+  if (/^(?:who (?:is|are) (?:performing|playing|speaking)|who are (?:the )?(?:performers|speakers|artists)|(?:which|what) (?:performers|speakers|artists) (?:are )?(?:listed|named)|(?:what|show me) (?:is |the )?lineup)$/.test(plain))
+    return reply(visual.performers.length ? `The material names ${visual.performers.join(', ')}.` : 'I could not read a named participant list from the material.', scene);
+  if (/^(?:what(?:'s| is) (?:the )?(?:printed )?(?:schedule|program)|what(?:'s| is) on the program|(?:tell me|read) (?:the )?(?:schedule|program)|what (?:are )?the set times)$/.test(plain))
+    return reply(visual.schedule.length ? `The printed schedule lists ${visual.schedule.join('; ')}.`
+      : 'I could not read a detailed schedule from the material.', scene, visual.schedule.length ? 'medium' : 'low');
+  if (/^(?:when does (?:it|the .+) start|what time does (?:it|the .+) start|what(?:'s| is) (?:the )?(?:start time|date and time)|when is (?:it|the .+))$/.test(plain))
+    return reply(visual.dateText || visual.timeText
+      ? `The material lists ${visual.dateText ?? ''}${visual.dateText && visual.timeText ? ' at ' : ''}${visual.timeText ?? ''}${visual.timeText && visual.timezoneText ? ` ${visual.timezoneText}` : ''}.`
+      : 'I could not read a start date or time from the material.', scene);
+  if (/^(?:what|which) venue(?: is (?:this|it|the event) (?:at|in))?$/.test(plain))
+    return reply(visual.venueName ? `The material names ${visual.venueName}${visual.locationText ? ` in ${visual.locationText}` : ''}.` : 'I could not read a venue from the material.', scene);
+  return undefined;
+}
 const researchKind = (question: string): EventResearchKind | undefined => {
   if (/\b(cancel|cancelled|canceled|postponed|rescheduled|still happening|happening tonight|current status)\b/i.test(question)) return 'status';
   if (/\b(tickets?|sold out|on sale|availability)\b/i.test(question)) return 'tickets';
@@ -54,7 +64,10 @@ function factAnswer(kind: EventResearchKind, event: NonNullable<Scene['event']>)
 
 /** Event follow-ups only fetch missing facts. No map or external-link action exists. */
 export async function exploreEvent(request: AskRequest, qloo: QlooService, research?: ResearchService, places?: PlacesService): Promise<Answer> {
-  let scene = await refreshEventRanking(request.scene!, request.profile, qloo);
+  const printed = request.scene?.event?.pendingCalendar || request.scene?.event?.pendingCalendarDetails
+    ? undefined : eventPrintedAnswer(request.scene!, request.question);
+  if (printed) return printed;
+  let scene = request.scene!;
   let event = scene.event!;
   const question = request.question;
   const visual = event.visual;
@@ -87,17 +100,6 @@ export async function exploreEvent(request: AskRequest, qloo: QlooService, resea
         timeZone: pending.timeZone, ...(pending.location ? { location: pending.location } : {}),
         ...(pending.reminderMinutes ? { reminderMinutes: pending.reminderMinutes } : {}) });
   }
-  if (/\b(who|which)\b.*\b(perform(?:ing|ers?)?|artists?|speakers?|playing|lineup)\b|\b(lineup|performers?)\b/i.test(question) && !currentScheduleQuestion(question))
-    return reply(visual.performers.length ? `The material names ${visual.performers.join(', ')}.` : 'I could not read a performer list from the material.', scene);
-  if (/\b(schedule|program|set times?)\b/i.test(question) && !currentScheduleQuestion(question))
-    return reply(visual.schedule.length ? `The printed schedule lists ${visual.schedule.join('; ')}.`
-      : 'I could not read a detailed schedule from the material.', scene, visual.schedule.length ? 'medium' : 'low');
-  if (/\b(what time|when|start time)\b/i.test(question) && !currentScheduleQuestion(question) && !/\b(tonight|still happening)\b/i.test(question) && !calendarRequest(question))
-    return reply(visual.dateText || visual.timeText
-      ? `The material lists ${[visual.dateText, visual.timeText, visual.timezoneText].filter(Boolean).join(' at ')}.`
-      : 'I could not read a start date or time from the material.', scene);
-  if (/\b(what|which)\s+venue\b/i.test(question))
-    return reply(visual.venueName ? `The material names ${visual.venueName}${visual.locationText ? ` in ${visual.locationText}` : ''}.` : 'I could not read a venue from the material.', scene);
   if (asksForConnections(question)) {
     const visible = visibleReferences(scene.culturalEvidence.entities);
     const named = visible.filter((item) => questionNamesEntity(item, question));
@@ -122,12 +124,13 @@ export async function exploreEvent(request: AskRequest, qloo: QlooService, resea
         : `I could not verify a cultural connection between ${pair[0].detectedName} and ${pair[1].detectedName}.`, nextScene, relationships.length ? 'medium' : 'low');
   }
   if (/\b(why|which|what)\b.*\b(interest|relevant|fit|match|rank)\b/i.test(question)) {
-    const first = event.ranking[0];
-    if (!first) return reply('I could not match a named event reference to your interests through Qloo.', scene, 'low');
+    const focus = flyerTasteFocus(visual, scene.culturalEvidence.entities, event.ranking);
+    const first = focus?.ranked;
+    if (!first) return reply('I could not establish a supported taste match for a featured reference on this material.', scene, 'low');
     if (first.exactInterest) return reply(`${first.name} is already in your interests.`, scene);
     const contributors = first.contributingInterestIds.flatMap((id) => request.profile?.entities.find((item) => item.id === id)?.name ?? []);
-    return reply(contributors.length ? `Qloo ranks ${first.name} highest among the named references, with ${contributors.slice(0, 2).join(' and ')} contributing to the profile match. That does not establish a specific shared theme.`
-      : `Qloo ranks ${first.name} highest among the named references, but I do not have a clear explanation for the match.`, scene);
+    return reply(contributors.length ? `${first.name} has a taste match for you, with ${contributors.slice(0, 2).join(' and ')} among the interests contributing to the recommendation. That does not establish a specific shared theme.`
+      : `I could not explain the Qloo match for ${first.name} from your saved interests.`, scene);
   }
   const practical = /\b(address|where|phone|number|open|hours|accessible|accessibility|near|distance|how far)\b/i.test(question);
   if (practical && !calendarRequest(question)) {

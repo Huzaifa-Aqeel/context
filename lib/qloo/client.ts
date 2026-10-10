@@ -5,7 +5,7 @@ import type { QlooConfig } from '@/lib/server/config';
 import { ProviderHttp, providerData, type ProviderFetch } from '@/lib/server/http';
 import type { QlooService, ShelfRanking, EventRanking, DiningRecommendation, PlaceRecommendation } from './service';
 import { QLOO_PLACE_TAGS, classifyQlooPlace, type CulturalPlaceBucket } from '@/lib/places/qloo-tags';
-import { cachedShelfMatch, type ShelfResolutionEntry } from './display-resolution-cache';
+import { cachedShelfMatch, flyerResolutionKey, type ResolutionEntry } from './display-resolution-cache';
 import { displayCategories, type DisplayKind } from '@/lib/display/categories';
 import type { CulturalEvidence, Locality, LocationContext, ResolvedEntity, VisionEntity } from '@/types/context';
 import { metersBetween } from '@/lib/location/distance';
@@ -102,6 +102,7 @@ export function selectQlooMatch(detected: VisionEntity, candidates: QlooEntity[]
   }
   const base = { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence, source: 'vision' as const,
     groundingBasis: 'direct' as const, ...(detected.carrier ? { carrier: detected.carrier } : {}), ...(detected.visualDescription ? { visualDescription: detected.visualDescription } : {}),
+    ...(detected.role ? { role: detected.role } : {}), ...(detected.qlooPriority ? { qlooPriority: detected.qlooPriority } : {}),
     ...(detected.visibleText ? { visibleText: detected.visibleText } : {}), ...(detected.relatedName ? { relatedName: detected.relatedName } : {}),
     ...(detected.visiblePlatform ? { visiblePlatform: detected.visiblePlatform } : {}), ...(detected.visibleEdition ? { visibleEdition: detected.visibleEdition } : {}),
     ...(detected.position ? { position: detected.position } : {}) };
@@ -130,7 +131,7 @@ export class QlooClient implements QlooService {
       if (cacheable && searchCache.has(cacheKey)) return searchCache.get(cacheKey);
       for (let attempt = 0; attempt < 4; attempt++) {
         let response: Response;
-        try { response = await this.fetcher(`${this.config.baseUrl}${path}`, { headers: { Accept: 'application/json', 'X-Api-Key': this.config.apiKey }, signal: AbortSignal.timeout(30_000) }); }
+        try { response = await this.fetcher.call(globalThis, `${this.config.baseUrl}${path}`, { headers: { Accept: 'application/json', 'X-Api-Key': this.config.apiKey }, signal: AbortSignal.timeout(30_000) }); }
         catch { throw new ApiError(503, 'QLOO_UNREACHABLE', 'Cultural matching is temporarily unavailable.'); }
         if (response.status === 429 && attempt < 3) {
           await new Promise((resolve) => setTimeout(resolve, retryDelay(response.headers.get('Retry-After'), attempt)));
@@ -169,7 +170,7 @@ export class QlooClient implements QlooService {
     for (const entity of entities) this.facts.set(entity.entity_id, factOf(entity));
     return entities;
   }
-  async rankShelf(kind: DisplayKind, visible: VisionEntity[], interests: TasteEntity[], cache: ShelfResolutionEntry[] = []): Promise<ShelfRanking> {
+  async rankShelf(kind: DisplayKind, visible: VisionEntity[], interests: TasteEntity[], cache: ResolutionEntry[] = []): Promise<ShelfRanking> {
     const type = displayCategories[kind].qlooType;
     const resolved = new Array<ResolvedEntity>(visible.length);
     let next = 0;
@@ -241,9 +242,9 @@ export class QlooClient implements QlooService {
       return { resolved, ranked, complete };
     } catch { return { resolved, ranked: exactRanked, complete: false }; }
   }
-  async rankEvent(visible: VisionEntity[], interests: TasteEntity[]): Promise<EventRanking> {
+  async rankEvent(visible: VisionEntity[], interests: TasteEntity[], cache: ResolutionEntry[] = [], printedLocality?: Locality): Promise<EventRanking> {
     const resolved: ResolvedEntity[] = [];
-    for (let offset = 0; offset < visible.length; offset += 8) resolved.push(...await this.resolveEntities(visible.slice(offset, offset + 8)));
+    for (let offset = 0; offset < visible.length; offset += 8) resolved.push(...await this.resolveEntities(visible.slice(offset, offset + 8), printedLocality, cache));
     return this.rerankEvent(resolved, interests);
   }
   async rerankEvent(resolved: ResolvedEntity[], interests: TasteEntity[]): Promise<EventRanking> {
@@ -255,6 +256,7 @@ export class QlooClient implements QlooService {
     }
     const ranked: EventRanking['ranked'] = [];
     for (const [type, items] of groups) {
+      const groupStart = ranked.length;
       const unique = [...new Map(items.map((item) => [item.qlooId!, item])).values()];
       for (const item of unique.filter((entry) => interestIds.includes(entry.qlooId!))) ranked.push({
         entityId: item.qlooId!, name: item.detectedName, exactInterest: true, contributingInterestIds: [item.qlooId!],
@@ -263,8 +265,8 @@ export class QlooClient implements QlooService {
       if (!others.length || !interestIds.length) continue;
       try {
         const response = providerData(insightsSchema, await this.http.json('/v2/insights', {
-          'filter.type': type, 'filter.results.entities': unique.map((item) => item.qlooId).join(','),
-          'signal.interests.entities': interestIds, 'feature.explainability': true, take: unique.length,
+          'filter.type': type, 'filter.results.entities': others.map((item) => item.qlooId).join(','),
+          'signal.interests.entities': interestIds, 'feature.explainability': true, take: others.length,
         }));
         if (response.success === false) continue;
         const allowed = new Set(others.map((item) => item.qlooId));
@@ -277,18 +279,11 @@ export class QlooClient implements QlooService {
               interestIds.includes(entry.entity_id) && entry.score >= 0.1).sort((a, b) => b.score - a.score).map((entry) => entry.entity_id) ?? [])] });
         }
       } catch { /* A failed type batch does not erase visible event information or other ranked types. */ }
+      ranked.splice(groupStart, ranked.length - groupStart, ...ranked.slice(groupStart)
+        .sort((a, b) => Number(b.exactInterest) - Number(a.exactInterest) || (b.affinity ?? -1) - (a.affinity ?? -1)));
     }
-    ranked.sort((a, b) => Number(b.exactInterest) - Number(a.exactInterest) || (b.affinity ?? -1) - (a.affinity ?? -1));
+    // Independent filter.type requests cannot form a universal cross-type leaderboard.
     return { resolved, ranked };
-  }
-  async sharedEventTag(performerId: string, contributingInterestIds: string[]): Promise<string | undefined> {
-    const ids = [...new Set([performerId, ...contributingInterestIds])];
-    if (ids.length < 2 || ids.length > 3) return undefined;
-    await this.lookup(ids.filter((id) => !this.facts.get(id)?.tags.length));
-    const facts = ids.map((id) => this.facts.get(id));
-    if (facts.some((fact) => !fact?.tags.length)) return undefined;
-    const shared = facts[0]!.tags.filter((tag) => facts.slice(1).every((fact) => fact!.tags.some((other) => normalized(other) === normalized(tag))));
-    return shared.find((tag) => tag.length >= 2 && !/^(music|artist|person|live|performance|entertainment|popular|contemporary)$/i.test(tag));
   }
   private placeCandidates(entities: QlooEntity[], interestIds: string[], radiusMeters: number): PlaceRecommendation[] {
     return [...new Map(entities.flatMap((entity): PlaceRecommendation[] => {
@@ -375,16 +370,22 @@ export class QlooClient implements QlooService {
     if (!this.facts.has(entityId)) await this.lookup([entityId]);
     return this.facts.get(entityId);
   }
-  async resolveEntities(detections: VisionEntity[], locality?: Locality) {
+  async resolveEntities(detections: VisionEntity[], locality?: Locality, cache: ResolutionEntry[] = []) {
     const results: ResolvedEntity[] = [];
     // Process two at a time to avoid bursts against hackathon quotas.
     for (let offset = 0; offset < Math.min(detections.length, 8); offset += 2) {
       results.push(...await Promise.all(detections.slice(offset, offset + 2).map(async (detected) => {
         const directType = categoryTypes[normalized(detected.category).replace(/ /g, '_')];
+        const saved = directType && directType !== 'urn:entity:place' ? cache.find((entry) => entry.kind === 'flyer'
+          && flyerResolutionKey(entry.qlooType, entry.title) === flyerResolutionKey(directType, detected.label)) : undefined;
+        if (saved) return { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence,
+          qlooId: saved.qlooId, qlooName: saved.qlooName, qlooType: saved.qlooType, matchConfidence: 0.95,
+          source: 'vision' as const, groundingBasis: 'direct' as const, role: detected.role, qlooPriority: detected.qlooPriority };
         const relatedType = detected.relatedCategory ? categoryTypes[normalized(detected.relatedCategory).replace(/ /g, '_')] : undefined;
         const related = detected.category !== 'book_or_podcast' && !directType && detected.relatedName && relatedType;
         if (!directType && !related && !detected.allowBroadSearch && detected.category !== 'book_or_podcast') return { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence, source: 'vision' as const,
           matchConfidence: 0, groundingBasis: 'direct' as const, ...(detected.carrier ? { carrier: detected.carrier } : {}), ...(detected.visualDescription ? { visualDescription: detected.visualDescription } : {}),
+          role: detected.role, qlooPriority: detected.qlooPriority,
           ...(detected.visibleText ? { visibleText: detected.visibleText } : {}), ...(detected.relatedName ? { relatedName: detected.relatedName } : {}), ...(detected.position ? { position: detected.position } : {}) };
         const target = related ? { ...detected, label: detected.relatedName!, category: detected.relatedCategory! } : detected;
         const expectedType = related ? relatedType : directType;
@@ -406,7 +407,8 @@ export class QlooClient implements QlooService {
         } catch (error) {
           if (error instanceof ApiError && error.code === 'QLOO_NOT_FOUND') candidates = [];
           else return { detectedName: detected.label, detectedCategory: detected.category, visionConfidence: detected.confidence,
-            source: 'vision' as const, resolutionPending: true, relatedName: detected.relatedName, position: detected.position };
+            source: 'vision' as const, resolutionPending: true, relatedName: detected.relatedName, position: detected.position,
+            role: detected.role, qlooPriority: detected.qlooPriority };
         }
         const match = selectQlooMatch(target, candidates, locality);
         const result = related ? { ...match, detectedName: detected.label, detectedCategory: detected.category, groundingBasis: 'related' as const,

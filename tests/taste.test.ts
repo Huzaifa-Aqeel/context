@@ -91,17 +91,20 @@ test('weak taste evidence never highlights a reference or promotes an uncertain 
   assert.equal(orderedReferences(uncertain, context, 'familiar')[0].qlooId, 'film');
 });
 
-test('deleting the profile preserves scene and generic history while excluding old taste', () => {
+test('changing or deleting the profile clears the active capture and conversation', () => {
   const state = useContextStore.getState(); state.clearSession(); state.setScene(scene);
   useContextStore.getState().addMessage({ role: 'assistant', content: 'Generic context.' });
   useContextStore.getState().setProfile(profile);
+  assert.equal(useContextStore.getState().scene, null);
+  assert.deepEqual(useContextStore.getState().messages, []);
+  useContextStore.getState().setScene(scene);
   useContextStore.getState().addMessage({ role: 'assistant', content: 'Personalized context.' });
   useContextStore.getState().setTasteContext(context);
   const generation = useContextStore.getState().generation;
   useContextStore.getState().clearTaste();
-  assert.strictEqual(useContextStore.getState().scene, scene); assert.equal(useContextStore.getState().messages.length, 1);
+  assert.equal(useContextStore.getState().scene, null); assert.equal(useContextStore.getState().messages.length, 0);
   assert.deepEqual(activeTasteRequest(), {}); assert.equal(useContextStore.getState().tasteContext, null);
-  assert.deepEqual(conversationForRequest().map((message) => message.content), ['Generic context.']);
+  assert.deepEqual(conversationForRequest(), []);
   assert.throws(() => assertCurrentSession(generation), /changed/);
   useContextStore.getState().clearSession();
 });

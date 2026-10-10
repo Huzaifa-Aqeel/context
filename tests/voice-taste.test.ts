@@ -16,6 +16,7 @@ import { POST as editRoute } from '../app/api/taste/edit+api';
 import { tasteProfileSchema } from '../schemas/taste';
 import { SpeechSequence, splitSpeech } from '../lib/audio/sequence';
 import { applyInterestEdits } from '../lib/taste/edit';
+import { describeInterestChanges, displayedInterests } from '../lib/taste/edit-feedback';
 
 function emptyGroups(): StructuredInterests { return { movies_tv: [], music_artists: [], books_podcasts: [], dining_food: [], places_travel: [], brands: [], video_games: [], other: [] }; }
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>((yes) => { resolve = yes; }); return { promise, resolve }; }
@@ -52,6 +53,45 @@ test('voice interest recording requires an explicit start and waits for the comp
   await run.conversation.cancel();
 });
 
+test('edit mode records immediately after permission and never calls speech for the prompt or result', async () => {
+  const calls: string[] = [];
+  const states: ConversationState[] = [];
+  let editMode = true;
+  const conversation = new TasteConversation<string>({
+    isActive: () => true,
+    skipPromptSpeech: () => editMode,
+    skipResultSpeech: () => editMode,
+    prepare: async () => { calls.push('permission'); },
+    speak: async () => { calls.push('speech'); return true; },
+    record: async () => { calls.push('record'); },
+    stopRecording: async () => { calls.push('stop'); return 'recording'; },
+    discardRecording: async () => { calls.push('discard'); },
+    save: async () => { calls.push('save'); editMode = false; return 'Removed Interstellar from movies and TV.'; },
+    onState: (state) => states.push(state),
+  });
+  assert.deepEqual(calls, []);
+  await conversation.start();
+  assert.deepEqual(calls, ['permission', 'record']);
+  assert.equal(states.at(-1)?.message, 'Listening');
+  await conversation.end();
+  assert.deepEqual(calls, ['permission', 'record', 'stop', 'save', 'discard']);
+  assert.equal(states.at(-1)?.message, 'Removed Interstellar from movies and TV.');
+  assert.equal(calls.filter((call) => call === 'speech').length, 0);
+});
+
+test('edit feedback names the actual category changes without rewriting untouched interests', () => {
+  const before = { ...emptyGroups(), movies_tv: ['Interstellar'], music_artists: ['Radiohead'] };
+  const after = { ...emptyGroups(), movies_tv: ['Arrival'], music_artists: ['Radiohead'] };
+  assert.equal(describeInterestChanges(before, after), 'Removed Interstellar from movies and TV. Added Arrival to movies and TV.');
+});
+
+test('a saved profile without grouped interests remains reviewable and editable by category', () => {
+  const profile = { entities: [{ id: 'film', name: 'Interstellar', type: 'urn:entity:movie' }] };
+  assert.deepEqual(displayedInterests(null, profile).movies_tv, ['Interstellar']);
+  assert.deepEqual(applyInterestEdits(displayedInterests(null, profile), 'Remove Interstellar from movies.',
+    [{ action: 'remove', category: 'movies_tv', value: 'Interstellar' }]).interests?.movies_tv, []);
+});
+
 test('real speech sequencing reports success only after every prompt chunk finishes and failure on cancellation', async () => {
   const playing: ReturnType<typeof deferred<void>>[] = [];
   const sequence = new SpeechSequence({
@@ -69,6 +109,21 @@ test('real speech sequencing reports success only after every prompt chunk finis
   assert.equal(await cancelled, false);
   const failed = new SpeechSequence({ isActive: () => true, onState: () => {}, generate: async () => { throw new Error('Unavailable'); }, play: async () => {} });
   assert.equal(await failed.speak('A prompt.'), false);
+});
+
+test('the spoken capability answer replays from retained audio after other responses', async () => {
+  const generated: string[] = [];
+  const played: string[] = [];
+  const sequence = new SpeechSequence({
+    isActive: () => true, onState: () => {},
+    generate: async (chunk) => { generated.push(chunk); return { uri: chunk, dispose: () => {} }; },
+    play: async (uri) => { played.push(uri); },
+  });
+  assert.equal(await sequence.speak('Ask Context about these books.', undefined, true), true);
+  assert.equal(await sequence.speak('A different scene answer.'), true);
+  assert.equal(await sequence.speak('Ask Context about these books.', undefined, true), true);
+  assert.deepEqual(generated, ['Ask Context about these books.', 'A different scene answer.']);
+  assert.equal(played.length, 3);
 });
 
 test('End conversation immediately hides the orb and submits exactly one recorded response', async () => {

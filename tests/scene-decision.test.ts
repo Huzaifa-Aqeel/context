@@ -5,6 +5,7 @@ import { sameCalendarEvent } from '../lib/actions/calendar-identity';
 import { explore, type Providers } from '../lib/orchestration/context';
 import { analyzeEvent } from '../lib/orchestration/event';
 import { useContextStore } from '../stores/context';
+import type { SceneReasoningInput } from '../lib/llm/scene-decision';
 import type { AskRequest, Scene } from '../types/context';
 import type { TasteProfile } from '../types/taste';
 
@@ -21,7 +22,7 @@ const request = (question: string, scene?: Scene, position?: { latitude: number;
   ({ question, scene, profile, messages: [], mode: 'scene', locationEnabled: true, position });
 const qloo = { resolveEntities: noCall, analyzeConnections: noCall, analyzeTaste: noCall, getEntityFact: noCall,
   exploreReference: noCall, getLocationContext: noCall };
-const providers = (plan: () => Promise<unknown>, answer: () => Promise<unknown>, overrides: Partial<Providers> = {}): Providers => ({
+const providers = (plan: (input: SceneReasoningInput) => Promise<unknown>, answer: () => Promise<unknown>, overrides: Partial<Providers> = {}): Providers => ({
   vision: { inspectScene: noCall }, qloo, llm: { nextTurn: noCall },
   sceneReasoner: { plan: plan as NonNullable<Providers['sceneReasoner']>['plan'], answer: answer as NonNullable<Providers['sceneReasoner']>['answer'] },
   ...overrides,
@@ -36,6 +37,33 @@ test('structured event reasoning answers a specific personal-fit question from s
   assert.equal(planned, 1);
   assert.equal(result.answer, 'Radiohead is already one of your saved interests.');
   assert.equal(result.scene?.event?.visual.title, 'Summer Sound');
+});
+
+test('a printed start-time follow-up skips Qwen and Qloo', async () => {
+  const scene = eventScene();
+  const result = await explore(request('What time does it start?', scene), providers(noCall, noCall,
+    { qloo: { ...qloo, rerankEvent: noCall } }));
+  assert.match(result.answer, /October 10, 2026 at 8 PM ET/);
+  assert.equal(result.scene?.event?.profileSignature, profile.signature);
+});
+
+test('a performer decision stays in structured reasoning rather than the printed-list fast path', async () => {
+  let plans = 0;
+  const result = await explore(request('Which performer should I see?', eventScene()), providers(async () => {
+    plans++;
+    return { scope: 'event', next: 'answer', answer: 'Radiohead is already in your interests.', evidenceIds: ['qloo:radiohead'] };
+  }, noCall));
+  assert.equal(plans, 1);
+  assert.match(result.answer, /Radiohead/);
+});
+
+test('a stale signed event is rejected before any planner or Qloo call', async () => {
+  const scene = eventScene();
+  scene.event!.profileSignature = 'b'.repeat(64);
+  const result = await explore(request('Are tickets available?', scene), providers(noCall, noCall,
+    { qloo: { ...qloo, rerankEvent: noCall } }));
+  assert.match(result.answer, /Capture a new scene/);
+  assert.equal(result.scene, undefined);
 });
 
 test('event Capture states the printed performer even when Qloo ranking is unavailable', async () => {
@@ -107,18 +135,41 @@ test('dining comparison uses retained Qloo candidates without another Qloo or Pl
   assert.match(result.answer, /Cafe A/);
 });
 
-test('event research is on demand and the second Qwen answer reuses cached facts', async () => {
-  let searches = 0; let syntheses = 0;
+test('a repeated researched event question reuses its grounded answer while evidence is fresh', async () => {
+  let searches = 0; let syntheses = 0; let plans = 0;
   const research = { search: async () => { searches++; return [{ title: 'Summer Sound tickets',
     url: 'https://summersound.example/tickets', content: 'Summer Sound tickets are on sale now for October 10, 2026.',
     retrievedAt: new Date().toISOString() }]; } };
-  const p = providers(async () => ({ scope: 'event', next: 'event_research', researchKind: 'tickets', evidenceIds: [] }),
+  const p = providers(async () => { plans++; return { scope: 'event', next: 'event_research', researchKind: 'tickets', evidenceIds: [] }; },
     async () => { syntheses++; return { answer: 'The official event ticket page says tickets are on sale.', evidenceIds: ['research:0'] }; }, { research });
   const first = await explore(request('Are tickets on sale?', eventScene()), p);
   assert.equal(searches, 1); assert.equal(syntheses, 1);
   const second = await explore(request('Are tickets on sale?', first.scene), p);
-  assert.equal(searches, 1); assert.equal(syntheses, 2);
+  assert.equal(searches, 1); assert.equal(syntheses, 1); assert.equal(plans, 1);
   assert.match(second.answer, /on sale/);
+  assert.equal(second.scene?.event?.answerCache?.length, 1);
+  const refreshed = await explore(request('Check again: are tickets on sale?', second.scene), p);
+  assert.equal(searches, 2); assert.equal(syntheses, 2); assert.equal(plans, 2);
+  assert.match(refreshed.answer, /on sale/);
+});
+
+test('a researched Event answer is not reused after its cited fact changes', async () => {
+  let plans = 0; let answers = 0;
+  const scene = eventScene();
+  scene.event!.researchedFacts = [{ kind: 'tickets', value: 'tickets are on sale',
+    sourceUrl: 'https://summersound.example/tickets', retrievedAt: new Date().toISOString(),
+    supportingQuote: 'Tickets are on sale.' }];
+  scene.event!.researchChecks = [{ kind: 'tickets', checkedAt: new Date().toISOString() }];
+  const p = providers(async () => { plans++; return { scope: 'event', next: 'event_research', researchKind: 'tickets' }; },
+    async () => { answers++; return { answer: 'Tickets are on sale.', evidenceIds: ['research:0'] }; },
+    { research: { search: noCall } });
+  const first = await explore(request('Are tickets on sale?', scene), p);
+  assert.equal(first.scene?.event?.answerCache?.length, 1);
+  const changed = structuredClone(first.scene!);
+  changed.event!.researchedFacts[0].value = 'tickets are sold out';
+  await explore(request('Are tickets on sale?', changed), p);
+  assert.equal(plans, 2);
+  assert.equal(answers, 2);
 });
 
 test('invalid model evidence and invented dining targets cannot become spoken facts or Places calls', async () => {

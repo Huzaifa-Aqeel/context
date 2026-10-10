@@ -27,8 +27,6 @@ const config: ExpoConfig = {
     }],
     ['expo-image-picker', {
       photosPermission: 'Allow Context to analyze a photo you choose.',
-      cameraPermission: false,
-      microphonePermission: false,
     }],
     ['expo-location', {
       locationWhenInUsePermission: 'Allow Context to explain cultural context in your local area.',

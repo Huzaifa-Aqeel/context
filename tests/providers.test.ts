@@ -52,6 +52,18 @@ test('provider HTTP errors sanitize credentials, private text, quota and model p
   await assert.rejects(broken.request('/'), /unreadable/);
 });
 
+test('provider transports call fetch with its global receiver for worker runtimes', async () => {
+  const globalOnly = function (this: unknown) {
+    assert.equal(this, globalThis);
+    return Promise.resolve(Response.json({ results: { entities: [] } }));
+  } as typeof fetch;
+  const http = new ProviderHttp('https://provider.test', {}, 'AI', globalOnly);
+  assert.deepEqual(await http.request('/probe'), { results: { entities: [] } });
+  const qloo = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, globalOnly);
+  const resolved = await qloo.resolveEntities([{ label: 'Nike', category: 'brand', confidence: 0.9, culturallyRelevant: true }]);
+  assert.equal(resolved[0].qlooId, undefined);
+});
+
 test('Tavily remains a generic event research provider with bounded HTTPS sources', async () => {
   const client = new TavilyClient({ apiKey: 'fixture', baseUrl: 'https://tavily.test' }, async (input, init) => {
     assert.equal(String(input), 'https://tavily.test/search');

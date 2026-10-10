@@ -39,7 +39,7 @@ test('event capture uses visible printed material and Qloo ranking without Tavil
   assert.deepEqual(scene.event?.researchedFacts, []);
 });
 
-test('multi-performer flyer names the strongest printed performer, contributing interests, and a verified shared tag', async () => {
+test('multi-performer flyer keeps the printed lineup and explains Qloo contribution without a tag lookup', async () => {
   const interests: TasteProfile = { entities: [
     { id: 'miles', name: 'Miles Davis', type: 'urn:entity:artist' },
     { id: 'coke', name: 'Coke Studio', type: 'urn:entity:brand' },
@@ -47,20 +47,15 @@ test('multi-performer flyer names the strongest printed performer, contributing 
   const visual = { materialType: 'flyer' as const, title: 'Lahore Jazz Night', dateText: '14 November', timeText: '8 PM', venueName: 'Arts Hall',
     performers: ['Ali Noor', 'Sara Khan'], schedule: ['Ali Noor: 9 PM'] };
   const detected = visual.performers.map((label) => ({ label, category: 'artist', confidence: 0.95, culturallyRelevant: true }));
-  let tagCalls = 0;
   const result = await analyzeEvent(visual, detected, interests, { ...qloo,
     rankEvent: async () => ({ resolved: detected.map((item) => ({ detectedName: item.label, detectedCategory: item.category,
       visionConfidence: item.confidence, qlooId: item.label, qlooType: 'urn:entity:artist', matchConfidence: 0.95, source: 'vision' as const })),
     ranked: [{ entityId: 'Ali Noor', name: 'Ali Noor', affinity: 0.8, exactInterest: false, contributingInterestIds: ['miles', 'coke'] },
       { entityId: 'Sara Khan', name: 'Sara Khan', affinity: 0.3, exactInterest: false, contributingInterestIds: ['miles'] }] }),
-    sharedEventTag: async (id, ids) => { tagCalls++; assert.equal(id, 'Ali Noor'); assert.deepEqual(ids, ['miles', 'coke']); return 'fusion'; },
   });
-  assert.equal(tagCalls, 1);
   assert.equal(result.summary, 'This is the flyer for Lahore Jazz Night at Arts Hall on 14 November, starting at 8 PM. ' +
     'Performers: Ali Noor and Sara Khan. The printed schedule says: Ali Noor: 9 PM. ' +
-    'Ali Noor ranks highest for you, with Miles Davis and Coke Studio among the interests contributing to the recommendation. ' +
-    'Both are associated with fusion.');
-  assert.equal(result.event?.ranking[0].sharedTag, 'fusion');
+    'Ali Noor stands out among the artists I could match, with Miles Davis and Coke Studio among the interests contributing to the recommendation.');
   assert.deepEqual(result.event?.visual.schedule, ['Ali Noor: 9 PM']);
   assert.match(result.summary, /Sara Khan/);
 });
@@ -72,7 +67,6 @@ test('single performer flyer omits ranking language and unsupported tag while ke
       rankEvent: async () => ({ resolved: [{ detectedName: 'Anna Weber', detectedCategory: 'artist', visionConfidence: 0.9,
         qlooId: 'anna', qlooType: 'urn:entity:artist', matchConfidence: 0.95, source: 'vision' }],
       ranked: [{ entityId: 'anna', name: 'Anna Weber', affinity: 0.7, exactInterest: false, contributingInterestIds: ['yo-yo'] }] }),
-      sharedEventTag: async () => undefined,
     });
   assert.equal(result.summary, 'This is the program for Spring Chamber Series on May 2, starting at 7 PM. ' +
     'Performers: Anna Weber. Anna Weber has a taste match for you, with Yo-Yo Ma among the interests contributing to the recommendation.');
@@ -86,7 +80,7 @@ test('first flyer answer keeps every readable performer and important printed pr
     printedDetails: ['Doors at 6 PM', 'Admission is free', 'Step-free entrance'] };
   const result = await analyzeEvent(visual, [], profile, { ...qloo, rankEvent: noCall });
   assert.match(result.summary, /starting at 7 PM, ending at 11 PM/);
-  assert.match(result.summary, /Performers: Amira, Bilal, Cleo and Danish/);
+  assert.match(result.summary, /Named participants: Amira, Bilal, Cleo and Danish/);
   assert.match(result.summary, /Amira: 7:30 PM; Cleo: 9 PM/);
   assert.match(result.summary, /Doors at 6 PM; Admission is free; Step-free entrance/);
   assert.doesNotMatch(result.summary, /and others/);
@@ -100,21 +94,6 @@ test('event material beyond old performer and detail limits remains readable', a
   assert.match(scene.summary, /Performer 31/);
   assert.match(scene.summary, /Printed detail 13/);
   assert.equal(sceneSchema.parse(scene).event?.visual.performers.length, 31);
-});
-
-test('Qloo shared event tag requires the performer and every named interest to carry the same specific tag', async () => {
-  let lookups = 0;
-  const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (url) => {
-    const parsed = new URL(String(url));
-    assert.equal(parsed.pathname, '/entities'); lookups++;
-    const ids = parsed.searchParams.get('entity_ids')!.split(',');
-    return Response.json({ results: ids.map((id) => ({ entity_id: id, name: id, types: ['urn:entity:artist'],
-      tags: (id === 'performer' || id === 'interestA' ? ['Fusion', 'Music'] : ['Music']).map((name) =>
-        ({ tag_id: `urn:tag:genre:music:${name.toLowerCase()}`, name })) })) });
-  });
-  assert.equal(await client.sharedEventTag('performer', ['interestA']), 'Fusion');
-  assert.equal(await client.sharedEventTag('performer', ['interestA', 'interestB']), undefined);
-  assert.equal(lookups, 2);
 });
 
 test('event Qloo contributors are ordered by their explainability scores before the first answer uses them', async () => {
@@ -142,10 +121,10 @@ test('multi-performer answer omits an unsupported shared tag but keeps the print
     rankEvent: async () => ({ resolved: visual.performers.map((name) => ({ detectedName: name, detectedCategory: 'artist',
       visionConfidence: 0.95, qlooId: name, qlooType: 'urn:entity:artist', matchConfidence: 0.95, source: 'vision' as const })),
     ranked: [{ entityId: 'Ali Noor', name: 'Ali Noor', affinity: 0.7, exactInterest: false,
-      contributingInterestIds: ['radiohead'] }] }), sharedEventTag: async () => undefined,
+      contributingInterestIds: ['radiohead'] }] }),
   });
   assert.equal(result.summary, 'This is the flyer for Jazz Night on 14 November. ' +
-    'Performers: Ali Noor and Sara Khan. Ali Noor ranks highest for you, with Radiohead among the interests contributing to the recommendation.');
+    'Performers: Ali Noor and Sara Khan. Ali Noor has a taste match for you, with Radiohead among the interests contributing to the recommendation.');
 });
 
 test('a readable flyer with no cultural candidates skips Qloo and still returns printed event details', async () => {
@@ -155,9 +134,163 @@ test('a readable flyer with no cultural candidates skips Qloo and still returns 
   qloo: { ...qloo, rankEvent: noCall }, llm: { nextTurn: noCall } };
   const scene = await analyzeScene({ image: 'data:image/jpeg;base64,YQ==', mode: 'scene', profile }, providers);
   assert.equal(scene.summary, 'This is the flyer for Neighborhood Concert at Arts Hall on 14 November, starting at 8 PM. ' +
-    'Performers: Local Ensemble.');
+    'Named participants: Local Ensemble.');
   assert.deepEqual(scene.event?.ranking, []);
   assert.equal(scene.event?.visual.performers[0], 'Local Ensemble');
+});
+
+test('a conference flyer evaluates named speakers but leaves its venue and sponsor out of Capture Qloo calls', async () => {
+  const paths: string[] = [];
+  const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (url, init) => {
+    const parsed = new URL(String(url));
+    const type = parsed.pathname === '/v2/insights'
+      ? (JSON.parse(String(init?.body)) as { 'filter.type': string })['filter.type'] : parsed.searchParams.get('types');
+    paths.push(`${parsed.pathname}:${type}`);
+    if (parsed.pathname === '/search') {
+      assert.equal(parsed.searchParams.get('types'), 'urn:entity:person');
+      const name = parsed.searchParams.get('query')!;
+      return Response.json({ results: [{ entity_id: name, name, types: ['urn:entity:person'] }] });
+    }
+    assert.equal(parsed.pathname, '/v2/insights');
+    assert.equal(parsed.searchParams.get('filter.type'), 'urn:entity:person');
+    return Response.json({ success: true, results: { entities: ['Jensen Huang', 'Fei-Fei Li'].map((name, index) => ({
+      entity_id: name, name, types: ['urn:entity:person'], query: { affinity: 0.8 - index * 0.1,
+        explainability: { 'signal.interests.entities': [{ entity_id: 'radiohead', score: 0.4 }] } },
+    })) } });
+  });
+  const scene = await analyzeEvent({ materialType: 'flyer', kind: 'conference', title: 'Annual AI Summit',
+    venueName: 'Moscone Center', performers: ['Jensen Huang', 'Fei-Fei Li'], schedule: [],
+    primarySubject: { name: 'Moscone Center', entityIndex: 2 },
+    printedDetails: ['NVIDIA sponsors the summit'] }, [
+    { label: 'Jensen Huang', category: 'person', role: 'speaker', qlooPriority: 'secondary', confidence: 0.95, culturallyRelevant: true },
+    { label: 'Fei-Fei Li', category: 'person', role: 'speaker', qlooPriority: 'secondary', confidence: 0.95, culturallyRelevant: true },
+    { label: 'Moscone Center', category: 'place', role: 'primary_subject', qlooPriority: 'primary', confidence: 0.95, culturallyRelevant: true },
+    { label: 'NVIDIA', category: 'brand', role: 'organizer', qlooPriority: 'context_only', confidence: 0.95, culturallyRelevant: true },
+  ], profile, client);
+  assert.deepEqual(paths, ['/search:urn:entity:person', '/search:urn:entity:person', '/v2/insights:urn:entity:person']);
+  assert.match(scene.summary, /Speakers: Jensen Huang and Fei-Fei Li/);
+  assert.match(scene.summary, /at Moscone Center/);
+  assert.match(scene.summary, /NVIDIA sponsors the summit/);
+  assert.doesNotMatch(scene.summary, /Performers:|Both are associated/);
+  assert.equal(scene.culturalEvidence.entities.length, 4);
+});
+
+test('a brand promotion stays readable while only a printed speaker enters flyer Qloo evaluation', async () => {
+  const visual = { materialType: 'flyer' as const, kind: 'mixed' as const, title: 'Nike running weekend',
+    primarySubject: { name: 'Nike', entityIndex: 0 }, venueName: 'Westfield', performers: ['Guest Speaker'], schedule: [],
+    printedDetails: ['20% off running shoes through Sunday'] };
+  const detected = [
+    { label: 'Nike', category: 'brand', role: 'primary_subject' as const, confidence: 0.95, culturallyRelevant: true },
+    { label: 'Guest Speaker', category: 'person', role: 'speaker' as const, confidence: 0.95, culturallyRelevant: true },
+    { label: 'Westfield', category: 'place', role: 'venue' as const, confidence: 0.95, culturallyRelevant: true },
+  ];
+  const result = await analyzeEvent(visual, detected, profile, { ...qloo, rankEvent: async (visible) => {
+    assert.deepEqual(visible.map((item) => item.label), ['Guest Speaker']);
+    return { resolved: visible.map((item) => ({ detectedName: item.label, detectedCategory: item.category,
+      role: item.role, visionConfidence: item.confidence, qlooId: item.label, qlooName: item.label,
+      qlooType: 'urn:entity:person', matchConfidence: 0.95, source: 'vision' as const })),
+    ranked: [{ entityId: 'Guest Speaker', name: 'Guest Speaker', affinity: 0.99, exactInterest: false, contributingInterestIds: ['radiohead'] }] };
+  } });
+  assert.match(result.summary, /20% off running shoes through Sunday/);
+  assert.match(result.summary, /Nike running weekend/);
+  assert.doesNotMatch(result.summary, /Nike has a taste match for you/);
+  assert.match(result.summary, /Guest Speaker has a taste match/);
+});
+
+test('brand and book flyer subjects remain printed facts without Capture Qloo requests', async () => {
+  for (const [category, title] of [['brand', 'Nike weekend sale'], ['book', 'The Hobbit launch']] as const) {
+    const result = await analyzeEvent({ materialType: 'flyer', title, performers: [], schedule: [],
+      primarySubject: { name: title, entityIndex: 0 }, printedDetails: ['Saturday at the library'] },
+    [{ label: title, category, role: 'primary_subject', confidence: 0.95, culturallyRelevant: true }],
+    profile, { ...qloo, rankEvent: noCall });
+    assert.match(result.summary, new RegExp(title));
+    assert.match(result.summary, /Saturday at the library/);
+    assert.deepEqual(result.event?.ranking, []);
+  }
+});
+
+test('a venue promotion evaluates its place subject while a speaker flyer venue stays context only', async () => {
+  const result = await analyzeEvent({ materialType: 'flyer', kind: 'venue_promotion', title: 'Blue Note reopening',
+    venueName: 'Blue Note', performers: [], schedule: [], primarySubject: { name: 'Blue Note', entityIndex: 0 } },
+  [{ label: 'Blue Note', category: 'place', role: 'venue', confidence: 0.95, culturallyRelevant: true }], profile,
+  { ...qloo, rankEvent: async (visible) => {
+    assert.deepEqual(visible.map((item) => [item.label, item.category, item.role]), [['Blue Note', 'place', 'primary_subject']]);
+    return { resolved: [], ranked: [] };
+  } });
+  assert.match(result.summary, /Blue Note reopening at Blue Note/);
+});
+
+test('a venue promotion uses its printed city to disambiguate Qloo place records without device location', async () => {
+  const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (url) => {
+    const parsed = new URL(String(url));
+    if (parsed.pathname === '/search') return Response.json({ results: [
+      { entity_id: 'blue-note-new-york', name: 'Blue Note', types: ['urn:entity:place'], properties: { geocode: { city: 'New York' } } },
+      { entity_id: 'blue-note-tokyo', name: 'Blue Note', types: ['urn:entity:place'], properties: { geocode: { city: 'Tokyo' } } },
+    ] });
+    return Response.json({ success: true, results: { entities: [{ entity_id: 'blue-note-new-york', name: 'Blue Note',
+      types: ['urn:entity:place'], query: { affinity: 0.6, explainability: {
+        'signal.interests.entities': [{ entity_id: 'radiohead', score: 0.3 }] } } }] } });
+  });
+  const result = await analyzeEvent({ materialType: 'flyer', kind: 'venue_promotion', title: 'Blue Note reopening',
+    venueName: 'Blue Note', locationText: 'New York, NY', primarySubject: { name: 'Blue Note', entityIndex: 0 },
+    performers: [], schedule: [] },
+  [{ label: 'Blue Note', category: 'place', role: 'primary_subject', confidence: 0.95, culturallyRelevant: true }], profile, client);
+  assert.equal(result.culturalEvidence.entities[0].qlooId, 'blue-note-new-york');
+  assert.match(result.summary, /Radiohead among the interests contributing/);
+});
+
+test('a mixed movie-and-speaker flyer makes only subject and speaker Qloo requests, without a cross-type winner', async () => {
+  const searches: string[] = []; const insights: string[] = [];
+  const client = new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, async (url, init) => {
+    const parsed = new URL(String(url));
+    if (parsed.pathname === '/search') {
+      const type = parsed.searchParams.get('types')!;
+      searches.push(type);
+      const name = parsed.searchParams.get('query')!;
+      return Response.json({ results: [{ entity_id: name, name, types: [type] }] });
+    }
+    const type = (JSON.parse(String(init?.body)) as { 'filter.type': string })['filter.type'];
+    insights.push(type);
+    const movie = type === 'urn:entity:movie';
+    return Response.json({ success: true, results: { entities: [{ entity_id: movie ? 'Dune: Part Two' : 'Guest Speaker',
+      name: movie ? 'Dune: Part Two' : 'Guest Speaker', types: [type], query: { affinity: movie ? 0.2 : 0.99,
+        explainability: { 'signal.interests.entities': [{ entity_id: 'radiohead', score: 0.3 }] } } }] } });
+  });
+  const result = await analyzeEvent({ materialType: 'flyer', kind: 'movie', title: 'Dune: Part Two screening',
+    primarySubject: { name: 'Dune: Part Two', entityIndex: 0 }, venueName: 'Cinema One',
+    performers: ['Guest Speaker'], schedule: [] }, [
+    { label: 'Dune: Part Two', category: 'movie', role: 'primary_subject', confidence: 0.95, culturallyRelevant: true },
+    { label: 'Guest Speaker', category: 'person', role: 'speaker', confidence: 0.95, culturallyRelevant: true },
+    { label: 'Cinema One', category: 'place', role: 'venue', confidence: 0.95, culturallyRelevant: true },
+  ], profile, client);
+  assert.deepEqual(searches, ['urn:entity:movie', 'urn:entity:person']);
+  assert.deepEqual(insights, ['urn:entity:movie', 'urn:entity:person']);
+  assert.match(result.summary, /Dune: Part Two has a taste match/);
+  assert.doesNotMatch(result.summary, /Guest Speaker has a taste match/);
+  assert.match(result.summary, /at Cinema One/);
+});
+
+test('a previously resolved flyer movie uses the signed resolution cache on another Capture', async () => {
+  let searches = 0; let insights = 0;
+  const fetcher = async (url: RequestInfo | URL) => {
+    const parsed = new URL(String(url));
+    if (parsed.pathname === '/search') {
+      searches++;
+      return Response.json({ results: [{ entity_id: 'dune-id', name: 'Dune: Part Two', types: ['urn:entity:movie'] }] });
+    }
+    insights++;
+    return Response.json({ success: true, results: { entities: [{ entity_id: 'dune-id', name: 'Dune: Part Two', types: ['urn:entity:movie'],
+      query: { affinity: 0.7, explainability: { 'signal.interests.entities': [{ entity_id: 'radiohead', score: 0.3 }] } } }] } });
+  };
+  const visual = { kind: 'movie' as const, title: 'Dune: Part Two screening', primarySubject: { name: 'Dune: Part Two', entityIndex: 0 },
+    performers: [], schedule: [], printedDetails: ['Screening this weekend'] };
+  const detected = [{ label: 'Dune: Part Two', category: 'movie', role: 'primary_subject' as const, confidence: 0.95, culturallyRelevant: true }];
+  const first = await analyzeEvent(visual, detected, profile, new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, fetcher));
+  assert.equal(first.resolutionCache?.entries.length, 1);
+  const second = await analyzeEvent(visual, detected, profile, new QlooClient({ apiKey: 'fixture', baseUrl: 'https://qloo.test' }, fetcher), first.resolutionCache?.entries);
+  assert.equal(searches, 1);
+  assert.equal(insights, 2);
+  assert.match(second.summary, /Dune: Part Two has a taste match/);
 });
 
 test('Qloo failure or an opaque rank does not block flyer orientation or invent taste relevance', async () => {
@@ -236,17 +369,14 @@ test('Calendar requires explicit year and timezone, and missing start details re
   assert.ok(clarified.scene?.event?.pendingCalendar);
 });
 
-test('a changed taste profile discards stale event ranking and reranks retained IDs without Search', async () => {
+test('a changed taste profile requires a new capture instead of reranking the old event', async () => {
   const scene = eventScene(); scene.event!.profileSignature = 'a'.repeat(64);
   const nextProfile = { ...profile, signature: 'b'.repeat(64) };
-  let reranks = 0;
-  const answer = await exploreEvent({ ...ask(scene, 'Which performer matches my interests?'), profile: nextProfile }, {
-    ...qloo, rerankEvent: async (resolved, interests) => {
-      reranks++; assert.equal(resolved[0].qlooId, 'radiohead'); assert.equal(interests[0].id, 'radiohead');
-      return { resolved, ranked: [{ entityId: 'radiohead', name: 'Radiohead', exactInterest: true, contributingInterestIds: ['radiohead'] }] };
-    },
+  const answer = await explore({ ...ask(scene, 'Which performer matches my interests?'), profile: nextProfile }, {
+    vision: { inspectScene: noCall }, qloo: { ...qloo, rerankEvent: noCall }, llm: { nextTurn: noCall },
   });
-  assert.equal(reranks, 1); assert.equal(answer.scene?.event?.profileSignature, nextProfile.signature);
+  assert.match(answer.answer, /Capture a new scene/);
+  assert.equal(answer.scene, undefined);
 });
 
 test('Tavily is used only for current event facts, which are cached without opening links', async () => {
@@ -275,8 +405,9 @@ test('dining needs explicit location and Qloo interest ranking; Places is only c
   assert.match(address.answer, /10 Main Street/); assert.equal(placesCalls, 1);
   const repeated = await exploreDining(ask(address.scene!, 'What is the address of Cafe Roma?'), ranking, places);
   assert.equal(placesCalls, 1); assert.equal(repeated.action, undefined);
-  const changed = await exploreDining({ ...ask(address.scene!, 'Why does it fit?'), profile: { ...profile, signature: 'b'.repeat(64) } }, ranking, places);
-  assert.match(changed.answer, /interests changed/); assert.equal(qlooCalls, 1);
+  const changed = await explore({ ...ask(address.scene!, 'Why does it fit?'), profile: { ...profile, signature: 'b'.repeat(64) } },
+    { vision: { inspectScene: noCall }, qloo: ranking, llm: { nextTurn: noCall }, places });
+  assert.match(changed.answer, /Capture a new scene/); assert.equal(changed.scene, undefined); assert.equal(qlooCalls, 1);
 });
 
 test('Geoapify requires an exact unique named anchor and keeps the key in the request', async () => {

@@ -16,9 +16,12 @@ import { analyzeRequestSchema, sceneSchema } from '@/schemas/context';
 import { assertCurrentSession, includeLocality, useContextStore } from '@/stores/context';
 import { hasRequiredTasteProfile } from '@/lib/taste/required';
 import { ProfileRequired } from '@/components/profile-required';
+import { SceneGuidanceDisclosure } from '@/components/scene-guidance-disclosure';
+import { capabilityAnswer } from '@/lib/guidance/scene-guidance';
 
 export default function SceneScreen() {
-  const { image, scene, setScene, locationEnabled, profile, tasteContext, tasteError, strategy, question, lastQuestion, autoSpeakScene } = useContextStore();
+  const { image, scene, setScene, locationEnabled, profile, tasteContext, tasteError, strategy, question, lastQuestion,
+    announcedSceneId, markSceneAnnounced, guidanceOpenSceneId, toggleSceneGuidance } = useContextStore();
   const personalization = Boolean(profile && !scene?.shelf && !scene?.event && !scene?.dining);
   const profileReady = hasRequiredTasteProfile(profile);
   const exploration = useExploration();
@@ -26,7 +29,6 @@ export default function SceneScreen() {
   const focused = useIsFocused();
   const attemptedImage = useRef<string | null>(null);
   const resultText = useRef<Text>(null);
-  const focusedScene = useRef<string | null>(null);
   const [laidOutScene, setLaidOutScene] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const analysis = useMutation({
@@ -35,9 +37,12 @@ export default function SceneScreen() {
       const result = await postApi('/api/scene/analyze', analyzeRequestSchema.parse({ image: state.image, profile: state.profile ?? undefined, resolutionCache: state.resolutionCache, locality: includeLocality(state) ? state.locality ?? undefined : undefined, question: state.question.trim() || undefined }), sceneSchema);
       assertCurrentSession(state.generation);
       if (!request.current()) throw new Error('This scene analysis was cancelled. Try again when you return.');
-      return { scene: result, warning: request.warning };
+      return { scene: result, warning: request.warning, generation: state.generation };
     },
-    onSuccess: (result) => { setScene(result.scene); setNotice(result.warning ?? ''); },
+    onSuccess: (result) => {
+      if (useContextStore.getState().generation !== result.generation) return;
+      setScene(result.scene); setNotice(result.warning ?? '');
+    },
     onError: (error) => setNotice(error.message),
   });
   useEffect(() => {
@@ -48,24 +53,26 @@ export default function SceneScreen() {
   }, [profileReady, focused, image, analysis]);
   const ask = (text: string) => {
     setNotice('');
-    exploration.mutate(text, { onSuccess: () => router.push('/conversation'), onError: (error) => setNotice(error.message) });
+    exploration.mutate(text, { onSuccess: (result) => {
+      if (useContextStore.getState().generation === result.requestGeneration) router.push('/conversation');
+    }, onError: (error) => setNotice(error.message) });
   };
   const summary = scene ? scenePresentation(scene, profile, tasteContext, personalization, strategy, question || lastQuestion) : '';
   const references = scene ? orderedReferences(scene, personalization ? tasteContext : undefined, strategy, question || lastQuestion).filter(isConfirmed) : [];
   const hasTasteTargets = references.length > 0 || Boolean(locationEnabled && scene?.locationContext?.facts?.length);
   const resultReady = !personalization || !hasTasteTargets || Boolean(tasteContext || tasteError);
   useEffect(() => {
-    if (!focused || !scene || laidOutScene !== scene.id || !resultReady || autoSpeakScene || Platform.OS === 'web' || focusedScene.current === scene.id) return;
+    if (!focused || !scene || laidOutScene !== scene.id || !resultReady || Platform.OS === 'web' || announcedSceneId === scene.id) return;
     let cancelled = false;
     const timer = setTimeout(() => {
       void AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
         if (!enabled || cancelled || !resultText.current) return;
         const handle = findNodeHandle(resultText.current);
-        if (handle) { focusedScene.current = scene.id; AccessibilityInfo.setAccessibilityFocus(handle); }
+        if (handle) { AccessibilityInfo.setAccessibilityFocus(handle); markSceneAnnounced(scene.id); }
       }).catch(() => {});
     }, 150);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [autoSpeakScene, focused, laidOutScene, resultReady, scene, summary]);
+  }, [announcedSceneId, focused, laidOutScene, markSceneAnnounced, resultReady, scene, summary]);
   if (!profileReady) return <ProfileRequired />;
   return <Screen>
     {image && <>
@@ -76,10 +83,12 @@ export default function SceneScreen() {
     </>}
     {scene && <>
       <Text ref={resultText} style={styles.body}
-        accessibilityLabel={!autoSpeakScene && resultReady ? `Scene analysis complete. ${summary}` : summary}
-        accessibilityLiveRegion={Platform.OS === 'web' && !autoSpeakScene && resultReady ? 'polite' : 'none'}
+        accessibilityLabel={resultReady ? `Scene analysis complete. ${summary}` : summary}
+        accessibilityLiveRegion={Platform.OS === 'web' && resultReady ? 'polite' : 'none'}
         onLayout={() => setLaidOutScene(scene.id)}>{summary}</Text>
-      <ResponseControls text={summary} automatic={autoSpeakScene && resultReady} autoKey={scene.id} />
+      <SceneGuidanceDisclosure text={capabilityAnswer(scene)} expanded={guidanceOpenSceneId === scene.id}
+        onToggle={() => toggleSceneGuidance(scene.id)} />
+      <ResponseControls text={summary} />
       {scene.warnings?.map((warning) => <Notice key={warning} text={warning} speech={false} />)}
       {scene.environmentalObservations?.map((item) => <View key={item.label} style={{ gap: 4 }}><Body>{item.label}</Body><Text style={styles.small}>{item.confidence < 0.7 ? 'Identification uncertain' : 'Visually identified'}{item.position ? ` · ${item.position}` : ''}</Text></View>)}
       <TasteEvidence />

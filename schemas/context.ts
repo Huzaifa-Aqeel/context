@@ -18,6 +18,8 @@ export const localitySchema = z.object({
 export const visionEntitySchema = z.object({
   label: shortText, category: shortText, confidence: scoreSchema,
   culturallyRelevant: z.boolean(),
+  role: z.enum(['primary_subject', 'headliner', 'participant', 'speaker', 'venue', 'brand', 'featured_work', 'organizer', 'other']).optional(),
+  qlooPriority: z.enum(['primary', 'secondary', 'context_only']).optional(),
   carrier: z.enum(['poster', 'clothing', 'brand_mark', 'book_cover', 'artwork', 'product', 'logo', 'venue_sign', 'album_cover', 'film_reference', 'other']).optional(),
   visualDescription: shortText.optional(), visibleText: shortText.optional(),
   relatedName: shortText.optional(), relatedCategory: shortText.optional(),
@@ -30,6 +32,7 @@ export const visionEntitySchema = z.object({
 export const resolvedEntitySchema = z.object({
   detectedName: shortText, detectedCategory: shortText,
   visionConfidence: scoreSchema, qlooId: shortText.optional(),
+  role: visionEntitySchema.shape.role, qlooPriority: visionEntitySchema.shape.qlooPriority,
   qlooName: shortText.optional(), qlooType: shortText.optional(),
   matchConfidence: scoreSchema.optional(),
   source: z.enum(['vision', 'user', 'qloo']).optional(),
@@ -76,10 +79,11 @@ export const shelfItemSchema = z.object({
   affinity: scoreSchema.optional(), contributingInterestIds: z.array(shortText).max(100).optional(),
 });
 export const shelfResolutionCacheSchema = z.object({
-  version: z.literal(1), entries: z.array(z.object({
+  version: z.literal(1), entries: z.array(z.union([z.object({
     kind: displayKindSchema, title: shortText, author: shortText.optional(), relatedName: shortText.optional(),
     qlooId: shortText, qlooName: shortText, qlooType: shortText,
-  })).max(100), signature: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  }), z.object({ kind: z.literal('flyer'), title: shortText,
+    qlooId: shortText, qlooName: shortText, qlooType: shortText })])).max(100), signature: z.string().regex(/^[a-f0-9]{64}$/).optional(),
 });
 // Category adapters declare allowed fields; the shared schema only enforces safe field-key syntax.
 export const shelfFactFieldSchema = z.string().regex(/^[a-z][a-z0-9_]{0,49}$/);
@@ -109,6 +113,8 @@ export const shelfContextSchema = z.object({
 });
 export const eventVisualSchema = z.object({
   materialType: z.enum(['flyer', 'program', 'schedule', 'handout']).optional(),
+  kind: z.enum(['concert', 'festival', 'conference', 'talk', 'brand_promotion', 'venue_promotion', 'movie', 'book', 'game', 'mixed', 'unknown']).optional(),
+  primarySubject: z.object({ name: shortText, entityIndex: z.number().int().min(0).max(119).nullable() }).nullable().optional(),
   title: shortText.optional(), dateText: shortText.optional(), timeText: shortText.optional(), endTimeText: shortText.optional(), timezoneText: shortText.optional(),
   venueName: shortText.optional(), locationText: shortText.optional(),
   performers: z.array(shortText).default([]), schedule: z.array(shortText).default([]),
@@ -157,6 +163,9 @@ export const eventContextSchema = z.object({
     exactInterest: z.boolean(), contributingInterestIds: z.array(shortText).max(100), sharedTag: shortText.optional() })).max(30),
   researchedFacts: z.array(eventFactSchema).max(30).default([]),
   researchChecks: z.array(z.object({ kind: z.enum(['status', 'schedule', 'tickets', 'official_page', 'calendar', 'reviews']), checkedAt: z.iso.datetime() })).max(20).optional(),
+  answerCache: z.array(z.object({ question: z.string().trim().min(1).max(800), answer: z.string().trim().min(1).max(800),
+    confidence: confidenceSchema, evidence: z.array(z.object({ id: shortText, value: z.string().trim().min(1).max(600) })).min(1).max(8),
+    createdAt: z.iso.datetime() })).max(8).optional(),
   verifiedTicketUrl: z.url().max(1000).optional(),
   verifiedStart: z.object({ start: z.iso.datetime({ offset: true }), timeZone: shortText, sourceUrl: z.url().max(1000), checkedAt: z.iso.datetime() }).optional(),
   pendingCalendar: z.object({ title: shortText, start: z.iso.datetime({ offset: true }), timeZone: shortText,

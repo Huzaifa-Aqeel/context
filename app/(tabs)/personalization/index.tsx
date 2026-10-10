@@ -1,4 +1,4 @@
-import { Switch, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { clearSpokenOutput } from '@/lib/audio/playback';
 import { LocationControl } from '@/components/location-control';
@@ -6,7 +6,7 @@ import { Body, Button, Card, Heading, Screen, styles } from '@/components/ui';
 import { useContextStore } from '@/stores/context';
 
 export default function PersonalizationScreen() {
-  const { profile, interests, clearTaste, autoSpeakScene, setAutoSpeakScene } = useContextStore();
+  const { profile, interests, clearTaste } = useContextStore();
   const count = interests ? Object.values(interests).flat().length : profile?.entities.length ?? 0;
   return <Screen>
     <Heading>Personalization</Heading>
@@ -23,16 +23,5 @@ export default function PersonalizationScreen() {
     </View>
     <View style={{ height: 1, backgroundColor: '#C1CDC7', marginVertical: 8 }} accessible={false} />
     <LocationControl />
-    <View style={{ height: 1, backgroundColor: '#C1CDC7', marginVertical: 8 }} accessible={false} />
-    <View style={{ gap: 14 }}>
-      <Text accessibilityRole="header" style={[styles.body, { fontWeight: '700' }]}>Scene speech</Text>
-      <Text style={styles.body}>Would you like Context to speak scene results automatically? When off, the scene answer stays available as text for TalkBack or VoiceOver.</Text>
-      <View style={{ minHeight: 56, justifyContent: 'center', alignItems: 'flex-start' }}>
-        <Switch value={autoSpeakScene} onValueChange={setAutoSpeakScene}
-          accessibilityLabel="Speak scene results automatically"
-          accessibilityHint="When off, Context does not start its own voice for a new scene. You can still use the Replay response button."
-          accessibilityState={{ checked: autoSpeakScene }} />
-      </View>
-    </View>
   </Screen>;
 }

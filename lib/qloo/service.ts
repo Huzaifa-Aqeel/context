@@ -1,6 +1,6 @@
 import type { TasteEntity, TasteContext } from '@/types/taste';
 import type { CulturalEvidence, Locality, LocationContext, ResolvedEntity, VisionEntity } from '@/types/context';
-import type { ShelfResolutionEntry } from './display-resolution-cache';
+import type { ResolutionEntry } from './display-resolution-cache';
 import type { DisplayKind } from '@/lib/display/categories';
 import type { CulturalPlaceBucket } from '@/lib/places/qloo-tags';
 
@@ -19,11 +19,10 @@ export type DiningRecommendation = PlaceRecommendation;
 
 /** Server-only adapter boundary. Implement against verified Qloo endpoints. */
 export interface QlooService {
-  rankShelf?(kind: DisplayKind, visible: VisionEntity[], interests: TasteEntity[], cache?: ShelfResolutionEntry[]): Promise<ShelfRanking>;
+  rankShelf?(kind: DisplayKind, visible: VisionEntity[], interests: TasteEntity[], cache?: ResolutionEntry[]): Promise<ShelfRanking>;
   rerankShelf?(kind: DisplayKind, resolved: ResolvedEntity[], interests: TasteEntity[], incompleteResolution?: boolean): Promise<ShelfRanking>;
-  rankEvent?(visible: VisionEntity[], interests: TasteEntity[]): Promise<EventRanking>;
+  rankEvent?(visible: VisionEntity[], interests: TasteEntity[], cache?: ResolutionEntry[], printedLocality?: Locality): Promise<EventRanking>;
   rerankEvent?(resolved: ResolvedEntity[], interests: TasteEntity[]): Promise<EventRanking>;
-  sharedEventTag?(performerId: string, contributingInterestIds: string[]): Promise<string | undefined>;
   recommendDining?(position: { latitude: number; longitude: number }, interests: TasteEntity[],
     options?: { device?: boolean; extraSignalId?: string; weekday?: string }): Promise<DiningRecommendation[]>;
   discoverArea?(position: { latitude: number; longitude: number }, interests: TasteEntity[],

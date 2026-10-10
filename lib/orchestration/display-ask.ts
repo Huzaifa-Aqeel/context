@@ -1,9 +1,6 @@
 import type { LlmService } from '@/lib/llm/service';
 import type { Answer, AskRequest, ShelfContext } from '@/types/context';
-import type { QlooService } from '@/lib/qloo/service';
 import type { ResearchService } from '@/lib/research/tavily';
-import { buildShelfBrief } from './display-brief';
-import { shelfSummary } from './display';
 import { displayCategories } from '@/lib/display/categories';
 import { researchDisplayQuestion } from './display-research';
 
@@ -22,37 +19,10 @@ function positive(value: string) {
 }
 
 /** Shelf conversations never enter the general locality, Places, or web-tool router. */
-export async function exploreShelf(request: AskRequest, llm: LlmService, qloo?: QlooService, research?: ResearchService): Promise<Answer> {
+export async function exploreShelf(request: AskRequest, llm: LlmService, research?: ResearchService): Promise<Answer> {
   const scene = request.scene!;
   let shelf = scene.shelf!;
-  let summary = scene.summary;
-  const answer = (text: string, confidence: Answer['confidence'] = 'medium'): Answer => ({ answer: text, confidence, scene: { ...scene, summary, shelf } });
-
-  if (request.profile?.signature && request.profile.signature !== shelf.profileSignature) {
-    let ranking;
-    if (qloo?.rerankShelf) {
-      const resolved = shelf.inventory.filter((item) => item.resolution === 'matched' && item.qlooId).map((item) => ({
-        detectedName: item.title, detectedCategory: displayCategories[shelf.kind].visualCategory,
-        visionConfidence: 0.9, qlooId: item.qlooId, qlooName: item.qlooName,
-        qlooType: displayCategories[shelf.kind].qlooType,
-        matchConfidence: 0.95, source: 'vision' as const,
-      }));
-      try { ranking = await qloo.rerankShelf(shelf.kind, resolved, request.profile.entities, shelf.inventory.some((item) => item.resolution !== 'matched')); }
-      catch { /* Old personalization evidence must not survive a failed rerank. */ }
-    }
-    const ranked = new Map(ranking?.ranked.map((item) => [item.entityId, item]) ?? []);
-    shelf = { ...shelf, profileSignature: request.profile.signature, rankingComplete: Boolean(ranking?.complete),
-      shortlistIds: ranking?.ranked.slice(0, 4).map((item) => item.entityId) ?? [],
-      briefItems: undefined, briefCreatedAt: undefined, researchChecks: undefined,
-      inventory: shelf.inventory.map((item) => ({ ...item,
-        exactInterest: Boolean(item.qlooId && request.profile?.entities.some((interest) => interest.id === item.qlooId)),
-        interestProvenance: item.qlooId && request.profile?.entities.some((interest) => interest.id === item.qlooId) ? 'USER' as const : undefined,
-        affinity: item.qlooId ? ranked.get(item.qlooId)?.affinity : undefined,
-        contributingInterestIds: item.qlooId ? ranked.get(item.qlooId)?.contributingInterestIds : undefined,
-      })) };
-    shelf = await buildShelfBrief(shelf, request.profile, llm);
-    summary = shelfSummary(shelf);
-  }
+  const answer = (text: string, confidence: Answer['confidence'] = 'medium'): Answer => ({ answer: text, confidence, scene: { ...scene, shelf } });
 
   const question = request.question;
   const named = namedItems(shelf, question);

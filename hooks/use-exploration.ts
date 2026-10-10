@@ -7,10 +7,13 @@ import { asksAboutArea } from '@/lib/orchestration/intent';
 import { asksForDiningDiscovery, asksForAreaDiscovery, needsDevicePosition } from '@/lib/orchestration/intent';
 import { devicePosition } from '@/lib/location/position';
 import { createCalendarAction } from '@/lib/actions/calendar';
+import { capabilityAnswer, isCapabilityQuestion } from '@/lib/guidance/scene-guidance';
 export function useExploration() {
   const begin = useContextRequest();
   return useMutation({
     mutationFn: async (question: string) => {
+      if (isCapabilityQuestion(question)) return { ...answerSchema.parse({ answer: capabilityAnswer(useContextStore.getState().scene) }),
+        requestGeneration: useContextStore.getState().generation };
       const request = await begin(question); const { state } = request;
       const dining = asksForDiningDiscovery(question);
       const area = asksForAreaDiscovery(question);
@@ -28,10 +31,13 @@ export function useExploration() {
         try { answer = await createCalendarAction(result.action); }
         catch { answer = 'I could not add that event to Calendar. Please try again or check Calendar permission.'; }
       }
-      return { ...result, answer, action: undefined, warnings: [...new Set([...(result.warnings ?? []), ...(request.warning ? [request.warning] : [])])] };
+      assertCurrentSession(state.generation);
+      return { ...result, answer, action: undefined, requestGeneration: state.generation,
+        warnings: [...new Set([...(result.warnings ?? []), ...(request.warning ? [request.warning] : [])])] };
     },
     onSuccess: (result, question) => {
       const state = useContextStore.getState();
+      if (state.generation !== result.requestGeneration) return;
       if (result.scene) state.updateScene(result.scene);
       if (result.locationContext) state.setLocationContext(result.locationContext);
       if (result.tasteContext) state.setTasteContext(result.tasteContext);

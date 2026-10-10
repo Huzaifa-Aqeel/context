@@ -4,7 +4,7 @@ import { shelfContextSchema } from '@/schemas/context';
 import type { ResolvedEntity, Scene, ShelfContext, VisionEntity } from '@/types/context';
 import type { TasteProfile } from '@/types/taste';
 import type { LlmService } from '@/lib/llm/service';
-import { shelfResolutionKey, type ShelfResolutionEntry } from '@/lib/qloo/display-resolution-cache';
+import { shelfResolutionKey, flyerResolutionKey, type ResolutionEntry, type ShelfResolutionEntry } from '@/lib/qloo/display-resolution-cache';
 import { buildShelfBrief } from './display-brief';
 import { displayCategories, type DisplayKind } from '@/lib/display/categories';
 
@@ -39,7 +39,7 @@ export function shelfSummary(shelf: ShelfContext) {
   return summary;
 }
 
-export async function analyzeShelf(kind: DisplayKind, detected: VisionEntity[], profile: TasteProfile | undefined, qloo: QlooService, llm?: LlmService, cache: ShelfResolutionEntry[] = []): Promise<Scene> {
+export async function analyzeShelf(kind: DisplayKind, detected: VisionEntity[], profile: TasteProfile | undefined, qloo: QlooService, llm?: LlmService, cache: ResolutionEntry[] = []): Promise<Scene> {
   const category = displayCategories[kind];
   const candidates = detected.filter((item) => item.culturallyRelevant && item.confidence >= 0.7 && (category.acceptedVisualCategories as readonly string[]).includes(normalized(item.category).replace(/ /g, '_')));
   const visible = [...new Map(candidates.map((item) => [category.identityUsesRelatedName && item.relatedName
@@ -88,7 +88,8 @@ export async function analyzeShelf(kind: DisplayKind, detected: VisionEntity[], 
     qlooId: item.qlooId!, qlooName: item.qlooName, qlooType: item.qlooType,
   }] : []);
   const resolutionCache = { version: 1 as const, entries: [...new Map([...cache, ...newEntries].map((entry) =>
-    [shelfResolutionKey(entry.kind, entry.title, entry.relatedName ?? entry.author), entry])).values()].slice(-100) };
+    [entry.kind === 'flyer' ? flyerResolutionKey(entry.qlooType, entry.title)
+      : shelfResolutionKey(entry.kind, entry.title, entry.relatedName ?? entry.author), entry])).values()].slice(-100) };
   return {
     origin: 'image', id: crypto.randomUUID(), createdAt: new Date().toISOString(), summary: shelfSummary(shelf),
     confidence: visible.length ? (shortlistIds.length ? 'medium' : 'low') : 'low', shelf, resolutionCache,

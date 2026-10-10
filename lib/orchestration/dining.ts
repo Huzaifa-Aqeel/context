@@ -4,6 +4,7 @@ import type { Answer, AskRequest, Scene } from '@/types/context';
 import { asksForDiningDiscovery } from './intent';
 import { metersBetween, spokenDistance, straightLineKilometers } from '@/lib/location/distance';
 import { instantForWallTime, openingStatusAt, wallTime } from '@/lib/places/opening-hours';
+import { flyerTasteFocus } from './flyer-selection';
 
 function reply(answer: string, scene?: Scene, confidence: Answer['confidence'] = 'medium'): Answer {
   return { answer, confidence, ...(scene ? { scene } : {}) };
@@ -91,7 +92,8 @@ export async function discoverDining(request: AskRequest, qloo: QlooService,
   if (!request.profile?.entities.length) return reply('Set up at least one matched interest before finding dining places.', baseScene, 'low');
   if (!qloo.recommendDining) return reply('Nearby dining is unavailable right now.', baseScene, 'low');
   const eventSignalId = /\b(suits?|fits?) (?:the |tonight.?s )?(?:show|concert|event)\b/i.test(request.question)
-    && baseScene?.event?.visual.performers.length === 1 ? baseScene.event.ranking[0]?.entityId : undefined;
+    && baseScene?.event?.visual.performers.length === 1
+    ? flyerTasteFocus(baseScene.event.visual, baseScene.culturalEvidence.entities, baseScene.event.ranking)?.ranked.entityId : undefined;
   let candidates;
   try { candidates = await qloo.recommendDining(anchor.position, request.profile.entities,
     { device: anchor.source.kind === 'device', extraSignalId: eventSignalId }); }
@@ -166,8 +168,6 @@ export async function exploreDining(request: AskRequest, qloo: QlooService, plac
     return discoverDining(request, qloo, { position: request.position, source: { kind: 'device' } });
   }
   const scene = request.scene;
-  if (scene?.dining?.profileSignature && scene.dining.profileSignature !== request.profile?.signature)
-    return reply('Your interests changed. Ask me to find nearby dining again for your current profile.', scene, 'low');
   const candidates = scene?.dining?.candidates ?? [];
   if (!candidates.length) return reply('Ask me to find a nearby restaurant first.', scene, 'low');
   const named = candidates.filter((candidate) => request.question.toLowerCase().includes(candidate.name.toLowerCase()));

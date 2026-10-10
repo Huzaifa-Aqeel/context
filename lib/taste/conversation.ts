@@ -1,10 +1,12 @@
 export type VoicePhase = 'idle' | 'speaking' | 'listening' | 'processing';
-export type ConversationState = { phase: VoicePhase; orbVisible: boolean; busy: boolean; message: string };
+export type ConversationState = { phase: VoicePhase; orbVisible: boolean; busy: boolean; message: string; silentSpeech?: boolean };
 export const interestsPrompt = "You haven't set up your interests yet. Tell me anything you like in movies and TV, music, books and podcasts, food and dining, places and travel, brands, video games, or anything else. Mention as many or as few as you want. For example: Add Interstellar to movies and TV, and Radiohead to music. I'll listen when I finish speaking. Tap the orb again when you're done.";
 type Dependencies<Recording> = {
   prompt?: string | (() => string);
+  skipPromptSpeech?: () => boolean;
+  skipResultSpeech?: () => boolean;
   readyMessage?: string;
-  processingMessage?: string;
+  processingMessage?: string | (() => string);
   failureMessage?: string;
   isActive: () => boolean;
   prepare: (signal: AbortSignal) => Promise<void>;
@@ -19,6 +21,7 @@ type Dependencies<Recording> = {
 export class TasteConversation<Recording> {
   private job?: AbortController;
   private cleanup?: Promise<void>;
+  private resultSpeechSkipped = false;
   private state: ConversationState = { phase: 'idle', orbVisible: false, busy: false, message: '' };
   constructor(private dependencies: Dependencies<Recording>) {}
   private emit(next: Partial<ConversationState>) { this.state = { ...this.state, ...next }; this.dependencies.onState(this.state); }
@@ -27,15 +30,20 @@ export class TasteConversation<Recording> {
   async start() {
     if (this.job || this.cleanup || !this.dependencies.isActive()) return;
     const job = new AbortController(); this.job = job;
-    this.emit({ phase: 'idle', orbVisible: true, busy: true, message: 'Getting ready…' });
+    const skipPromptSpeech = this.dependencies.skipPromptSpeech?.() ?? false;
+    const skipResultSpeech = this.dependencies.skipResultSpeech?.() ?? false;
+    this.resultSpeechSkipped = skipResultSpeech;
+    this.emit({ phase: 'idle', orbVisible: true, busy: true, message: 'Getting ready…', silentSpeech: skipResultSpeech });
     try {
       await this.dependencies.prepare(job.signal); this.check(job);
-      this.emit({ phase: 'speaking', message: this.dependencies.readyMessage ?? 'Listen, then tell me what you like.' });
-      const prompt = typeof this.dependencies.prompt === 'function' ? this.dependencies.prompt() : this.dependencies.prompt ?? interestsPrompt;
-      if (!await this.dependencies.speak(prompt, job.signal)) throw new Error('I could not play the prompt. Please start again.');
-      this.check(job);
+      if (!skipPromptSpeech) {
+        this.emit({ phase: 'speaking', message: this.dependencies.readyMessage ?? 'Listen, then tell me what you like.' });
+        const prompt = typeof this.dependencies.prompt === 'function' ? this.dependencies.prompt() : this.dependencies.prompt ?? interestsPrompt;
+        if (!await this.dependencies.speak(prompt, job.signal)) throw new Error('I could not play the prompt. Please start again.');
+        this.check(job);
+      }
       await this.dependencies.record(job.signal); this.check(job);
-      this.emit({ phase: 'listening', message: 'Listening. Take your time.' });
+      this.emit({ phase: 'listening', message: skipPromptSpeech ? 'Listening' : 'Listening. Take your time.' });
     } catch (error) { if (this.job === job) await this.cancel(error instanceof Error ? error.message : 'Please start again.'); }
   }
   async end() {
@@ -47,12 +55,15 @@ export class TasteConversation<Recording> {
   async finish() {
     const job = this.job;
     if (!job || this.state.phase !== 'listening' || !this.current(job)) return;
-    this.emit({ phase: 'processing', message: this.dependencies.processingMessage ?? 'Saving your interests…' });
+    this.emit({ phase: 'processing', message: typeof this.dependencies.processingMessage === 'function'
+      ? this.dependencies.processingMessage() : this.dependencies.processingMessage ?? 'Saving your interests…' });
     try {
       const recording = await this.dependencies.stopRecording(job.signal); this.check(job);
       const message = await this.dependencies.save(recording, job.signal); this.check(job);
-      this.emit({ phase: 'speaking', message });
-      await this.dependencies.speak(message, job.signal); this.check(job);
+      if (!this.resultSpeechSkipped) {
+        this.emit({ phase: 'speaking', message });
+        await this.dependencies.speak(message, job.signal); this.check(job);
+      }
       await this.cancel(message);
     } catch (error) { if (this.job === job) await this.cancel(error instanceof Error ? error.message : this.dependencies.failureMessage ?? 'I could not save your interests. Please start again.'); }
   }

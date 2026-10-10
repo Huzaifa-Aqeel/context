@@ -10,9 +10,11 @@ import { transcriptionSchema } from '@/schemas/context';
 import { assertCurrentSession, useContextStore } from '@/stores/context';
 
 type SpokenConversationOptions = {
-  prompt: string | (() => string);
+  prompt?: string | (() => string);
+  skipPromptSpeech?: () => boolean;
+  skipResultSpeech?: () => boolean;
   readyMessage: string;
-  processingMessage: string;
+  processingMessage: string | (() => string);
   filename: string;
   saveTranscript: (text: string, signal: AbortSignal, commit: (save: () => void) => void) => Promise<string>;
 };
@@ -54,6 +56,8 @@ export function useSpokenConversation(options: SpokenConversationOptions) {
     };
     return new VoiceConversation<string>({
       prompt: options.prompt,
+      skipPromptSpeech: options.skipPromptSpeech,
+      skipResultSpeech: options.skipResultSpeech,
       readyMessage: options.readyMessage,
       processingMessage: options.processingMessage,
       isActive: () => mounted.current && focus.current && AppState.currentState === 'active',

@@ -29,7 +29,6 @@ export type SceneReasoningInput = {
   messages: AskRequest['messages'];
   scene?: Scene;
   interests: { id: string; name: string }[];
-  profileSignature?: string;
   available: { research: boolean; places: boolean; qloo: boolean; calendar: boolean; devicePosition: boolean };
   completed?: Pick<SceneDecision, 'scope' | 'next' | 'targetId' | 'researchKind' | 'detail'>;
 };

@@ -6,6 +6,7 @@ import { apiErrorSchema } from '@/schemas/context';
 import { withRequestSignal } from '@/lib/api/timeout';
 import { apiUrl } from '@/lib/api/client';
 import { SpeechSequence, type SpeechState } from './sequence';
+import { isGuidanceText } from '@/lib/guidance/scene-guidance';
 
 let state: SpeechState = { status: 'idle' };
 const listeners = new Set<() => void>();
@@ -67,7 +68,7 @@ export const speakResponse = async (text: string, signal?: AbortSignal) => {
   currentText = text;
   const cancel = () => { if (currentText === text) stopSpokenOutput(); };
   signal?.addEventListener('abort', cancel, { once: true });
-  try { return await sequence.speak(text, useContextStore.getState().speechPreferences); }
+  try { return await sequence.speak(text, useContextStore.getState().speechPreferences, isGuidanceText(text)); }
   finally { signal?.removeEventListener('abort', cancel); }
 };
 export const stopSpokenOutput = () => { currentText = ''; sequence.stop(); };

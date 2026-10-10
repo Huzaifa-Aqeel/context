@@ -7,7 +7,7 @@ import type { ResearchService } from '@/lib/research/tavily';
 import type { Answer, AskRequest, Scene } from '@/types/context';
 import { discoverDining, fetchDiningDetails } from './dining';
 import { continueArea, discoverArea, discoverMall } from './area';
-import { exploreEvent, refreshEventRanking } from './event-ask';
+import { eventPrintedAnswer, exploreEvent } from './event-ask';
 import { asksForAreaDiscovery, asksForDiningDiscovery, explicitlyNearDevice, implicitlyNearDevice, visibleReferences } from './intent';
 import { metersBetween, spokenDistance, straightLineKilometers } from '@/lib/location/distance';
 import { withinGeojson } from '@/lib/location/geometry';
@@ -16,11 +16,21 @@ type Services = { qloo: QlooService; reasoner: SceneReasoningService; research?:
 const reply = (answer: string, scene: Scene, confidence: Answer['confidence'] = 'medium'): Answer => ({ answer, scene, confidence });
 const recent = (date: string, minutes = 15) => Date.now() - new Date(date).getTime() < minutes * 60_000;
 const explicitCalendar = (question: string) => /\b(add|save|create|put)\b.*\bcalendar\b|\bremind me\b/i.test(question);
+const freshCheckRequested = (question: string) => /\brecheck\b|\brefresh\b|\bcheck\b.{0,60}\bagain\b/i.test(question);
+const answerKey = (question: string) => question.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+
+function cachedEventAnswer(request: AskRequest, scene: Scene, services: Services): Answer | undefined {
+  if (!scene.event || freshCheckRequested(request.question) || explicitCalendar(request.question)) return undefined;
+  const cached = scene.event.answerCache?.findLast((item) => item.question === answerKey(request.question) && recent(item.createdAt));
+  if (!cached) return undefined;
+  const evidence = sceneEvidence(reasoningInput({ ...request, scene }, services));
+  return cached.evidence.every((item) => evidence[item.id] === item.value)
+    ? reply(cached.answer, scene, cached.confidence) : undefined;
+}
 
 function reasoningInput(request: AskRequest, services: Services): SceneReasoningInput {
   return { question: request.question, messages: request.messages, scene: request.scene,
     interests: request.profile?.entities.map((item) => ({ id: item.id, name: item.name })) ?? [],
-    profileSignature: request.profile?.signature,
     available: { research: Boolean(services.research)
       && !asksForDiningDiscovery(request.question) && !asksForAreaDiscovery(request.question)
       && !(request.scene?.area && !request.scene.event), places: Boolean(services.places),
@@ -32,11 +42,21 @@ function grounded(answer: string | undefined, ids: string[], input: SceneReasoni
     return reply('I could not support that answer from the information I have. Ask about a specific part of this scene.', scene, 'low');
   return reply(answer, scene);
 }
-async function answerAfterTool(request: AskRequest, services: Services, scene: Scene, completed: SceneDecision): Promise<Answer> {
+async function answerAfterTool(request: AskRequest, services: Services, scene: Scene, completed: SceneDecision,
+  cacheResearch = false): Promise<Answer> {
   try {
     const input = { ...reasoningInput({ ...request, scene }, services), completed };
     const answer = await services.reasoner.answer(input);
-    return grounded(answer.answer, answer.evidenceIds, input, scene);
+    const result = grounded(answer.answer, answer.evidenceIds, input, scene);
+    if (!cacheResearch || !scene.event || answerKey(request.question).length > 800 || result.confidence === 'low'
+      || !answer.evidenceIds.some((id) => id.startsWith('research:'))) return result;
+    const known = sceneEvidence(input);
+    const evidence = answer.evidenceIds.map((id) => ({ id, value: known[id] })).filter((item): item is { id: string; value: string } => Boolean(item.value));
+    if (evidence.length !== answer.evidenceIds.length) return result;
+    const previous = scene.event.answerCache?.filter((item) => item.question !== answerKey(request.question)) ?? [];
+    return { ...result, scene: { ...scene, event: { ...scene.event, answerCache: [...previous,
+      { question: answerKey(request.question), answer: result.answer, confidence: result.confidence,
+        evidence, createdAt: new Date().toISOString() }].slice(-8) } } };
   } catch { return reply('I checked the available information, but could not form a reliable answer. Please ask a narrower question.', scene, 'low'); }
 }
 
@@ -83,21 +103,11 @@ async function placeAnchor(plan: SceneDecision, request: AskRequest, scene: Scen
 /** Scene-first Event and place orchestration. Qwen selects evidence needs; code owns provider calls and actions. */
 export async function exploreActiveScene(request: AskRequest, services: Services): Promise<Answer> {
   let scene = request.scene!;
-  if (scene.event) scene = await refreshEventRanking(scene, request.profile, services.qloo);
-  if (scene.dining?.profileSignature && scene.dining.profileSignature !== request.profile?.signature) {
-    // Physical identity and address evidence remain valid; only the taste ordering is stale.
-    if (!/^\s*(?:is .* open|what (?:is|are) .* hours|where is|what is .* address|phone|how far)/i.test(request.question)
-      && scene.dining.resolvedAnchor && request.profile?.entities.length) {
-      const anchor = scene.dining.resolvedAnchor;
-      return discoverDining(request, services.qloo, { position: { latitude: anchor.latitude, longitude: anchor.longitude },
-        source: anchor.kind === 'device' ? { kind: 'device' } : anchor.kind === 'venue'
-          ? { kind: 'event_venue', name: anchor.name ?? 'the venue', placeId: anchor.placeId ?? '' }
-          : { kind: 'named', name: anchor.name ?? 'the area', placeId: anchor.placeId ?? '' }, resolved: anchor }, scene, services.places);
-    }
-  }
-  if (scene.area?.profileSignature && scene.area.profileSignature !== request.profile?.signature
-    && !/^\s*(?:is .* open|what (?:is|are) .* hours|where is|what is .* address|phone|how far)/i.test(request.question)) {
-    return discoverArea(request, services.qloo, scene.area.anchor, services.places, scene, scene.area);
+  if (scene.event && !scene.event.pendingCalendar && !scene.event.pendingCalendarDetails) {
+    const printed = eventPrintedAnswer(scene, request.question);
+    if (printed) return printed;
+    const cached = cachedEventAnswer(request, scene, services);
+    if (cached) return cached;
   }
   const event = scene.event;
   // An in-progress Calendar confirmation has a deterministic safety path. It must not be reinterpreted as dining.
@@ -124,7 +134,8 @@ export async function exploreActiveScene(request: AskRequest, services: Services
       || !scene.event || !plan.researchKind || !services.research)
       return reply('I cannot check current event information right now.', scene, 'low');
     const eventState = scene.event;
-    if (!eventState.researchChecks?.some((check) => check.kind === plan.researchKind && recent(check.checkedAt))) {
+    if (freshCheckRequested(request.question)
+      || !eventState.researchChecks?.some((check) => check.kind === plan.researchKind && recent(check.checkedAt))) {
       try {
         const found = await researchEvent(eventState, plan.researchKind, services.research);
         scene = { ...scene, event: { ...eventState,
@@ -134,7 +145,7 @@ export async function exploreActiveScene(request: AskRequest, services: Services
           researchChecks: [...(eventState.researchChecks ?? []), { kind: plan.researchKind, checkedAt: new Date().toISOString() }].slice(-20) } };
       } catch { return reply('I could not verify current event information right now.', scene, 'low'); }
     }
-    return answerAfterTool(request, services, scene, plan);
+    return answerAfterTool(request, services, scene, plan, true);
   }
   if (plan.next === 'venue_details') {
     if (!scene.event?.visual.venueName) return reply('I could not read a specific venue from this material.', scene, 'low');
